@@ -1,5 +1,6 @@
 pragma solidity ^0.4.18;
 
+//testingdeleteChangeto:Add-16-players-Backend
 contract Hashminer {
   // state variables
   address player;
