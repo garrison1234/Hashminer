@@ -2,13 +2,19 @@ pragma solidity ^0.4.18;
 
 contract Hashminer {
   // custom types
+  struct Account {
+    address wallet;
+    uint256 balance;
+  }
+
   struct Player {
     uint8 id;
-    address wallet;
     uint8 nonce;
+    address wallet;
   }
 
   // state variables
+  mapping (address => Account) public accounts;
   mapping (uint8 => Player) public players;
   uint8 maxNumberOfPlayers = 16;
   uint8 playerCounter;
@@ -17,7 +23,7 @@ contract Hashminer {
   bytes32 blockHash;
   uint8 winningNonce;
   uint8 numberOfWinningPlayers;
-  uint[16] prizeAmounts = [
+  uint[17] prizeAmounts = [
     0,
     760 finney,
     380 finney,
@@ -32,14 +38,30 @@ contract Hashminer {
     69 finney,
     63 finney,
     58 finney,
+    54 finney,
     51 finney,
-    48 finney ]; // change this to handle arbitrary number of players. There's probably a better solution.
+    48 finney ];
   uint256 playerPrize;
   uint256 callerIncentive = 2 finney;
   address caller;
 
 
   // events
+  event LogAccountDeposit(
+    address _wallet,
+    uint _depositAmount,
+    uint _balance
+  );
+  event LogAccountWithdraw(
+    address _wallet,
+    uint _withdrawAmount,
+    uint _balance
+  );
+  event LogPlayerAdded(
+    uint _playerCounter,
+    uint8 _nonce,
+    address wallet)
+  );
   event LogPlayersReady(
     uint _blockNumber
   );
@@ -52,17 +74,42 @@ contract Hashminer {
   );
 
 
+  // deposit funds to account
+  function depositFunds() payable public {
+    // update balance
+    accounts[msg.sender].balance += msg.value;
+    LogAccountDeposit(msg.sender, msg.value, accounts[msg.sender].balance);
+  }
+
+  // withdraw funds from account
+  function withdrawFunds(uint _withdrawAmount) payable public {
+    // check that player has sufficient funds
+    require(accounts[msg.sender].balance >= _withdrawAmount);
+
+    // update balance and transfer funds
+    accounts[msg.sender].balance -= _withdrawAmount;
+    msg.sender.transfer(_withdrawAmount);
+    LogAccountWithdraw(msg.sender, msg.value, accounts[msg.sender].balance);
+  }
+
+  // check account balance
+  function getAccountBalance() public view returns (uint _balance) {
+    return(accounts[msg.sender].balance);
+  }
+
   // play betting game
   function playGame(uint8 _nonce) payable public {
     // check that game is active
     require(playerCounter < maxNumberOfPlayers);
 
-    // check that value equals gameCost
-    require(msg.value == gameCost);
+    // check that account has enough funds and update balance
+    require(accounts[msg.sender].balance >= gameCost);
+    accounts[msg.sender].balance -= gameCost;
 
     // add new player
     playerCounter++; //Sebastien left also left this counter before adding article. Ensures no players are ever added without adding to counter?
-    players[playerCounter] = Player(playerCounter, msg.sender, _nonce);
+    players[playerCounter] = Player(playerCounter, _nonce, msg.sender);
+    LogPlayerAdded(playerCounter, _nonce, msg.sender);
 
     // save number of the block that will determine the winner
     if (playerCounter == maxNumberOfPlayers) {
@@ -82,27 +129,29 @@ contract Hashminer {
     // obtain hash of the block that determined the winner
     blockHash = block.blockhash(blockNumber);
 
-    // obtain wining nonce (last 4 bits of the blockHash)
-    winningNonce = uint8(blockHash) & 0xF;
+    // obtain winning nonce (last 4 bits of the blockHash)
+    // this varies the desired blockHash ending each game for a given nonce
+    winningNonce = uint8(keccak256(blockNumber, blockHash)) & 0xF;
 
-    // determine how many and which players won
+    // prepare output array
+    address[] memory winningPlayers = new address[](maxNumberOfPlayers);
+
+    // determine winning players
     numberOfWinningPlayers = 0;
     for (uint8 i = 1; i <= maxNumberOfPlayers;  i++) {
       if (players[i].nonce == winningNonce) {
-      numberOfWinningPlayers++;
+        numberOfWinningPlayers++;
+        // store winning player's address
+        winningPlayers[numberOfWinningPlayers] = players[i].wallet;
       }
     }
 
     // calculate prize per player
-    playerPrize = prizeAmounts[numberOfWinningPlayers]; // dividing produces an error. No events were produced after adding this line.
+    playerPrize = prizeAmounts[numberOfWinningPlayers];
 
-    // pay each winning player
-    uint8 j = 1;
-    while (j <= maxNumberOfPlayers) { //This can be made more efficient by ending loop after last winner is paid
-      if (players[j].nonce == winningNonce){
-        players[j].wallet.transfer(playerPrize);
-      }
-      j++;
+    // update balance of winning accounts
+    for (uint8 j = 1; j <= numberOfWinningPlayers; j++) {
+      accounts[winningPlayers[j]].balance += playerPrize;
     }
 
     // reset playerCounter to restart game
@@ -110,7 +159,7 @@ contract Hashminer {
 
     LogGameFinished(blockNumber, winningNonce, numberOfWinningPlayers, playerPrize, caller);
 
-    // record the caller and transfer reward
+    // store the caller and transfer reward
     caller = msg.sender;
     caller.transfer(callerIncentive);
   }
