@@ -1,67 +1,45 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.19;
 
 contract Hashminer {
   // custom types
-  struct Account {
-    address wallet;
-    uint256 balance;
-  }
-
   struct Player {
-    uint8 nonce;
-    address wallet;
+  uint nonce;
+  address wallet;
   }
 
   // state variables
   address owner;
   bool gameLocked;
-  mapping (address => Account) public accounts;
-  mapping (uint8 => Player) public players;
-  uint8 maxNumberOfPlayers;
-  uint8[16] takenNonces;
-  uint8 playerCounter;
-  uint256 gameCost;
+  uint maxNumberOfPlayers = 2; // must be 2^N
+  mapping (uint => Player) public players;
+  uint[3] takenNonces; // array size is maxNumberOfPlayers+1
+  uint playerCounter;
+  uint gameCost = 50 finney;
   uint blockNumber;
   bytes32 blockHash;
-  uint8 winningNonce;
+  uint winningNonce;
   address winner;
-  uint256 prize;
-  uint256 houseFee;
-  uint256 houseBalance;
-  uint256 callerIncentive;
+  uint prize = 60 finney;
+  uint callerIncentive = 2 finney;
   address caller;
-
 
   // events
   event LogGameLock(
     bool _gameLocked
   );
   event LogGameOptionsSet(
-    uint8 _maxNumberOfPlayers,
-    uint256 _gameCost,
-    uint256 _prize,
-    uint256 _houseFee,
-    uint256 _callerIncentive
+    uint _maxNumberOfPlayers,
+    uint _gameCost,
+    uint _prize,
+    uint _callerIncentive
   );
   event LogHouseWithdraw(
     address _wallet,
-    address _wallet2,
-    uint _withdrawAmount,
-    uint houseBalance
-  );
-  event LogAccountDeposit(
-    address _wallet,
-    uint _depositAmount,
-    uint _balance
-  );
-  event LogAccountWithdraw(
-    address _wallet,
-    uint _withdrawAmount,
-    uint _balance
+    uint _withdrawAmount
   );
   event LogPlayerAdded(
     uint _playerCounter,
-    uint8 _nonce,
+    uint _nonce,
     address wallet
   );
   event LogPlayersReady(
@@ -70,18 +48,26 @@ contract Hashminer {
   event LogGameFinished(
     uint _blockNumber,
     bytes32 _blockHash,
-    uint8 _winningNonce,
+    uint _winningNonce,
     address _winner,
-    uint256 _winnerBalance,
-    uint256 _houseBalance,
     address _caller,
-    uint256 _callerBalance,
     bool _gameLocked
   );
 
   // constructor
   function Hashminer() public {
     owner = msg.sender;
+  }
+
+  // deactivate the contract
+  function kill() public {
+    // only allow the contract owner
+    require(msg.sender == owner);
+
+    // check that game is locked and not active. This ensures deactivation is only possible when game is inactive
+    require(gameLocked && (playerCounter == 0));
+
+    selfdestruct(owner);
   }
 
   // lock or unlock game after current game ends for game option changes and front-end updates
@@ -95,8 +81,8 @@ contract Hashminer {
   }
 
   // change game settings
-  function setGameOptions(uint8 _maxNumberOfPlayers, uint256 _gameCost,
-    uint256 _prize, uint256 _houseFee, uint256 _callerIncentive) public {
+  function setGameOptions(uint _maxNumberOfPlayers, uint _gameCost,
+    uint _prize, uint _callerIncentive) public {
     // only allow the contract owner to make changes
     require(msg.sender == owner);
 
@@ -107,9 +93,8 @@ contract Hashminer {
     maxNumberOfPlayers = _maxNumberOfPlayers;
     gameCost = _gameCost;
     prize = _prize;
-    houseFee = _houseFee;
     callerIncentive = _callerIncentive;
-    LogGameOptionsSet(maxNumberOfPlayers, gameCost, prize, houseFee, callerIncentive);
+    LogGameOptionsSet(maxNumberOfPlayers, gameCost, prize, callerIncentive);
   }
 
   // transfer funds from house to given an address
@@ -117,79 +102,49 @@ contract Hashminer {
     // only allow the contract owner to withdraw
     require(msg.sender == owner);
 
-    // check that house funds are sufficient for the withdrawal
-    require(houseBalance >= _withdrawAmount);
-
-    // check that game is locked and not active. This ensures there will be enough funds to pay the game winner
+    // check that game is locked and not active. This ensures there will be enough funds to pay the current game winner
     require(gameLocked && (playerCounter == 0));
 
     // transfer to  address _wallet
     _wallet.transfer(_withdrawAmount);
-
-    // update house balance
-    houseBalance -= _withdrawAmount;
-    LogHouseWithdraw(msg.sender, _wallet, _withdrawAmount, houseBalance);
+    LogHouseWithdraw(_wallet, _withdrawAmount);
   }
 
-  // deposit funds to account
-  function depositFunds() payable public {
-    // update balance
-    accounts[msg.sender].balance += msg.value;
-    LogAccountDeposit(msg.sender, msg.value, accounts[msg.sender].balance);
-  }
+  // add player to the game
+  function playGame(uint _nonce) payable public {
+    // check that value transferred matches the cost to play
+    require(msg.value == gameCost);
 
-  // withdraw funds from account
-  function withdrawFunds(uint _withdrawAmount) public {
-    // check that player has sufficient funds
-    require(accounts[msg.sender].balance >= _withdrawAmount);
-
-    // update balance and transfer funds
-    accounts[msg.sender].balance -= _withdrawAmount;
-    msg.sender.transfer(_withdrawAmount);
-    LogAccountWithdraw(msg.sender, _withdrawAmount, accounts[msg.sender].balance);
-  }
-
-  // check account balance
-  function getAccountBalance() public view returns (uint _balance) {
-    return(accounts[msg.sender].balance);
-  }
-
-  // play betting game
-  function playGame(uint8 _nonce) public {
-    // check that game has not been locked or that the game is already active
+    // check that game is unlocked or already active
     require((!gameLocked) || (playerCounter > 0));
 
-    // check that game is not full
-    require(playerCounter < maxNumberOfPlayers);
+    // check that the nonce is within the accepted range of values
+    require((0 < _nonce) && (_nonce <= maxNumberOfPlayers));
 
-    // check that the nonce has not been chosen
-    for (uint8 i = 1; i <= playerCounter; i++) {
-      require(_nonce != takenNonces[i]);
+    // check that the nonce has not been taken. This also checks that the game is not full.
+    for (uint i = 1; i <= playerCounter; i++) {
+      if (_nonce == takenNonces[i]) {revert();}
     }
-
-    // check that account has enough funds and update balance
-    require(accounts[msg.sender].balance >= gameCost);
-    accounts[msg.sender].balance -= gameCost;
 
     // add new player
     playerCounter++;
     players[_nonce] = Player(_nonce, msg.sender);
 
-    // add nonce to list of chosen ones for this game
+    // add nonce to list of already chosen ones.
     takenNonces[playerCounter] = _nonce;
 
     LogPlayerAdded(playerCounter, _nonce, msg.sender);
 
-    // save number of the block that will determine the winner
+    // save number of the block that will determine the winner if game is full
     if (playerCounter == maxNumberOfPlayers) {
       blockNumber = block.number + 3;
       LogPlayersReady(blockNumber);
     }
   }
 
-  // determine game winner
+  // reveal game winner, transfer the prize and the reward to the caller
   function revealWinner() public {
-    // check that game is set
+    // check that game is full
     require(playerCounter == maxNumberOfPlayers);
 
     // check that the block that determines the winner has been mined
@@ -199,39 +154,37 @@ contract Hashminer {
     blockHash = block.blockhash(blockNumber);
 
     // obtain winning nonce. The desired blockHash ending for a given nonce is varied each game
-    winningNonce = uint8(keccak256(blockNumber, blockHash)) & 0xF;
+    winningNonce = (uint(keccak256(blockNumber, blockHash)) & (maxNumberOfPlayers - 1)) + 1;
 
-    // update balance of account whose player won
+    // transfer prize to winning player
     winner = players[winningNonce].wallet;
-    accounts[winner].balance += prize;
+    //winner.transfer(prize);
 
-    // add house fee to house balance
-    houseBalance += houseFee - callerIncentive;
-
-    // reset playerCounter to restart game
+    // reset playerCounter and takenNonces to restart game. BETTER WAY TO DO THIS WITHOUT LOOPING!!!????
     playerCounter = 0;
+    for (uint j = 1; j <= maxNumberOfPlayers; j++) {
+      takenNonces[j] = 0;
+    }
 
-    // store the caller address and add reward to their balance
+    // store the caller address and transfer their reward
     caller = msg.sender;
-    accounts[caller].balance += callerIncentive;
-    LogGameFinished(blockNumber, blockHash, winningNonce, winner, accounts[winner].balance,
-      houseBalance, caller, accounts[caller].balance, gameLocked);
+    caller.transfer(prize);
+    LogGameFinished(blockNumber, blockHash, winningNonce, winner, caller, gameLocked);
   }
 
   // get game information
   function getGameInfo() public view returns (
     address _owner,
     bool _gameLocked,
-    uint8 _maxNumberOfPlayers,
-    uint8 _playerCounter,
-    uint256 _gameCost,
+    uint _maxNumberOfPlayers,
+    uint _playerCounter,
+    uint _gameCost,
     uint _blockNumber,
     bytes32 _blockHash,
-    uint8 _winningNonce,
-    uint256 _prize,
-    uint256 _houseFee,
-    uint256 _houseBalance,
-    uint256 _callerIncentive,
+    uint _winningNonce,
+    address _winner,
+    uint _prize,
+    uint _callerIncentive,
     address _caller
     ) {
     return(
@@ -243,11 +196,9 @@ contract Hashminer {
       blockNumber,
       blockHash,
       winningNonce,
+      winner,
       prize,
-      houseFee,
-      houseBalance,
       callerIncentive,
       caller);
   }
-
 }
