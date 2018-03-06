@@ -10,16 +10,16 @@ contract Hashminer {
   // state variables
   address owner;
   bool gameLocked;
-  uint maxNumberOfPlayers = 2; // must be 2^N
+  uint maxNumberOfPlayers = 16; // must be 2^N
   mapping (uint => Player) public players;
-  uint[3] takenNonces; // array size is maxNumberOfPlayers+1
+  uint[65] takenNonces; // array size must be at least maxNumberOfPlayers+1
   uint playerCounter;
   uint gameCost = 50 finney;
   uint blockNumber;
   bytes32 blockHash;
   uint winningNonce;
   address winner;
-  uint prize = 60 finney;
+  uint prize = 760 finney;
   uint callerIncentive = 2 finney;
   address caller;
 
@@ -158,7 +158,7 @@ contract Hashminer {
 
     // transfer prize to winning player
     winner = players[winningNonce].wallet;
-    //winner.transfer(prize);
+    winner.transfer(prize);
 
     // reset playerCounter and takenNonces to restart game. BETTER WAY TO DO THIS WITHOUT LOOPING!!!????
     playerCounter = 0;
@@ -168,7 +168,7 @@ contract Hashminer {
 
     // store the caller address and transfer their reward
     caller = msg.sender;
-    caller.transfer(prize);
+    caller.transfer(callerIncentive);
     LogGameFinished(blockNumber, blockHash, winningNonce, winner, caller, gameLocked);
   }
 
