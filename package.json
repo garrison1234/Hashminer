@@ -1,6 +1,6 @@
 {
-  "name": "chainskills",
-  "version": "1.0.0",
+  "name": "Hashminer",
+  "version": "0.0.1",
   "description": "",
   "main": "truffle.js",
   "directories": {
@@ -10,8 +10,8 @@
     "dev": "lite-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "ChainSkills",
-  "license": "ISC",
+  "author": "Hashminer",
+  "license": "MIT",
   "devDependencies": {
     "lite-server": "^2.3.0"
   }

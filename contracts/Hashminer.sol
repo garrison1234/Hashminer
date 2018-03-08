@@ -10,16 +10,16 @@ contract Hashminer {
   // state variables
   address owner;
   bool gameLocked;
-  uint maxNumberOfPlayers = 2; // must be 2^N
+  uint maxNumberOfPlayers = 16; // must be 2^N
   mapping (uint => Player) public players;
-  uint[3] takenNonces; // array size is maxNumberOfPlayers+1
+  uint[65] takenNonces; // array size must be at least maxNumberOfPlayers+1
   uint playerCounter;
   uint gameCost = 50 finney;
   uint blockNumber;
   bytes32 blockHash;
   uint winningNonce;
   address winner;
-  uint prize = 60 finney;
+  uint prize = 760 finney;
   uint callerIncentive = 2 finney;
   address caller;
 
@@ -40,7 +40,7 @@ contract Hashminer {
   event LogPlayerAdded(
     uint _playerCounter,
     uint _nonce,
-    address wallet
+    address _wallet
   );
   event LogPlayersReady(
     uint _blockNumber
@@ -158,7 +158,7 @@ contract Hashminer {
 
     // transfer prize to winning player
     winner = players[winningNonce].wallet;
-    //winner.transfer(prize);
+    winner.transfer(prize);
 
     // reset playerCounter and takenNonces to restart game. BETTER WAY TO DO THIS WITHOUT LOOPING!!!????
     playerCounter = 0;
@@ -168,7 +168,7 @@ contract Hashminer {
 
     // store the caller address and transfer their reward
     caller = msg.sender;
-    caller.transfer(prize);
+    caller.transfer(callerIncentive);
     LogGameFinished(blockNumber, blockHash, winningNonce, winner, caller, gameLocked);
   }
 
@@ -201,4 +201,23 @@ contract Hashminer {
       callerIncentive,
       caller);
   }
+
+  // get current players information
+  function getPlayersInfo() public view returns (address[], uint[]) {
+    // prepare output arrays
+    address[] memory playerAddresses = new address[](playerCounter);
+    uint[] memory playerNonces = new uint[](playerCounter);
+
+    // iterate over all taken nonces
+    for(uint i = 1; i <= playerCounter;  i++) {
+      // save the player address and nonce if that nonce has already been selected
+      if(takenNonces[i] != 0) {
+        playerAddresses[i] = players[takenNonces[i]].wallet;
+        playerNonces[i] = players[takenNonces[i]].nonce;
+      }
+    }
+
+    return (playerAddresses, playerNonces);
+  }
+
 }
