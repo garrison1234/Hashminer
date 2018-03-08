@@ -40,7 +40,7 @@ contract Hashminer {
   event LogPlayerAdded(
     uint _playerCounter,
     uint _nonce,
-    address wallet
+    address _wallet
   );
   event LogPlayersReady(
     uint _blockNumber
@@ -201,4 +201,23 @@ contract Hashminer {
       callerIncentive,
       caller);
   }
+
+  // get current players information
+  function getPlayersInfo() public view returns (address[], uint[]) {
+    // prepare output arrays
+    address[] memory playerAddresses = new address[](playerCounter);
+    uint[] memory playerNonces = new uint[](playerCounter);
+
+    // iterate over all taken nonces
+    for(uint i = 1; i <= playerCounter;  i++) {
+      // save the player address and nonce if that nonce has already been selected
+      if(takenNonces[i] != 0) {
+        playerAddresses[i] = players[takenNonces[i]].wallet;
+        playerNonces[i] = players[takenNonces[i]].nonce;
+      }
+    }
+
+    return (playerAddresses, playerNonces);
+  }
+
 }
