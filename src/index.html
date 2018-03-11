@@ -20,123 +20,115 @@
 
      <!-- Application -->
      <link href="css/app.css" rel="stylesheet">
+     <!--<script src="//cdn.jsdelivr.net/npm/phaser@3.1.1/dist/phaser.js"></script>-->
 
 </head>
 
 <body>
-     <div class="container">
-          <div style="background:transparent !important" class="jumbotron text-center">
-               <img src="assets/logo.png" alt="Hashminer logo" style="height:128px;">
-          </div>
-          <div class="col-lg-12">
-            <p id="account" class="welcome pull-right"></p>
-            <p id="accountBalance" class="welcome pull-left"></p>
-          </div>
-     </div>
+    <div class="container">
 
-     <div class="container">
+      <div style="background:transparent !important" class="jumbotron text-center">
+        <img src="assets/logo2.png" alt="Hashminer logo" style="height:128px;">
+      </div>
+
       <div class="row">
-         <div class="col-md-3 text-center" id="article-list">
-          <div class="row panel panel-default">
-            <div class="panel-heading clearfix">
-              <div class="panel-title">
-                <button class="btn btn-info btn-lg" data-toggle="modal" data-target="#playGame">Play game</button>
-                <button class="btn btn-info btn-lg" data-toggle="modal" data-target="#revealWinner">Reveal winner</button>
-              </div>
-            </div>
-          </div>
+        <div class="col-lg-12">
+          <p id="account" class="welcome pull-right"></p>
+          <p id="accountBalance" class="welcome pull-left"></p>
         </div>
-        <div class="col-md-3 text-center" id="game-canvas">
-         <div class="row panel panel-default">
-           <div class="panel-heading clearfix">
-             <div class="panel-title">
-               <p>Game canvas</p>
-             </div>
-           </div>
-         </div>
-       </div>
-       <div class="col-md-6 text-center" id="players-info">
-        <div class="row panel panel-default">
-          <div class="panel-heading clearfix">
-            <div class="panel-title">
-              <p>Current game info</p>
-              <table class="table" id="players-info-table">
-               <thead>
-                 <tr>
-                   <th data-field="player"></th>
-                   <th data-field="nonce"></th>
-                 </tr>
-               </thead>
-             </table>
-            </div>
-          </div>
+      </div>
+
+      <div class="row text-center">
+          <button class="btn btn-info btn-lg" data-toggle="modal" data-target="#playGame" id="play-button">Play game</button>
+          <button type="button" class="btn btn-info btn-lg" data-dismiss="modal" onclick="App.revealWinner(); return false;"
+          id="reveal-button">Reveal Winner</button>
+      </div>
+
+      <div class="row text-center">
+        <iframe class="game" src="game.html" height="600" width="1160">game not available</iframe>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-8 text-center" id="game-information">
+          <p class="welcome">Game Information</p>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col"></th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Contract Owner</th>
+                <td><p id="owner"></p></td>
+              </tr>
+              <tr>
+                <th scope="row">Game Locked?</th>
+                <td><p id="gameLocked"></p></td>
+              </tr>
+              <tr>
+                <th scope="row">Maximum number of players</th>
+                <td><p id="maxNumberOfPlayers"></p></td>
+              </tr>
+              <tr>
+                <th scope="row">Number of players currently in the game</th>
+                <td><p id="playerCounter"></p></td>
+              </tr>
+              <tr>
+                <th scope="row">Cost to play</th>
+                <td><p id="gameCost"></p></td>
+              </tr>
+              <tr>
+                <th scope="row">Block number determined / will determine the winner</th>
+                <td><p id="blockNumber"></p></td>
+              </tr>
+              <tr>
+                <th scope="row">BlockHash</th>
+                <td><p id="blockHash"></p></td>
+              </tr>
+              <tr>
+                <th scope="row">Last winning nonce</th>
+                <td><p id="winningNonce"></p></td>
+              </tr>
+              <tr>
+                <th scope="row">Last winner</th>
+                <td><p id="winner"></p></td>
+              </tr>
+              <tr>
+                <th scope="row">Game Prize</th>
+                <td><p id="prize"></p></td>
+              </tr>
+              <tr>
+                <th scope="row">Game caller reward</th>
+                <td><p id="callerIncentive"></p></td>
+              </tr>
+              <tr>
+                <th scope="row">Last caller</th>
+                <td><p id="caller"></p></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col-lg-4 text-center" id="players-info">
+          <p class="welcome">Current players</p>
+          <table class="table" id="players-table">
+            <thead>
+              <tr>
+                <th scope="col"></th>
+                <th scope="col"></th>
+              </tr>
+              <tr>
+                <th scope="col">Player address</th>
+                <th scope="col">nonce</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-12 text-center" id="game-information">
-        <p class="welcome">Game Information</p>
-         <table class="table">
-          <thead>
-            <tr>
-              <th scope="col"></th>
-              <th scope="col"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">Contract Owner</th>
-              <td><p id="owner"></p></td>
-            </tr>
-            <tr>
-              <th scope="row">Game Locked?</th>
-              <td><p id="gameLocked"></p></td>
-            </tr>
-            <tr>
-              <th scope="row">Maximum number of players</th>
-              <td><p id="maxNumberOfPlayers"></p></td>
-            </tr>
-            <tr>
-              <th scope="row">Number of players currently in the game</th>
-              <td><p id="playerCounter"></p></td>
-            </tr>
-            <tr>
-              <th scope="row">Cost to play</th>
-              <td><p id="gameCost"></p></td>
-            </tr>
-            <tr>
-              <th scope="row">Block number determined / will determine the winner</th>
-              <td><p id="blockNumber"></p></td>
-            </tr>
-            <tr>
-              <th scope="row">BlockHash</th>
-              <td><p id="blockHash"></p></td>
-            </tr>
-            <tr>
-              <th scope="row">Last winning nonce</th>
-              <td><p id="winningNonce"></p></td>
-            </tr>
-            <tr>
-              <th scope="row">Last winner</th>
-              <td><p id="winner"></p></td>
-            </tr>
-            <tr>
-              <th scope="row">Game Prize</th>
-              <td><p id="prize"></p></td>
-            </tr>
-            <tr>
-              <th scope="row">Game caller reward</th>
-              <td><p id="callerIncentive"></p></td>
-            </tr>
-            <tr>
-              <th scope="row">Last caller</th>
-              <td><p id="caller"></p></td>
-            </tr>
-          </tbody>
-        </table>
-
-    </div>
-  </div>
 
 
      <!--<div id="footer" class="container">
@@ -161,9 +153,9 @@
 
           <div class="row">
             <div class="col-lg-12">
-              <form>
+              <form data-toggle="validator" role="form">
                 <div class="form-group">
-                  <label for="price">nonce</label>
+                  <label for="inputNonce">nonce</label>
                   <input type="number" class="form-control" id="nonce" placeholder="0" pattern="[0-9]?" step="1">
                 </div>
               </form>
@@ -187,6 +179,8 @@
      <script src="js/web3.min.js"></script>
      <script src="js/truffle-contract.js"></script>
      <script src="js/app.js"></script>
+
+
 </body>
 
 </html>

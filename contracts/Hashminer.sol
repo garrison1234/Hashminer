@@ -10,7 +10,7 @@ contract Hashminer {
   // state variables
   address owner;
   bool gameLocked;
-  uint maxNumberOfPlayers = 16; // must be 2^N
+  uint maxNumberOfPlayers = 4; // must be 2^N
   mapping (uint => Player) public players;
   uint[65] takenNonces; // array size must be at least maxNumberOfPlayers+1
   uint playerCounter;
@@ -19,7 +19,7 @@ contract Hashminer {
   bytes32 blockHash;
   uint winningNonce;
   address winner;
-  uint prize = 760 finney;
+  uint prize = 50 finney;
   uint callerIncentive = 2 finney;
   address caller;
 
@@ -209,11 +209,11 @@ contract Hashminer {
     uint[] memory playerNonces = new uint[](playerCounter);
 
     // iterate over all taken nonces
-    for(uint i = 1; i <= playerCounter;  i++) {
+    for(uint i = 0; i <= playerCounter;  i++) {
       // save the player address and nonce if that nonce has already been selected
-      if(takenNonces[i] != 0) {
-        playerAddresses[i] = players[takenNonces[i]].wallet;
-        playerNonces[i] = players[takenNonces[i]].nonce;
+      if(takenNonces[i+1] != 0) {
+        playerAddresses[i] = players[takenNonces[i+1]].wallet;
+        playerNonces[i] = players[takenNonces[i+1]].nonce;
       }
     }
 

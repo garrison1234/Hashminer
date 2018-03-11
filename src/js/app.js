@@ -2,6 +2,7 @@ App = {
      web3Provider: null,
      contracts: {},
      account: 0x0,
+     takenNonces: [],
 
      init: function() {
           return App.initWeb3();
@@ -29,16 +30,17 @@ App = {
        web3.eth.getCoinbase(function(err, account) {
          if(err === null) {
            App.account = account;
-           $('#account').text(account);
+           $('#account').text("Account: "+ account);
            web3.eth.getBalance(account, function(err, balance) {
              if(err === null) {
-               $('#accountBalance').text(web3.fromWei(balance, "ether") + " ETH");
+               $('#accountBalance').text("Balance: " + web3.fromWei(balance, "ether") + " ETH");
              }
            })
          }
        });
      },
 
+     // retrieve the Hashminer contract
      initContract: function() {
        $.getJSON('Hashminer.json', function(hashminerArtifact) {
          // get the contract artifact file and use it to instantiate a truffle contract abstraction
@@ -48,20 +50,18 @@ App = {
          // listen to events
          App.listenToEvents();
 
-         // displays all information and sets status for the play/reveal buttons
+         // displays all information
          App.displayGameInfo();
          App.displayPlayersInfo();
-         App.setPLayButtonStatus();
-         App.setRevealButtonStatus();
        });
      },
 
-     playGame: function() {
+     playGame: function(_nonce) {
        // retrieve the nonce
-       var _nonce = parseInt($('#nonce').val());
+       //var _nonce = parseInt($('#nonce').val());
 
        // check that the nonce is a valid number
-       if((_nonce < 1) || (nonce > 16)) {
+       if( (_nonce < 1) || (_nonce > 16) || (App.takenNonces.includes(_nonce)) ) {
          // player did not enter nonce
          return false;
        }
@@ -73,7 +73,19 @@ App = {
            gas: 500000
          });
        }).then(function(result) {
-         // Here place the logic for placing the player on the map, since the bet has been placed (the block with the transaction was mined)
+         // Place the player on the map now that transaction is confirmed
+         //game.confirmPlayer()
+       }).catch(function(err) {
+         console.error(err);
+       });
+     },
+
+     revealWinner: function() {
+       App.contracts.Hashminer.deployed().then(function(instance) {
+         return instance.revealWinner({
+           from: App.account,
+           gas: 500000
+         });
        }).catch(function(err) {
          console.error(err);
        });
@@ -82,8 +94,7 @@ App = {
      displayGameInfo: function() {
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.getGameInfo();
-       }).then(function(
-             gameInformation) {
+       }).then(function(gameInformation) {
          // retrieve the game information from the contract.
          $('#owner').text(gameInformation[0]);
          $('#gameLocked').text(gameInformation[1]);
@@ -97,6 +108,24 @@ App = {
          $('#prize').text(web3.fromWei(gameInformation[9], "ether") + " ETH");
          $('#callerIncentive').text(web3.fromWei(gameInformation[10], "ether") + " ETH");
          $('#caller').text(gameInformation[11]);
+
+         // convert to numbers
+         maxNumberOfPlayers = gameInformation[2].toNumber();
+         playerCounter = gameInformation[3].toNumber();
+
+         // enable playGame button if game is unlocked or active and not full
+         $('#play-button').prop('disabled', true);
+         if(((!gameInformation[1]) || playerCounter > 0) && (playerCounter < maxNumberOfPlayers)) {
+          $('#play-button').prop('disabled', false);
+          }
+
+          // start timer to enable revealWinner button if game is full
+          $('#reveal-button').prop('disabled', true);
+          if(playerCounter == maxNumberOfPlayers) {
+           setTimeout(function() { $('#reveal-button').prop('disabled', false); }, 5000);
+           }
+
+
        }).catch(function(err) {
          console.error(err.message);
        });
@@ -106,24 +135,17 @@ App = {
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.getPlayersInfo();
        }).then(function(playersInformation) {
-         // save playerAddresses and playerNonces arrays into a single one
-         var currentPlayers = [];
+         $('#players-table > tbody').empty();
+         App.takenNonces = [];
          for(i = 0; i < playersInformation[0].length; i++) {
-           currentPlayers.address = playersinformation[0][i];
-           currentPlayers.nonce = playersinformation[1][i];
+           $('#players-table > tbody:last-child').append('<tr><td><p>' + playersInformation[0][i].slice(0,8) + '...' +
+            '</p></td><td><p>' + playersInformation[1][i] + '</p></td></tr>');
          }
+         playersInformation[1].forEach(function(item){App.takenNonces.push(item.toNumber());})
 
-         //$('#players-info-table').bootstrapTable("load", currentPlayers);
        }).catch(function(err) {
          console.error(err.message);
        });
-     },
-
-     setPLayButtonStatus: function() {
-
-     },
-
-     setRevealButtonStatus: function() {
 
      },
 
@@ -133,12 +155,10 @@ App = {
          // listen to LogPlayerAdded event
         instance.LogPlayerAdded({}, {}).watch(function(error, event) {
           if (!error) {
-            // reload game information, players information and update account info if new player is the user
+            // update game, players and account information
             App.displayGameInfo();
             App.displayPlayersInfo();
-            if(event.args._wallet == App.account) {
-              App.displayAccountInfo();
-            }
+            App.displayAccountInfo();
           } else {
             console.error(error);
           }
@@ -147,10 +167,8 @@ App = {
         // listen to LogPlayersReady event
        instance.LogPlayersReady({}, {}).watch(function(error, event) {
          if (!error) {
-           // disable play button
-           App.setPLayButtonStatus(disable);
-           // set timer to enable reveal button
-           setTimeout(App.setRevealButtonStatus(enable), 60000);
+           // update game information
+           App.displayGameInfo();
          } else {
            console.error(error);
          }
@@ -159,10 +177,10 @@ App = {
        // listen to LogGameFinished event
       instance.LogGameFinished({}, {}).watch(function(error, event) {
         if (!error) {
-          // enable play button
-          App.setPLayButtonStatus(enable);
-          // disable reveal button. THIS WILL BE MODIFIED TO BE DISABLED ONCE ONE PLAYER REVEALS, TO ENSURE IT'S NOT CALLED TWICE AND GAS IS WASTED
-          App.setRevealButtonStatus(disable);
+          // update account, game and players information
+          App.displayAccountInfo();
+          App.displayGameInfo();
+          App.displayPlayersInfo();
         } else {
           console.error(error);
         }
