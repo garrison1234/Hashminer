@@ -2,19 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Making your first Phaser 3 Game - Part 3</title>
-    <script src="//cdn.jsdelivr.net/npm/phaser@3.1.1/dist/phaser.js"></script>
+    <title>Hashminer game</title>
+
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <!-- Application -->
     <link href="css/app.css" rel="stylesheet">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/phaser.js"></script>
+    <script src="js/web3.min.js"></script>
+    <script src="js/truffle-contract.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/game/game.js"></script>
+
 </head>
 <body style= "padding: 0px;">
 
   <div class="container">
 
     <div class="text-center">
-      <p class="welcome">Click on the map to place your miner</p>
+      <p class="welcome">Move the mouse to desired mining position</p>
     </div>
 
     <div id="game">
@@ -24,14 +33,5 @@
     </div>
 
   </div>
-
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-  <script src="js/web3.min.js"></script>
-  <script src="js/truffle-contract.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/game-wait-for-player.js"></script>
-  <script src="js/game-add-player.js"></script>
-  <script src="js/game.js"></script>
 
 </body>

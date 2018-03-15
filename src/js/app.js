@@ -56,13 +56,13 @@ App = {
        });
      },
 
-     playGame: function(_nonce) {
+     playGame: function(_nonce, _xdestination, _ydestination) {
        // retrieve the nonce
        //var _nonce = parseInt($('#nonce').val());
 
        // check that the nonce is a valid number
        if( (_nonce < 1) || (_nonce > 16) || (App.takenNonces.includes(_nonce)) ) {
-         // player did not enter nonce
+         //invalid nonce
          return false;
        }
 
@@ -73,10 +73,9 @@ App = {
            gas: 500000
          });
        }).then(function(result) {
-         // Place the player on the map now that transaction is confirmed
-         //game.confirmPlayer()
+         game.addNewMiner(_nonce, _xdestination, _ydestination);
        }).catch(function(err) {
-         console.error(err);
+         //tell user that transaction failed
        });
      },
 
