@@ -17,6 +17,7 @@ var config = {
     }
 };
 
+var playerMap = new Map(); //Get current players information from getPlayersInfo(), from contract
 var player;
 var precision = 5;
 var xmouse, ymouse;
@@ -163,7 +164,7 @@ var game = new Phaser.Game(config);
       App.playGame(nonce, xmouseClick, ymouseClick);
     }
 
-    //check if there is currently a miner that is moving
+    //animate miner moving to its destination
     if (playerMoving) {
       // place player on map
       if (!spriteAdded) {
@@ -212,12 +213,8 @@ var game = new Phaser.Game(config);
   }
 
   game.addNewMiner = function(_nonce, _xdestination, _ydestination) {
-    if (_nonce > 0) {
       xdestination = _xdestination;
       ydestination = _ydestination;
       playerMoving = true;
-    } else {
-      //unblock mouse to allow user to place play
-      mouseBlocked = false;
-    }
+
   }
