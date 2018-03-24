@@ -33,7 +33,7 @@ var game = new Phaser.Game(config);
 
 
   function preload () {
-    this.load.image('background', 'assets/background.png');
+    this.load.image('background', 'assets/mingbg.png');
     this.load.spritesheet('miner', 'assets/character1/spritesheet1.png',{ frameWidth: 20, frameHeight: 23 });
   }
 
