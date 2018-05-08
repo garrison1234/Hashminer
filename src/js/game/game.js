@@ -33,8 +33,9 @@ var game = new Phaser.Game(config);
 
 
   function preload () {
-    this.load.image('background', 'assets/mingbg.png');
-    this.load.spritesheet('miner', 'assets/character1/spritesheet1.png',{ frameWidth: 20, frameHeight: 23 });
+    this.load.image('background', 'assets/bgfinal.png');
+    this.load.spritesheet('miner', 'assets/character1/player1sheet.png',{ frameWidth: 20, frameHeight: 23 });
+    this.load.spritesheet('minerwin', 'assets/character1/player1winsheet.png',{ frameWidth: 20, frameHeight: 37 });
   }
 
   function create() {
@@ -44,35 +45,35 @@ var game = new Phaser.Game(config);
     //create animations
     this.anims.create({
         key: 'left',
-        frames: this.anims.generateFrameNumbers('miner', { start: 9, end: 11 }),
-        frameRate: 10,
-        repeat: -1
-    });
-
-    this.anims.create({
-        key: 'right',
-        frames: this.anims.generateFrameNumbers('miner', { start: 15, end: 17 }),
-        frameRate: 10,
-        repeat: -1
-    });
-
-    this.anims.create({
-        key: 'up',
-        frames: this.anims.generateFrameNumbers('miner', { start: 21, end: 23 }),
-        frameRate: 10,
-        repeat: -1
-    });
-
-    this.anims.create({
-        key: 'down',
         frames: this.anims.generateFrameNumbers('miner', { start: 3, end: 5 }),
         frameRate: 10,
         repeat: -1
     });
 
     this.anims.create({
-        key: 'mine',
+        key: 'right',
         frames: this.anims.generateFrameNumbers('miner', { start: 0, end: 2 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'up',
+        frames: this.anims.generateFrameNumbers('miner', { start: 6, end: 8 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'down',
+        frames: this.anims.generateFrameNumbers('miner', { start: 9, end: 11 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'mine',
+        frames: this.anims.generateFrameNumbers('miner', { start: 18, end: 20 }),
         frameRate: 4,
         repeat: -1
     });
