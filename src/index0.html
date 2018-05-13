@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+var client = {}
+client.socket = io.connect();
+console.log('here i am')
+
+
+client.socket.on("allPlayers", data => {
+  console.log("Sent my address, should receive some players locations if they are valid")
+  console.log(JSON.stringify(data))})
+var compteur = 0
+
+function hello() {console.log('hello')}
+
+function gameLoaded(add) {
+  console.log("Connection to game, sending my address")
+  client.socket.emit("gameLoaded",{address:add})
+}
+
+function selectNonce(add, ax,ay, anonce) {
+  var obj = {address:add, x:ax, y:ay, nonce:anonce}
+  console.log("Sending my selected nonce as well as all my data ",JSON.stringify(obj))
+  client.socket.emit("selectNonce", obj)
+}
+
+function revealWinner() {
+  client.socket.emit("revealWinner")
+}
+
+</script>
+<input id="clickMe" type="button" value="gameLoaded" onclick="gameLoaded(document.getElementById('playerNum').value);" />
+<input type="text" id="playerNum">
+<input id="clickMe" type="button" value="selectNonce" onclick="selectNonce(document.getElementById('address').value,document.getElementById('x').value,document.getElementById('y').value,document.getElementById('nonce').value);" />
+<input type="text" id="address">
+<input type="text" id="x">
+<input type="text" id="y">
+<input type="text" id="nonce">
+
+<input id="clickMe" type="button" value="revealWinner" onclick="revealWinner();" />
+
+</body>
+
+</html>
