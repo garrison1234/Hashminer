@@ -3,6 +3,18 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var helper = require("./helper.js")
+var Web3 = require('web3');
+var contract = require("truffle-contract");
+
+
+if (typeof web3 !== 'undefined') {
+  web3 = new Web3(web3.currentProvider);
+} else {
+  web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+}
+
+web3.eth.getAccounts(console.log)
+
 
 app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
@@ -20,38 +32,33 @@ server.listen(process.env.PORT || 8081,function(){
   console.log(__dirname);
 });
 
-var Players = [];
+var pendingSelections = []
+var confirmedSelections = [];
+var pendingTimer;
+
+
 
 io.on('connection',function(socket){
 
-  socket.on("gameLoaded",function(data){
-    var player = { address:data.address};
-    Players.push(player);
-    console.log(JSON.stringify(Players))
-    socket.emit("allPlayers", helper.getAllPlayers(Players));
+  socket.on("gameLoaded",function(){
+    socket.emit("allPlayers", pendingSelections.concat(confirmedSelections));
 
     socket.on("selectNonce", function(data){
-      if(helper.nonceValid(Players, data.nonce)){
-      //find the corresponding player in the array and update values
-      Update = helper.updatePlayer(Players, data);
-      //return Update  =  [Player, boolean exist, index]
-      if(Update[1]) {
-        Players = Update[0];
-        socket.broadcast.emit("newSelection", Players[Update[2]]);
+      if(helper.nonceValid(pendingSelections.concat(confirmedSelections), data.nonce)){
+        pendingSelections.push(data)
+        pendingTimer = setInterval(helper.checkConfirmations(),2000);
+        socket.broadcast.emit("newSelection",pendingSelections.concat(confirmedSelections));
       }
-      else
-        console.log("error not in array Players when selecting");
-      //--Should listen to ethereum, create a web 3 module initializing instance of contract
+      //--As long as pendingSelection has one element, listen to blockchain.
 
-
-
-
-      }
     });
   });
+  socket.on("debugPlayers", function(){
+    console.log(JSON.stringify(pendingSelections.concat(confirmedSelections)))
+  })
 
   socket.on("revealWinner", function(){
-    //add internal state stopping submission of button because client side is never safe
+    //add internal state stopping submission of button
     if(true) {
       socket.broadcast.emit("blockButton")
       //watch ethereum to get the winner

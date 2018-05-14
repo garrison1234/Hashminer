@@ -5,19 +5,17 @@
 <script>
 var client = {}
 client.socket = io.connect();
-console.log('here i am')
 
 
-client.socket.on("allPlayers", data => {
-  console.log("Sent my address, should receive some players locations if they are valid")
-  console.log(JSON.stringify(data))})
-var compteur = 0
+client.socket.on("allPlayers", () => {
+  console.log("Game loaded, should receive some players locations if they are valid")
+})
 
 function hello() {console.log('hello')}
 
-function gameLoaded(add) {
-  console.log("Connection to game, sending my address")
-  client.socket.emit("gameLoaded",{address:add})
+function gameLoaded() {
+  console.log("Connection to game")
+  client.socket.emit("gameLoaded")
 }
 
 function selectNonce(add, ax,ay, anonce) {
@@ -30,16 +28,17 @@ function revealWinner() {
   client.socket.emit("revealWinner")
 }
 
+function debugPlayers() {client.socket.emit("debugPlayers")}
+
 </script>
-<input id="clickMe" type="button" value="gameLoaded" onclick="gameLoaded(document.getElementById('playerNum').value);" />
-<input type="text" id="playerNum">
+<input id="clickMe" type="button" value="gameLoaded" onclick="gameLoaded();" />
 <input id="clickMe" type="button" value="selectNonce" onclick="selectNonce(document.getElementById('address').value,document.getElementById('x').value,document.getElementById('y').value,document.getElementById('nonce').value);" />
 <input type="text" id="address">
 <input type="text" id="x">
 <input type="text" id="y">
 <input type="text" id="nonce">
-
 <input id="clickMe" type="button" value="revealWinner" onclick="revealWinner();" />
+<input id="clickMe" type="button" value="debugSelections" onclick="debugPlayers()" />
 
 </body>
 
