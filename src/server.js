@@ -5,15 +5,15 @@ var io = require('socket.io').listen(server);
 var helper = require("./helper.js")
 var Web3 = require('web3');
 var contract = require("truffle-contract");
+var fs = require("fs");
+var web3
+web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7546"));
+hashminerAbi = JSON.parse(fs.readFileSync("../build/contracts/Hashminer.json")).abi
 
+var hashminer = web3.eth.contract(hashminerAbi)
+var ins = hashminer.at("0x625b914E3836f1E477aE2E11f8537a94126b8139")
+console.log(ins.getGameInfo());
 
-if (typeof web3 !== 'undefined') {
-  web3 = new Web3(web3.currentProvider);
-} else {
-  web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
-}
-
-web3.eth.getAccounts(console.log)
 
 
 app.use('/css',express.static(__dirname + '/css'));
@@ -29,14 +29,11 @@ app.get('/',function(req,res){
 
 server.listen(process.env.PORT || 8081,function(){
   console.log('Listening on '+server.address().port);
-  console.log(__dirname);
 });
 
 var pendingSelections = []
 var confirmedSelections = [];
 var pendingTimer;
-
-
 
 io.on('connection',function(socket){
 
@@ -65,3 +62,13 @@ io.on('connection',function(socket){
     }
   });
 });
+
+
+function initWeb3() {
+  if (typeof web3 !== 'undefined') {
+    var web3 = new Web3(web3.currentProvider);
+  } else {
+    var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+  }
+  return web3
+}

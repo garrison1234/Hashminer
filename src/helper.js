@@ -4,6 +4,5 @@ module.exports = {
       if(array[i].nonce === nonce) return false;}
     if(nonce < 16 && nonce > -1) return true;
     else return false;
-  },
-  
+  }
 }
