@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "phaser": "^3.2.0",
+<<<<<<< HEAD
     "web3": "0.20.6"
   },
   "repository": {
@@ -27,4 +28,8 @@
     "url": "https://github.com/garrison1234/Hashminer/issues"
   },
   "homepage": "https://github.com/garrison1234/Hashminer#readme"
+=======
+    "socket.io": "latest"
+  }
+>>>>>>> 13b61ca8846905b7d99b09cc71e03e12b6cad970
 }
