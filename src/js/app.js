@@ -2,7 +2,6 @@ App = {
      web3Provider: null,
      contracts: {},
      account: 0x0,
-     takenNonces: [],
 
      init: function() {
           return App.initWeb3();
@@ -47,9 +46,6 @@ App = {
          App.contracts.Hashminer = TruffleContract(hashminerArtifact);
          // set the provider for our contracts
          App.contracts.Hashminer.setProvider(App.web3Provider);
-         // listen to events
-         App.listenToEvents();
-
          // displays all information
          App.displayGameInfo();
          App.displayPlayersInfo();
@@ -57,25 +53,18 @@ App = {
      },
 
      playGame: function(_nonce, _xdestination, _ydestination) {
-       // retrieve the nonce
-       //var _nonce = parseInt($('#nonce').val());
-
-       // check that the nonce is a valid number
-       if( (_nonce < 1) || (_nonce > 16) || (App.takenNonces.includes(_nonce)) ) {
-         //invalid nonce
-         return false;
-       }
-
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.playGame(_nonce, {
            from: App.account,
-           value: web3.toWei(50,"finney"),
+           value: web3.toWei(50, "finney"),
            gas: 500000
          });
        }).then(function(result) {
-         game.addNewMiner(_nonce, _xdestination, _ydestination);
+         //transaction was mined
+         console.log('transaction successful');
        }).catch(function(err) {
-         //tell user that transaction failed
+         //transaction failed
+         console.log('transaction failed');
        });
      },
 
@@ -86,7 +75,7 @@ App = {
            gas: 500000
          });
        }).catch(function(err) {
-         console.error(err);
+         // revealWinner() transaction failed
        });
      },
 
@@ -107,26 +96,8 @@ App = {
          $('#prize').text(web3.fromWei(gameInformation[9], "ether") + " ETH");
          $('#callerIncentive').text(web3.fromWei(gameInformation[10], "ether") + " ETH");
          $('#caller').text(gameInformation[11]);
-
-         // convert to numbers
-         maxNumberOfPlayers = gameInformation[2].toNumber();
-         playerCounter = gameInformation[3].toNumber();
-
-         // enable playGame button if game is unlocked or active and not full
-         $('#play-button').prop('disabled', true);
-         if(((!gameInformation[1]) || playerCounter > 0) && (playerCounter < maxNumberOfPlayers)) {
-          $('#play-button').prop('disabled', false);
-          }
-
-          // start timer to enable revealWinner button if game is full
-          $('#reveal-button').prop('disabled', true);
-          if(playerCounter == maxNumberOfPlayers) {
-           setTimeout(function() { $('#reveal-button').prop('disabled', false); }, 5000);
-           }
-
-
        }).catch(function(err) {
-         console.error(err.message);
+         // getGameInfo() failed
        });
      },
 
@@ -143,12 +114,12 @@ App = {
          playersInformation[1].forEach(function(item){App.takenNonces.push(item.toNumber());})
 
        }).catch(function(err) {
-         console.error(err.message);
+         // getGameInfo() failed
        });
 
-     },
+     }
 
-     listenToEvents: function() {
+     /*listenToEvents: function() {
        App.contracts.Hashminer.deployed().then(function(instance) {
 
          // listen to LogPlayerAdded event
@@ -206,7 +177,7 @@ App = {
     });
 
       });
-     }
+    }*/
 };
 
 $(function() {
