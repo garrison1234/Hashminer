@@ -4,7 +4,6 @@ var config = {
     width: 960,
     height: 540,
     parent: 'game',
-    antialiasing: false,
     physics: {
       default: 'arcade',
       arcade: {
