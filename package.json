@@ -1,5 +1,5 @@
 {
-  "name": "Hashminer",
+  "name": "hashminer",
   "version": "0.0.1",
   "description": "",
   "main": "truffle.js",
@@ -16,6 +16,15 @@
     "lite-server": "^2.3.0"
   },
   "dependencies": {
-    "phaser": "^3.2.0"
-  }
+    "phaser": "^3.2.0",
+    "web3": "0.20.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/garrison1234/Hashminer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/garrison1234/Hashminer/issues"
+  },
+  "homepage": "https://github.com/garrison1234/Hashminer#readme"
 }

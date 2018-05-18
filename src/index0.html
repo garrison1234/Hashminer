@@ -7,8 +7,9 @@ var client = {}
 client.socket = io.connect();
 
 
-client.socket.on("allPlayers", () => {
+client.socket.on("allPlayers", (data) => {
   console.log("Game loaded, should receive some players locations if they are valid")
+  console.log(JSON.stringify(data));
 })
 
 function hello() {console.log('hello')}
