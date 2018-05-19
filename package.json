@@ -12,7 +12,7 @@
     "socket.io": "^2.1.0",
     "truffle-artifactor": "^3.0.5",
     "truffle-contract": "^3.0.5",
-    "web3": "0.20.6" 
+    "web3": "0.20.6"
   },
   "devDependencies": {},
   "scripts": {
@@ -29,4 +29,3 @@
   },
   "homepage": "https://github.com/garrison1234/Hashminer#readme"
 }
-

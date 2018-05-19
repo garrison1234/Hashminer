@@ -41,7 +41,7 @@ App = {
 
      // retrieve the Hashminer contract
      initContract: function() {
-       $.getJSON('Hashminer.json', function(hashminerArtifact) {
+       $.getJSON('/contracts/Hashminer.json', function(hashminerArtifact) {
          // get the contract artifact file and use it to instantiate a truffle contract abstraction
          App.contracts.Hashminer = TruffleContract(hashminerArtifact);
          // set the provider for our contracts
@@ -84,6 +84,7 @@ App = {
          return instance.getGameInfo();
        }).then(function(gameInformation) {
          // retrieve the game information from the contract.
+         console.log('getGameInfo() succeeded');
          $('#owner').text(gameInformation[0]);
          $('#gameLocked').text(gameInformation[1]);
          $('#maxNumberOfPlayers').text(gameInformation[2]);
@@ -97,7 +98,7 @@ App = {
          $('#callerIncentive').text(web3.fromWei(gameInformation[10], "ether") + " ETH");
          $('#caller').text(gameInformation[11]);
        }).catch(function(err) {
-         // getGameInfo() failed
+         console.log('getGameInfo() failed');
        });
      },
 
@@ -106,15 +107,15 @@ App = {
          return instance.getPlayersInfo();
        }).then(function(playersInformation) {
          $('#players-table > tbody').empty();
-         App.takenNonces = [];
-         for(i = 0; i < playersInformation[0].length; i++) {
+         //App.takenNonces = [];
+         for(i = 0; i < (playersInformation[0].length - 1); i++) {
            $('#players-table > tbody:last-child').append('<tr><td><p>' + playersInformation[0][i].slice(0,8) + '...' +
             '</p></td><td><p>' + playersInformation[1][i] + '</p></td></tr>');
          }
-         playersInformation[1].forEach(function(item){App.takenNonces.push(item.toNumber());})
+         //playersInformation[1].forEach(function(item){App.takenNonces.push(item.toNumber());})
 
        }).catch(function(err) {
-         // getGameInfo() failed
+         console.log('getGameInfo() failed');
        });
 
      }
@@ -181,7 +182,7 @@ App = {
 };
 
 $(function() {
-     $(window).load(function() {
+     $(window).on('load', function() {
           App.init();
      });
 });

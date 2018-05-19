@@ -42,12 +42,12 @@ var game = new Phaser.Game(config);
 
   function preload () {
 
-    this.load.image('background', 'assets/bgfinal.png');
+    this.load.image('background', '/assets/bgfinal.png');
 
     for (var i = 1; i <= 16; i++){
       minerNumber = i.toString();
-      this.load.spritesheet( ('miner' + minerNumber), ('assets/sheet' + minerNumber + '.png'), { frameWidth: 20, frameHeight: 23 });
-      this.load.spritesheet( ('minerwin' + minerNumber), ('assets/winsheet' + minerNumber + '.png'), { frameWidth: 20, frameHeight: 37 });
+      this.load.spritesheet( ('miner' + minerNumber), ('/assets/sheet' + minerNumber + '.png'), { frameWidth: 20, frameHeight: 23 });
+      this.load.spritesheet( ('minerwin' + minerNumber), ('/assets/winsheet' + minerNumber + '.png'), { frameWidth: 20, frameHeight: 37 });
     }
 
   }
@@ -199,7 +199,7 @@ var game = new Phaser.Game(config);
       ymouseClick = this.input.activePointer.y;
 
       App.playGame(mapNonce, xmouseClick, ymouseClick);
-      Client.playGame(mapNonce, xmouseClick, ymouseClick, App.account);
+      //Client.playGame(mapNonce, xmouseClick, ymouseClick, App.account);
 
       setTimeout(this.unblockMouse, 3000);
     }
