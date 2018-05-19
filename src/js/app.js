@@ -85,6 +85,7 @@ App = {
        }).then(function(gameInformation) {
          // retrieve the game information from the contract.
          console.log('getGameInfo() succeeded');
+         console.log('gameInformation: ' + gameInformation);
          $('#owner').text(gameInformation[0]);
          $('#gameLocked').text(gameInformation[1]);
          $('#maxNumberOfPlayers').text(gameInformation[2]);
