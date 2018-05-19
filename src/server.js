@@ -7,16 +7,17 @@ var Web3 = require('web3');
 var contract = require("truffle-contract");
 var fs = require("fs");
 var web3
-web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7546"));
+web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
 
 app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
 app.use('/assets',express.static(__dirname + '/assets'));
 app.use('/fonts',express.static(__dirname + '/fonts'));
-//app.use('/',express.static(__dirname + '/'));
+app.use('/',express.static(__dirname + '/'));
+app.use('/contracts',express.static(__dirname+ '/contracts'));
 
 app.get('/',function(req,res){
-  res.sendFile(__dirname+'/index0.html');
+  res.sendFile(__dirname+'/game.html');
 });
 
 server.listen(process.env.PORT || 8081,function(){
@@ -31,7 +32,7 @@ var latestPlayEvents = []
 var latestFinishEvents = []
 var hashminerAbi = JSON.parse(fs.readFileSync("../build/contracts/Hashminer.json")).abi
 var hashminer = web3.eth.contract(hashminerAbi)
-var instance = hashminer.at("0x625b914e3836f1e477ae2e11f8537a94126b8139")
+var instance = hashminer.at("0xfb88de099e13c3ed21f80a7a1e49f8caecf10df6")
 
 var PlayEvent = instance.LogPlayerAdded({},{fromBlock:"latest",toBlock:"latest"})
 PlayEvent.watch(function(err,res) {

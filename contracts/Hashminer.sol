@@ -119,21 +119,23 @@ contract Hashminer {
     require((!gameLocked) || (playerCounter > 0));
 
     // check that the nonce is within the accepted range of values
-    require((0 < _nonce) && (_nonce <= maxNumberOfPlayers));
+    require((0 <= _nonce) && (_nonce < maxNumberOfPlayers));
 
     // check that the nonce has not been taken. This also checks that the game is not full.
-    for (uint i = 1; i <= playerCounter; i++) {
+    for (uint i = 0; i < playerCounter; i++) {
       if (_nonce == takenNonces[i]) {revert();}
     }
-
-    // add new player
-    playerCounter++;
-    players[_nonce] = Player(_nonce, msg.sender);
 
     // add nonce to list of already chosen ones.
     takenNonces[playerCounter] = _nonce;
 
+    // save player struct with nonce and address in players[]
+    players[_nonce] = Player(_nonce, msg.sender);
+
     LogPlayerAdded(playerCounter, _nonce, msg.sender);
+
+    // add new player
+    playerCounter++;
 
     // save number of the block that will determine the winner if game is full
     if (playerCounter == maxNumberOfPlayers) {
@@ -154,7 +156,7 @@ contract Hashminer {
     blockHash = block.blockhash(blockNumber);
 
     // obtain winning nonce. The desired blockHash ending for a given nonce is varied each game
-    winningNonce = (uint(keccak256(blockNumber, blockHash)) & (maxNumberOfPlayers - 1)) + 1;
+    winningNonce = (uint(keccak256(blockNumber, blockHash)) & (maxNumberOfPlayers - 1));
 
     // transfer prize to winning player
     winner = players[winningNonce].wallet;
@@ -162,7 +164,7 @@ contract Hashminer {
 
     // reset playerCounter and takenNonces to restart game. BETTER WAY TO DO THIS WITHOUT LOOPING!!!????
     playerCounter = 0;
-    for (uint j = 1; j <= maxNumberOfPlayers; j++) {
+    for (uint j = 0; j < maxNumberOfPlayers; j++) {
       takenNonces[j] = 0;
     }
 
@@ -209,11 +211,11 @@ contract Hashminer {
     uint[] memory playerNonces = new uint[](playerCounter);
 
     // iterate over all taken nonces
-    for(uint i = 0; i <= playerCounter;  i++) {
+    for(uint i = 0; i < playerCounter;  i++) {
       // save the player address and nonce if that nonce has already been selected
-      if(takenNonces[i+1] != 0) {
-        playerAddresses[i] = players[takenNonces[i+1]].wallet;
-        playerNonces[i] = players[takenNonces[i+1]].nonce;
+      if(takenNonces[i] != 0) {
+        playerAddresses[i] = players[takenNonces[i]].wallet;
+        playerNonces[i] = players[takenNonces[i]].nonce;
       }
     }
 
