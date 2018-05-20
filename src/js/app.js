@@ -4,7 +4,9 @@ App = {
      account: 0x0,
 
      init: function() {
-          return App.initWeb3();
+        // block revealWinner button upon loading
+        $('#reveal-button').prop('disabled', true);
+        return App.initWeb3();
      },
 
      // initialize web3 provider
