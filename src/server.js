@@ -13,17 +13,18 @@ app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
 app.use('/assets',express.static(__dirname + '/assets'));
 app.use('/fonts',express.static(__dirname + '/fonts'));
-app.use('/',express.static(__dirname + '/'));
+//app.use('/',express.static(__dirname + '/'));
+app.use('/build',express.static(__dirname+ '/build'));
 app.use('/contracts',express.static(__dirname+ '/contracts'));
 
 app.get('/',function(req,res){
-  res.sendFile(__dirname+'/game.html');
+  res.sendFile(__dirname+'/index0.html');
 });
 
 server.listen(process.env.PORT || 8081,function(){
   console.log('Listening on '+server.address().port);
 });
-
+var debug = true
 var pendingSelections = []
 var confirmedSelections = [];
 var pendingTimer;
@@ -32,7 +33,7 @@ var latestPlayEvents = []
 var latestFinishEvents = []
 var hashminerAbi = JSON.parse(fs.readFileSync("../build/contracts/Hashminer.json")).abi
 var hashminer = web3.eth.contract(hashminerAbi)
-var instance = hashminer.at("0xf12b5dd4ead5f743c6baa640b0216200e89b60da")
+var instance = hashminer.at("0x625b914e3836f1e477ae2e11f8537a94126b8139")
 
 var PlayEvent = instance.LogPlayerAdded({},{fromBlock:"latest",toBlock:"latest"})
 PlayEvent.watch(function(err,res) {
@@ -41,8 +42,15 @@ PlayEvent.watch(function(err,res) {
     var result = helper.parsePlayEvent(playEvent, pendingSelections, confirmedSelections);
     pendingSelections = result[0]
     confirmedSelections = result[1]
-    //HA console.log(JSON.stringify(pendingSelections));
-    //HA console.log(JSON.stringify(confirmedSelections));
+    if(debug) {
+    console.log("---------------------------------");
+    console.log("In event Play:");
+    console.log("pending selections");
+    console.log(JSON.stringify(pendingSelections));
+    console.log("Confirmed selections");
+    console.log(JSON.stringify(confirmedSelections));
+    console.log("---------------------------------");
+  }
   } else {
     console.log(err)
   }
@@ -61,18 +69,36 @@ confirmedSelections = helper.loadStartingState(instance.getPlayersInfo())
 
 io.on('connection',function(socket){
   socket.on("gameLoaded",function(){
-
     socket.emit("allPlayers", confirmedSelections.concat(helper.addPendingField(pendingSelections)));
-    socket.on("selectNonce", function(data){
-      if(helper.nonceValid(pendingSelections.concat(confirmedSelections), data.nonce)){
-        console.log(JSON.stringify(data))
-        pendingSelections.push({address : data.address.toLowerCase(), x: parseInt(data.x), y: parseInt(data.y), nonce: parseInt(data.nonce)})
-        socket.broadcast.emit("newSelection",pendingSelections.concat(confirmedSelections));
-        }
-      });
     });
+
+    socket.on("selectNonce", function(data){
+      if(helper.nonceValid(pendingSelections.concat(confirmedSelections), parseInt(data.nonce))){
+        if(debug) {
+        console.log("---------------------------------");
+        console.log("new pending selection made");
+        console.log(data.nonce);
+        console.log("---------------------------------");
+      }
+        pendingSelections.push({address : data.address.toLowerCase(), x: parseInt(data.x), y: parseInt(data.y), nonce: parseInt(data.nonce)})
+        socket.broadcast.emit("newSelection",confirmedSelections.concat(helper.addPendingField(pendingSelections)));
+      } else {
+        if(debug) {
+        console.log("---------------------------------");
+        console.log("Nonce already selected or nonce invalid");
+        console.log(data.nonce);
+        console.log("---------------------------------");
+      }
+      }
+      });
+
     socket.on("debugPlayers", function(){
+      if(debug) {
+      console.log("---------------------------------");
+      console.log("");
       console.log(confirmedSelections.concat(helper.addPendingField(pendingSelections)))
+      console.log("---------------------------------");
+    }
     })
 
     socket.on("revealWinner", function(){

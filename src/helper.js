@@ -23,7 +23,6 @@ module.exports = {
     var findIndexPending = function(address, pending) {
       for(var i = 0 ; i < pending.length; i++){
         if(pending[i].address == address) {
-          console.log("return i suppose");
             return i;
         }
       }
@@ -33,11 +32,9 @@ module.exports = {
 
       for(var i = 0; i < confirmedSelections.length; i++) {
         if(confirmedSelections[i].address == playEvent.address && confirmedSelections[i].nonce === playEvent.nonce ){
-          //HA console.log('return false, already in');
           return false
         }
       }
-      console.log("return true, not already in");
       return true
     }
 
@@ -45,7 +42,6 @@ module.exports = {
       if(noRepetition(playEvent, confirmedSelections)) {
       var index = findIndexPending(playEvent.address, pendingSelections)
       if (typeof index !== 'undefined') {
-        console.log(index + " objective");
         confirmedSelections.push({address: pendingSelections[index].address, x:pendingSelections[index].x,y:pendingSelections[index].y,nonce:pendingSelections[index].nonce})
         pendingSelections.splice(index,1)
       } else {

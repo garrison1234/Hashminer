@@ -12,6 +12,10 @@ client.socket.on("allPlayers", (data) => {
   console.log(JSON.stringify(data));
 })
 
+client.socket.on("update", (data) => {
+  console.log(JSON.stringify(data));
+})
+
 function hello() {console.log('hello')}
 
 function gameLoaded() {
