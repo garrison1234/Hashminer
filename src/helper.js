@@ -33,7 +33,7 @@ module.exports = {
 
       for(var i = 0; i < confirmedSelections.length; i++) {
         if(confirmedSelections[i].address == playEvent.address && confirmedSelections[i].nonce === playEvent.nonce ){
-          console.log('return false, already in');
+          //HA console.log('return false, already in');
           return false
         }
       }

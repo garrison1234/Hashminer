@@ -110,10 +110,10 @@ var game = new Phaser.Game(config);
           repeat: -1
       });
 
-
-
     }
 
+    // ask server.js to send current players information
+    Client.gameLoaded();
   }
 
   function update() {
@@ -190,7 +190,7 @@ var game = new Phaser.Game(config);
       $('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' click to place miner');
     }
 
-    if ( this.input.activePointer.isDown && !(blockedNonces.includes(mapNonce)) && !gameOver) {
+    if ( !mouseBlocked && this.input.activePointer.isDown && !(blockedNonces.includes(mapNonce)) && !gameOver) {
       // block mouse
       mouseBlocked = true;
 
@@ -198,9 +198,12 @@ var game = new Phaser.Game(config);
       xmouseClick = this.input.activePointer.x;
       ymouseClick = this.input.activePointer.y;
 
-      App.playGame(mapNonce, xmouseClick, ymouseClick);
-      //Client.playGame(mapNonce, xmouseClick, ymouseClick, App.account);
+      // call to send transaction to blockchain
+      App.playGame(mapNonce);
+      // call to send transaction information to server.js
+      Client.playGame(mapNonce, xmouseClick, ymouseClick, App.account);
 
+      // block mouse for 3 seconds to avoid sending transaction twice
       setTimeout(this.unblockMouse, 3000);
     }
 
@@ -291,43 +294,9 @@ var game = new Phaser.Game(config);
   }
 
   // function called from app.js to add array of new confirmed player objects{nonce, x, y, address} sent from server.js
-  game.addActiveMiners = function(newPlayers) {
-      // add joined:'after' to each new player, so that the miner displacement will be animated
-      for (let element of newPlayers) {
-        element.joined = 'before';
-      }
-      // add newPlayers array to confirmedMiners array
-      Array.prototype.push.apply(confirmedMiners, newPlayers);
-      // extract the new confirmed nonces from the newPlayers array of objects
-      var newConfirmedNonces = newPlayers.map(a => a.nonce);
-      // add each new confirmed nonce if not already found in blockedNonces
-      var nonceIndex;
-      for (var k = 0; k < newConfirmedNonces.length; k++) {
-        nonceIndex = blockedNonces.indexOf(newConfirmedNonces[k]);
-        if (nonceIndex = -1) {
-          blockedNonces.push(newConfirmedNonces[k]);
-        }
-      }
-  }
-
-  // function called from app.js to add array of new confirmed player objects{nonce, x, y, address} sent from server.js
   game.addNewMiners = function(newPlayers) {
-      // add joined:'after' to each new player, so that the miner displacement will be animated
-      for (let element of newPlayers) {
-        element.joined = 'after';
-      }
       // add newPlayers array to confirmedMiners array
       Array.prototype.push.apply(confirmedMiners, newPlayers);
-      // extract the new confirmed nonces from the newPlayers array of objects
-      var newConfirmedNonces = newPlayers.map(a => a.nonce);
-      // add each new confirmed nonce if not already found in blockedNonces
-      var nonceIndex;
-      for (var k = 0; k < newConfirmedNonces.length; k++) {
-        nonceIndex = blockedNonces.indexOf(newConfirmedNonces[k]);
-        if (nonceIndex = -1) {
-          blockedNonces.push(newConfirmedNonces[k]);
-        }
-      }
   }
 
   // function called from app.js to block nonces already played, confirmed or in the process of being confirmed
@@ -337,7 +306,6 @@ var game = new Phaser.Game(config);
     if (nonceIndex = -1) {
       blockedNonces.push(blockedNonce);
     }
-    console.log('blockedNonces: ' + blockedNonces);
   }
 
   // function called from app.js to unblock nonces that were played but not confirmed in time
@@ -347,7 +315,6 @@ var game = new Phaser.Game(config);
     if (nonceIndex > -1) {
       blockedNonces.splice(nonceIndex, 1);
     }
-    console.log('blockedNonces: ' + blockedNonces);
   }
 
   game.unblockMouse = function() {

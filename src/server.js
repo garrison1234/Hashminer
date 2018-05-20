@@ -32,7 +32,7 @@ var latestPlayEvents = []
 var latestFinishEvents = []
 var hashminerAbi = JSON.parse(fs.readFileSync("../build/contracts/Hashminer.json")).abi
 var hashminer = web3.eth.contract(hashminerAbi)
-var instance = hashminer.at("0xfb88de099e13c3ed21f80a7a1e49f8caecf10df6")
+var instance = hashminer.at("0xf12b5dd4ead5f743c6baa640b0216200e89b60da")
 
 var PlayEvent = instance.LogPlayerAdded({},{fromBlock:"latest",toBlock:"latest"})
 PlayEvent.watch(function(err,res) {
@@ -41,8 +41,8 @@ PlayEvent.watch(function(err,res) {
     var result = helper.parsePlayEvent(playEvent, pendingSelections, confirmedSelections);
     pendingSelections = result[0]
     confirmedSelections = result[1]
-    console.log(JSON.stringify(pendingSelections));
-    console.log(JSON.stringify(confirmedSelections));
+    //HA console.log(JSON.stringify(pendingSelections));
+    //HA console.log(JSON.stringify(confirmedSelections));
   } else {
     console.log(err)
   }
