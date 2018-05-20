@@ -164,9 +164,9 @@ contract Hashminer {
 
     // reset playerCounter and takenNonces to restart game. BETTER WAY TO DO THIS WITHOUT LOOPING!!!????
     playerCounter = 0;
-    for (uint j = 0; j < maxNumberOfPlayers; j++) {
+    /*for (uint j = 0; j < maxNumberOfPlayers; j++) {
       takenNonces[j] = 0;
-    }
+    }*/
 
     // store the caller address and transfer their reward
     caller = msg.sender;
@@ -212,11 +212,9 @@ contract Hashminer {
 
     // iterate over all taken nonces
     for(uint i = 0; i < playerCounter;  i++) {
-      // save the player address and nonce if that nonce has already been selected
-      if(takenNonces[i] != 0) {
-        playerAddresses[i] = players[takenNonces[i]].wallet;
-        playerNonces[i] = players[takenNonces[i]].nonce;
-      }
+      // save player addresses and nonces
+      playerAddresses[i] = players[takenNonces[i]].wallet;
+      playerNonces[i] = players[takenNonces[i]].nonce;
     }
 
     return (playerAddresses, playerNonces);

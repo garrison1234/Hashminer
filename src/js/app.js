@@ -52,7 +52,7 @@ App = {
        });
      },
 
-     playGame: function(_nonce, _xdestination, _ydestination) {
+     playGame: function(_nonce) {
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.playGame(_nonce, {
            from: App.account,
@@ -61,7 +61,7 @@ App = {
          });
        }).then(function(result) {
          //transaction was mined
-         console.log('transaction successful');
+         console.log('playGame transaction successful, nonce: ' + _nonce);
        }).catch(function(err) {
          //transaction failed
          console.log('transaction failed');
@@ -84,8 +84,6 @@ App = {
          return instance.getGameInfo();
        }).then(function(gameInformation) {
          // retrieve the game information from the contract.
-         console.log('getGameInfo() succeeded');
-         console.log('gameInformation: ' + gameInformation);
          $('#owner').text(gameInformation[0]);
          $('#gameLocked').text(gameInformation[1]);
          $('#maxNumberOfPlayers').text(gameInformation[2]);
@@ -99,7 +97,6 @@ App = {
          $('#callerIncentive').text(web3.fromWei(gameInformation[10], "ether") + " ETH");
          $('#caller').text(gameInformation[11]);
        }).catch(function(err) {
-         console.log('getGameInfo() failed');
        });
      },
 
@@ -108,15 +105,11 @@ App = {
          return instance.getPlayersInfo();
        }).then(function(playersInformation) {
          $('#players-table > tbody').empty();
-         //App.takenNonces = [];
-         for(i = 0; i < (playersInformation[0].length - 1); i++) {
+         for(i = 0; i < (playersInformation[0].length); i++) {
            $('#players-table > tbody:last-child').append('<tr><td><p>' + playersInformation[0][i].slice(0,8) + '...' +
             '</p></td><td><p>' + playersInformation[1][i] + '</p></td></tr>');
          }
-         //playersInformation[1].forEach(function(item){App.takenNonces.push(item.toNumber());})
-
        }).catch(function(err) {
-         console.log('getGameInfo() failed');
        });
 
      }
