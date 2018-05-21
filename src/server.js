@@ -95,7 +95,7 @@ io.on('connection',function(socket){
     socket.on("debugPlayers", function(){
       if(debug) {
       console.log("---------------------------------");
-      console.log("");
+      console.log("DEBUG PLAYER");
       console.log(confirmedSelections.concat(helper.addPendingField(pendingSelections)))
       console.log("---------------------------------");
     }
