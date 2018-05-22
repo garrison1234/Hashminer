@@ -20,16 +20,15 @@ module.exports = {
   //add game parameters
   parsePlayEvent : function (playEvent, pendingSelections, confirmedSelections) {
 
-    var findIndexPending = function(address, pending) {
-      for(var i = 0 ; i < pending.length; i++){
-        if(pending[i].address == address) {
+    var findIndexPending = function() {
+      for(var i = 0 ; i < pendingSelections.length; i++){
+        if(pendingSelections[i].address == playEvent.address) {
             return i;
         }
       }
       return false;
     }
-    var noRepetition = function (playEvent,confirmedSelections) {
-
+    var noRepetition = function () {
       for(var i = 0; i < confirmedSelections.length; i++) {
         if(confirmedSelections[i].address == playEvent.address && confirmedSelections[i].nonce === playEvent.nonce ){
           return false
@@ -37,41 +36,46 @@ module.exports = {
       }
       return true
     }
+    var removePendingErrors = function () {
+      for(var i =0; i<pendingSelections.length; i++) {
+        if(pendingSelections[i].nonce == playEvent.nonce) {
+          pendingSelections.splice(i,1)
+        }
+      }
+    }
 
-    var modifyArrays = function (playEvent, pendingSelections, confirmedSelections) {
-      if(noRepetition(playEvent, confirmedSelections)) {
-      var index = findIndexPending(playEvent.address, pendingSelections)
-      if (typeof index !== 'undefined') {
+    var modifyArrays = function () {
+      if(noRepetition()) {
+      var index = findIndexPending()
+      if (typeof index != 'undefined' && index != false) {
         confirmedSelections.push({address: pendingSelections[index].address, x:pendingSelections[index].x,y:pendingSelections[index].y,nonce:pendingSelections[index].nonce})
         pendingSelections.splice(index,1)
       } else {
         //sinon ==> confirmedSelection with rdm x and y
         confirmedSelections.push({address : playEvent.address, x:0, y:0, nonce : playEvent.nonce})
       }}
-      return [pendingSelections, confirmedSelections]
     }
 
     if(confirmedSelections.length === 0) {
       if(pendingSelections.length === 0) {
         //In the case of a first new playGame
-        if(playEvent.counter == 1 ) {
+        if(playEvent.counter == 0 ) {
           confirmedSelections.push({address : playEvent.address, x:0, y:0, nonce : playEvent.nonce})
         //old event or ambiguous if not maxNum
         } else {
-          console.log("playEvent counter is not 1 :: 2 to maxNumberOfPlayers");
+          console.log("ERROR playEvent counter is not 1 :: 2 to maxNumberOfPlayers");
           console.log(playEvent.counter);
         }
       //01
       } else {
-        var results = modifyArrays(playEvent, pendingSelections, confirmedSelections)
-        pendingSelections = results[0]
-        confirmedSelections = results[1]
+
+        modifyArrays()
       }
     } else {
-        var results = modifyArrays(playEvent, pendingSelections, confirmedSelections)
-        pendingSelections = results[0]
-        confirmedSelections = results[1]
+        modifyArrays()
+
     }
+    removePendingErrors()
     return [pendingSelections, confirmedSelections]
   }
 }
