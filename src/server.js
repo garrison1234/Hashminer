@@ -13,12 +13,12 @@ app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
 app.use('/assets',express.static(__dirname + '/assets'));
 app.use('/fonts',express.static(__dirname + '/fonts'));
-//app.use('/',express.static(__dirname + '/'));
+app.use('/',express.static(__dirname + '/'));
 app.use('/build',express.static(__dirname+ '/build'));
 app.use('/contracts',express.static(__dirname+ '/contracts'));
 
 app.get('/',function(req,res){
-  res.sendFile(__dirname+'/index0.html');
+  res.sendFile(__dirname+'/index.html');
 });
 
 server.listen(process.env.PORT || 8081,function(){
@@ -33,7 +33,7 @@ var latestPlayEvents = []
 var latestFinishEvents = []
 var hashminerAbi = JSON.parse(fs.readFileSync("../build/contracts/Hashminer.json")).abi
 var hashminer = web3.eth.contract(hashminerAbi)
-var instance = hashminer.at("0x625b914e3836f1e477ae2e11f8537a94126b8139")
+var instance = hashminer.at("0x345ca3e014aaf5dca488057592ee47305d9b3e10")
 
 var PlayEvent = instance.LogPlayerAdded({},{fromBlock:"latest",toBlock:"latest"})
 PlayEvent.watch(function(err,res) {
