@@ -27,10 +27,6 @@ server.listen(process.env.PORT || 8081,function(){
 var debug = true
 var pendingSelections = []
 var confirmedSelections = [];
-var pendingTimer;
-var compteur = 0
-var latestPlayEvents = []
-var latestFinishEvents = []
 var hashminerAbi = JSON.parse(fs.readFileSync("../build/contracts/Hashminer.json")).abi
 var hashminer = web3.eth.contract(hashminerAbi)
 var instance = hashminer.at("0x345ca3e014aaf5dca488057592ee47305d9b3e10")
@@ -59,7 +55,10 @@ PlayEvent.watch(function(err,res) {
 var FinishEvent = instance.LogGameFinished({},{fromBlock:"latest", toBlock:"latest"})
 FinishEvent.watch(function(err,res) {
   if(!err){
-    //Listen to winner, flush everything, it is confirmed.
+    console.log(JSON.stringify(res));
+    pendingSelections = []
+    confirmedSelections = []
+
   } else {
     console.log(err)
   }
