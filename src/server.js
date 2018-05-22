@@ -27,6 +27,7 @@ server.listen(process.env.PORT || 8081,function(){
 var debug = true
 var pendingSelections = []
 var confirmedSelections = [];
+var gameInfo = [];
 var hashminerAbi = JSON.parse(fs.readFileSync("../build/contracts/Hashminer.json")).abi
 var hashminer = web3.eth.contract(hashminerAbi)
 var instance = hashminer.at("0x625b914e3836f1e477ae2e11f8537a94126b8139")
@@ -50,6 +51,24 @@ PlayEvent.watch(function(err,res) {
   } else {
     console.log(err)
   }
+  if(!result[2])
+    io.sockets.emit("newConfirmed", confirmedSelections[confirmedSelections.length-1])
+})
+
+var PlayerReadyEvent = instance.LogPlayersReady({}, {fromBlock:"latest", toBlock:"latest"})
+PlayerReadyEvent.watch(function(err,res) {
+  if(!err) {
+    console.log("PLAYER READY EVENT")
+    console.log(JSON.stringify(res))
+    //Should start a 3 block timeout to unblock button
+    //Could pull blocknumber and compare for a while
+    setTimeout(function(){
+      console.log("unblock button");
+      io.sockets.emit("unblockButton")
+    }, 10000)
+  } else {
+    console.log(err);
+  }
 })
 
 var FinishEvent = instance.LogGameFinished({},{fromBlock:"latest", toBlock:"latest"})
@@ -58,19 +77,20 @@ FinishEvent.watch(function(err,res) {
     console.log(JSON.stringify(res));
     pendingSelections = []
     confirmedSelections = []
-
   } else {
     console.log(err)
   }
 })
 
 confirmedSelections = helper.loadStartingState(instance.getPlayersInfo())
+gameInfo = instance.getGameInfo()
+drawBlock = gameInfo[5]
+console.log("The current block : " + drawBlock);
 
 io.on('connection',function(socket){
   socket.on("gameLoaded",function(){
     socket.emit("allPlayers", confirmedSelections.concat(helper.addPendingField(pendingSelections)));
     });
-
     socket.on("selectNonce", function(data){
       if(helper.nonceValid(pendingSelections.concat(confirmedSelections), parseInt(data.nonce))){
         if(debug) {
@@ -80,7 +100,7 @@ io.on('connection',function(socket){
         console.log("---------------------------------");
       }
         pendingSelections.push({address : data.address.toLowerCase(), x: parseInt(data.x), y: parseInt(data.y), nonce: parseInt(data.nonce)})
-        socket.broadcast.emit("newSelection",confirmedSelections.concat(helper.addPendingField(pendingSelections)));
+        socket.broadcast.emit("newSelection", data.nonce);
       } else {
         if(debug) {
         console.log("---------------------------------");
@@ -98,15 +118,15 @@ io.on('connection',function(socket){
       console.log(confirmedSelections.concat(helper.addPendingField(pendingSelections)))
       console.log("---------------------------------");
     }
-    })
-
+  });
     socket.on("revealWinner", function(){
-      //add internal state stopping submission of button
-      if(true) {
-        socket.broadcast.emit("blockButton")
-        //watch ethereum to get the winner
-      }
-    });
+       console.log("blocking button");
+        socket.emit("blockButton")
+        setTimeout(function(){
+          console.log("unblock button");
+          io.sockets.emit("unblockButton")
+        }, 10000)
+      });
   });
 
 

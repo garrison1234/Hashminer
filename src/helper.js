@@ -1,3 +1,58 @@
+var getXandY = function(nonce) {
+  var x,y;
+  switch (nonce) {
+    case 0:
+      x = 120; y = 67;
+    break;
+    case 1:
+      x = 120; y = 202;
+    break;
+    case 2:
+      x = 120; y = 337;
+    break;
+    case 3:
+      x = 120; y = 473;
+    break;
+    case 4:
+      x = 360; y = 67;
+    break;
+    case 5:
+      x = 360;y = 202;
+    break;
+    case 6:
+      x = 360;y = 337;
+    break;
+    case 7:
+      x = 360;y = 473;
+    break;
+    case 8:
+      x = 600;y = 67;
+    break;
+    case 9:
+      x = 600;y = 202;
+    break;
+    case 10:
+      x = 600;y = 337;
+    break;
+    case 11:
+      x = 600;y = 473;
+    break;
+    case 12:
+      x = 840;y = 67;
+    break;
+    case 13:
+      x = 840;y = 202;
+    break;
+    case 14:
+      x = 840;y = 337;
+    break;
+    case 15:
+      x = 840;y = 473;
+    break;
+  }
+  return [x,y]
+}
+
 module.exports = {
   nonceValid : function (array, nonce) {
     for(var i = 0; i < array.length; i++) {
@@ -8,7 +63,8 @@ module.exports = {
   loadStartingState : function (playersInfo) {
     var confirmedSelections = []
     for(var i = 0; i < playersInfo[0].length;i++) {
-      var selection = { address: playersInfo[0][i], x:0,y:0,nonce:playersInfo[1][i].toNumber()}
+      var coor = getXandY(playersInfo[1][i].toNumber())
+      var selection = { address: playersInfo[0][i], x:coor[0],y:coor[1],nonce:playersInfo[1][i].toNumber()}
       confirmedSelections.push(selection)
     }
     return confirmedSelections
@@ -26,7 +82,7 @@ module.exports = {
             return i;
         }
       }
-      return false;
+      return;
     }
     var noRepetition = function () {
       for(var i = 0; i < confirmedSelections.length; i++) {
@@ -44,38 +100,42 @@ module.exports = {
       }
     }
 
+
+
     var modifyArrays = function () {
       if(noRepetition()) {
       var index = findIndexPending()
-      if (typeof index != 'undefined' && index != false) {
+      if (typeof index !== 'undefined') {
+        console.log("here");
         confirmedSelections.push({address: pendingSelections[index].address, x:pendingSelections[index].x,y:pendingSelections[index].y,nonce:pendingSelections[index].nonce})
         pendingSelections.splice(index,1)
       } else {
-        //sinon ==> confirmedSelection with rdm x and y
-        confirmedSelections.push({address : playEvent.address, x:0, y:0, nonce : playEvent.nonce})
+        coor = getXandY(playEvent.nonce)
+        confirmedSelections.push({address : playEvent.address, x:coor[0], y:coor[1], nonce : playEvent.nonce})
       }}
     }
 
+    var noChange = false
     if(confirmedSelections.length === 0) {
       if(pendingSelections.length === 0) {
         //In the case of a first new playGame
         if(playEvent.counter == 0 ) {
-          confirmedSelections.push({address : playEvent.address, x:0, y:0, nonce : playEvent.nonce})
+          coor = getXandY(playEvent.nonce)
+          confirmedSelections.push({address : playEvent.address, x:coor[0], y:coor[1], nonce : playEvent.nonce})
         //old event or ambiguous if not maxNum
         } else {
+          noChange = true
           console.log("ERROR playEvent counter is not 1 :: 2 to maxNumberOfPlayers");
           console.log(playEvent.counter);
         }
       //01
       } else {
-
         modifyArrays()
       }
     } else {
         modifyArrays()
-
     }
     removePendingErrors()
-    return [pendingSelections, confirmedSelections]
+    return [pendingSelections, confirmedSelections, noChange]
   }
 }
