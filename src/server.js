@@ -24,12 +24,12 @@ app.get('/',function(req,res){
 server.listen(process.env.PORT || 8081,function(){
   console.log('Listening on '+server.address().port);
 });
-var debug = true
-var pendingSelections = []
+var debug = true;
+var pendingSelections = [];
 var confirmedSelections = [];
 var hashminerAbi = JSON.parse(fs.readFileSync("../build/contracts/Hashminer.json")).abi
-var hashminer = web3.eth.contract(hashminerAbi)
-var instance = hashminer.at("0x345ca3e014aaf5dca488057592ee47305d9b3e10")
+var hashminer = web3.eth.contract(hashminerAbi);
+var instance = hashminer.at("0x345ca3e014aaf5dca488057592ee47305d9b3e10"); //HA THIS ADDRESS CHANGES EVERY TIME THE CONTRACT IS DEPLOYED
 
 var PlayEvent = instance.LogPlayerAdded({},{fromBlock:"latest",toBlock:"latest"})
 PlayEvent.watch(function(err,res) {

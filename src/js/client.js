@@ -7,12 +7,14 @@ Client.socket.on('allPlayers',function(_newPlayers){
   console.log('received allPlayers from server.js: ' + _newPlayers);
     var newConfirmedMiners = [];
     for (let element of _newPlayers) {
+      console.log('player nonce: ' + element.nonce);
       // block all nonces if not already blocked
       game.blockNonce(element.nonce);
       // add property joined:'before' to each confirmed element and push to newConfirmedMiners
       if (!element.pending) {
         element.joined = 'before';
         newConfirmedMiners.push(element);
+        console.log('newConfirmedMiners: ' + newConfirmedMiners);
       }
     }
     // pass newConfirmedMiners to game
