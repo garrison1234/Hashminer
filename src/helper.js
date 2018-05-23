@@ -69,8 +69,8 @@ module.exports = {
     }
     return confirmedSelections
   },
-  addPendingField : function (pendingSelections) {
-    pendingSelections.forEach(function(obj) { obj.pending = true;});
+  addPendingField : function (pendingSelections, pendingStatus) {
+    pendingSelections.forEach(function(obj) { obj.pending = pendingStatus;});
     return pendingSelections
   },
   //add game parameters
