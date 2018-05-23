@@ -12,11 +12,17 @@ client.socket.on("allPlayers", (data) => {
   console.log(JSON.stringify(data));
 })
 
-client.socket.on("update", (data) => {
+client.socket.on("newConfirmed", (data) => {
+  console.log("newConfirmed event");
   console.log(JSON.stringify(data));
 })
+client.socket.on("blockButton", function () {
+  console.log("button is blocked");
+})
 
-function hello() {console.log('hello')}
+client.socket.on("unblockButton" ,() => {
+  console.log("button is unblocked");
+})
 
 function gameLoaded() {
   console.log("Connection to game")
