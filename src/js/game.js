@@ -198,13 +198,11 @@ var game = new Phaser.Game(config);
       xmouseClick = this.input.activePointer.x;
       ymouseClick = this.input.activePointer.y;
 
-      // call to send transaction to blockchain
-      App.playGame(mapNonce);
       // call to send transaction information to server.js
-      Client.playGame(mapNonce, xmouseClick, ymouseClick, App.account);
+      Client.playGame(mapNonce, xmouseClick, ymouseClick);
 
       // block mouse for 3 seconds to avoid sending transaction twice
-      setTimeout(this.unblockMouse, 3000);
+      setTimeout(function() { mouseBlocked = false}, 3000);
     }
 
     if ( (confirmedMiners.length > minerCounter) && !minerMoving && !gameOver ) {

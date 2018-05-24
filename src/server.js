@@ -19,6 +19,7 @@ app.use('/contracts',express.static(__dirname+ '/contracts'));
 
 app.get('/',function(req,res){
   res.sendFile(__dirname+'/index.html');
+  res.sendFile(__dirname+'/game.html');
 });
 
 server.listen(process.env.PORT || 8081,function(){
@@ -30,7 +31,7 @@ var confirmedSelections = [];
 var gameInfo = [];
 var hashminerAbi = JSON.parse(fs.readFileSync("../build/contracts/Hashminer.json")).abi
 var hashminer = web3.eth.contract(hashminerAbi);
-var instance = hashminer.at("0x345ca3e014aaf5dca488057592ee47305d9b3e10"); //HA THIS ADDRESS CHANGES EVERY TIME THE CONTRACT IS DEPLOYED
+var instance = hashminer.at("0x8f0483125fcb9aaaefa9209d8e9d7b9c8b9fb90f"); //HA THIS ADDRESS CHANGES EVERY TIME THE CONTRACT IS DEPLOYED
 
 var PlayEvent = instance.LogPlayerAdded({},{fromBlock:"latest",toBlock:"latest"})
 PlayEvent.watch(function(err,res) {

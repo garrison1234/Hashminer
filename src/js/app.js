@@ -28,6 +28,7 @@ App = {
 
      // display the user's ETH account and balance
      displayAccountInfo: function() {
+       console.log('displayAccountInfo called');
        web3.eth.getCoinbase(function(err, account) {
          if(err === null) {
            App.account = account;
@@ -82,6 +83,7 @@ App = {
      },
 
      displayGameInfo: function() {
+       console.log('displayGameInfo called');
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.getGameInfo();
        }).then(function(gameInformation) {
@@ -103,6 +105,7 @@ App = {
      },
 
      displayPlayersInfo: function() {
+       console.log('displayPlayersInfo called');
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.getPlayersInfo();
        }).then(function(playersInformation) {
