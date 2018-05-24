@@ -260,7 +260,7 @@ var game = new Phaser.Game(config);
     }
 
     if (gameOver) {
-      for (var l = 0; l <= 15; l++) {
+      for (var l = 0; l <= 3; l++) {
         element = activeMiners[l];
         element.disableBody(true, true);
         if (confirmedMiners[l].nonce == winningNonce) {
@@ -271,12 +271,12 @@ var game = new Phaser.Game(config);
           activeMiners[l].anims.play(('lose' + ((l + 1).toString())), true);
         }
       }
-      App.animateFinalTimer();
+      //App.animateFinalTimer();
       gameOver = false;
     }
 
     if (deletingMiners) {
-      for (var l = 0; l <= 15; l++) {
+      for (var l = 0; l <= 3; l++) {
         element = activeMiners[l];
         element.disableBody(true, true);
       }

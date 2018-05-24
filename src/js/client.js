@@ -34,9 +34,6 @@ Client.socket.on('nonceCancelled',function(_nonce){
 
 // new player confirmation from server.js
 Client.socket.on('newConfirmed',function(_newPlayer){
-  App.displayAccountInfo();
-  App.displayGameInfo();
-  App.displayPlayersInfo();
   console.log('received newConfirmed from server.js: ' + JSON.stringify(_newPlayer));
   // block nonce if not already blocked
   game.blockNonce(_newPlayer.nonce);
@@ -47,7 +44,6 @@ Client.socket.on('newConfirmed',function(_newPlayer){
   newPlayer[0] = _newPlayer;
   // pass new confirmed player to game
   game.addNewMiners(newPlayer);
-  // update game, user and players information
 });
 
 Client.socket.on('unblockButton',function(){
@@ -66,10 +62,6 @@ Client.socket.on('winner',function(_winningNonce){
     game.animateFinal(_winningNonce);
     // Add timer before calling next function
     setTimeout(game.deleteMiners, 10000);
-    // update game, user and players information
-    App.displayAccountInfo();
-    App.displayGameInfo();
-    App.displayPlayersInfo();
 });
 
 Client.gameLoaded = function() {
@@ -87,5 +79,11 @@ Client.playGame = function(_nonce, _x, _y) {
 
 Client.revealWinner = function() {
   console.log('client.revealWinner');
+  Client.socket.emit('revealWinner');
+};
+
+Client.animateFinal = function(_winningNonce) {
+  console.log('client.animateFinal');
+  game.animateFinal(_winningNonce);
   Client.socket.emit('revealWinner');
 };

@@ -49,6 +49,8 @@ App = {
          App.contracts.Hashminer = TruffleContract(hashminerArtifact);
          // set the provider for our contracts
          App.contracts.Hashminer.setProvider(App.web3Provider);
+         //listen to events
+         App.listenToEvents();
          // displays all information
          App.displayGameInfo();
          App.displayPlayersInfo();
@@ -117,13 +119,15 @@ App = {
        }).catch(function(err) {
        });
 
-     }
+     },
 
-     /*listenToEvents: function() {
+     // listen to events triggered by the contract
+     listenToEvents: function() {
        App.contracts.Hashminer.deployed().then(function(instance) {
 
          // listen to LogPlayerAdded event
         instance.LogPlayerAdded({}, {}).watch(function(error, event) {
+          console.log('received player added event');
           if (!error) {
             // update game, players and account information
             App.displayGameInfo();
@@ -147,6 +151,9 @@ App = {
        // listen to LogGameFinished event
       instance.LogGameFinished({}, {}).watch(function(error, event) {
         if (!error) {
+          console.log('received game finished event');
+          $('#reveal-button').prop('disabled', true);
+          Client.animateFinal(event.args._nonce);
           // update account, game and players information
           App.displayAccountInfo();
           App.displayGameInfo();
@@ -177,7 +184,7 @@ App = {
     });
 
       });
-    }*/
+    }
 };
 
 $(function() {
