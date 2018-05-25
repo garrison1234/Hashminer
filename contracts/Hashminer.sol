@@ -162,11 +162,8 @@ contract Hashminer {
     winner = players[winningNonce].wallet;
     winner.transfer(prize);
 
-    // reset playerCounter and takenNonces to restart game. BETTER WAY TO DO THIS WITHOUT LOOPING!!!????
+    // reset playerCounter
     playerCounter = 0;
-    /*for (uint j = 0; j < maxNumberOfPlayers; j++) {
-      takenNonces[j] = 0;
-    }*/
 
     // store the caller address and transfer their reward
     caller = msg.sender;

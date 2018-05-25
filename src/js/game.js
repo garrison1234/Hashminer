@@ -263,6 +263,7 @@ var game = new Phaser.Game(config);
       for (var l = 0; l <= 3; l++) {
         element = activeMiners[l];
         element.disableBody(true, true);
+        console.log('confirmedMiners[' + l + ']: ' + confirmedMiners[l].nonce + ', ' + 'winningNonce: ' + winningNonce);
         if (confirmedMiners[l].nonce == winningNonce) {
             activeMiners[l] = this.physics.add.sprite(confirmedXcoordinates[l], confirmedYcoordinates[l], ('minerwin' + ((l + 1).toString())))
             activeMiners[l].anims.play(('win' + ((l + 1).toString())), true);
@@ -271,7 +272,7 @@ var game = new Phaser.Game(config);
           activeMiners[l].anims.play(('lose' + ((l + 1).toString())), true);
         }
       }
-      //App.animateFinalTimer();
+      setTimeout(function() { deletingMiners = true}, 10000);
       gameOver = false;
     }
 
@@ -320,6 +321,7 @@ var game = new Phaser.Game(config);
   }
 
   game.animateFinal = function(_winningNonce) {
+    console.log('game.animateFinal, _winningNonce:' + _winningNonce);
     confirmedXcoordinates = confirmedMiners.map(a => a.x);
     confirmedYcoordinates = confirmedMiners.map(a => a.y);
     winningNonce = _winningNonce;

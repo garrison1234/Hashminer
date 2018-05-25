@@ -84,6 +84,7 @@ Client.revealWinner = function() {
 
 Client.animateFinal = function(_winningNonce) {
   console.log('client.animateFinal');
+  console.log('call game.animateFinal with winningNonce:' + _winningNonce);
   game.animateFinal(_winningNonce);
   Client.socket.emit('revealWinner');
 };

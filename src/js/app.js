@@ -44,7 +44,7 @@ App = {
 
      // retrieve the Hashminer contract
      initContract: function() {
-       $.getJSON('/contracts/Hashminer.json', function(hashminerArtifact) {
+       $.getJSON("/contracts/Hashminer.json", function(hashminerArtifact) {
          // get the contract artifact file and use it to instantiate a truffle contract abstraction
          App.contracts.Hashminer = TruffleContract(hashminerArtifact);
          // set the provider for our contracts
@@ -142,6 +142,7 @@ App = {
        instance.LogPlayersReady({}, {}).watch(function(error, event) {
          if (!error) {
            // update game information
+           $('#reveal-button').prop('disabled', false);
            App.displayGameInfo();
          } else {
            console.error(error);
@@ -152,8 +153,10 @@ App = {
       instance.LogGameFinished({}, {}).watch(function(error, event) {
         if (!error) {
           console.log('received game finished event');
+          console.log('event information: ' + JSON.stringify(event.args._winningNonce));
           $('#reveal-button').prop('disabled', true);
-          Client.animateFinal(event.args._nonce);
+          Client.animateFinal(event.args._winningNonce);
+          console.log('call Client.animateFinal with winningNonce: ' + event.args._winningNonce);
           // update account, game and players information
           App.displayAccountInfo();
           App.displayGameInfo();
