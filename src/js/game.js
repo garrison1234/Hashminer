@@ -17,19 +17,19 @@ var config = {
     }
 };
 
+var clientAddress;
 var minerCounter = 0;
 var precision = 3;
 var xmouse, ymouse;
 var xmouseClick, ymouseClick;
 var mouseBlocked;
-var xdestination, ydestination;
 var minerMoving;
 var blockedNonces = [];
 var confirmedMiners = [];
+var style = { font: "16px Lucida Console", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" };
+var minerText = [];
 var activeMiners = [];
 var mapNonce;
-var movingMiner;
-var xdestination, ydestination;
 var gameOver = false;
 var deletingMiners = false;
 var winningNonce;
@@ -206,22 +206,33 @@ var game = new Phaser.Game(config);
     }
 
     if ( (confirmedMiners.length > minerCounter) && !minerMoving && !gameOver ) {
+
       // define the destination coordinates
-      xdestination = confirmedMiners[minerCounter].x;
-      ydestination = confirmedMiners[minerCounter].y;
+      var xdestination = confirmedMiners[minerCounter].x;
+      var ydestination = confirmedMiners[minerCounter].y;
+      var newMinerAddress
+      if (confirmedMiners[minerCounter].address == clientAddress ) {
+          newMinerAddress = 'You';
+      } else {
+          newMinerAddress = confirmedMiners[minerCounter].address.substring(0, 6) + '...';
+      }
 
       if (confirmedMiners[minerCounter].joined == 'before') {
           activeMiners[minerCounter] = this.physics.add.sprite(xdestination, ydestination, ('miner' + ((minerCounter + 1).toString())))
+          minerText[minerCounter] = this.add.text(xdestination, ydestination, newMinerAddress, style);
       } else {
           activeMiners[minerCounter] = this.physics.add.sprite(509, 0, ('miner' + ((minerCounter + 1).toString())))
+          minerText[minerCounter] = this.add.text(509, 0, newMinerAddress, style);
       }
+
       minerMoving = true;
     }
 
     //animate miner moving to its destination
     if (minerMoving) {
       // save moving miner object in movingMiner
-      movingMiner = activeMiners[minerCounter];
+      var movingMiner = activeMiners[minerCounter];
+
       //move miner to desired x coordinate
       if ( (Math.abs(movingMiner.y - ydestination)) > precision ) {
         movingMiner.setVelocityX(0);
@@ -259,10 +270,18 @@ var game = new Phaser.Game(config);
       }
     }
 
+    // update all miner text positions
+    for (var l = 0; l < activeMiners.length; l++) {
+    minerText[l].x = Math.floor(activeMiners[l].x - 14);
+    minerText[l].y = Math.floor(activeMiners[l].y + 12);
+    }
+
     if (gameOver) {
       for (var l = 0; l <= 3; l++) {
-        element = activeMiners[l];
+        var element = activeMiners[l];
+        var elementText = minerText[l];
         element.disableBody(true, true);
+        elementText.disableBody(true, true);
         console.log('confirmedMiners[' + l + ']: ' + confirmedMiners[l].nonce + ', ' + 'winningNonce: ' + winningNonce);
         if (confirmedMiners[l].nonce == winningNonce) {
             activeMiners[l] = this.physics.add.sprite(confirmedXcoordinates[l], confirmedYcoordinates[l], ('minerwin' + ((l + 1).toString())))
@@ -278,8 +297,10 @@ var game = new Phaser.Game(config);
 
     if (deletingMiners) {
       for (var l = 0; l <= 3; l++) {
-        element = activeMiners[l];
+        var element = activeMiners[l];
+        var elementText = minerText[l];
         element.disableBody(true, true);
+        elementText.disableBody(true, true);
       }
       minerCounter = 0;
       blockedNonces = [];
@@ -290,6 +311,11 @@ var game = new Phaser.Game(config);
       deletingMiners = false;
     }
 
+  }
+
+  // set client's ETH address
+  game.setClientAddress = function(_clientAddress) {
+      clientAddress = _clientAddress;
   }
 
   // function called from app.js to add array of new confirmed player objects{nonce, x, y, address} sent from server.js

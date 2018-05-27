@@ -56,17 +56,11 @@ Client.socket.on('blockButton',function(){
     $('#reveal-button').prop('disabled', true);
 });
 
-Client.socket.on('winner',function(_winningNonce){
-  console.log('received winner from server.js: ' + _winningNonce);
-    $('#reveal-button').prop('disabled', true);
-    game.animateFinal(_winningNonce);
-    // Add timer before calling next function
-    setTimeout(game.deleteMiners, 10000);
-});
-
 Client.gameLoaded = function() {
   console.log('client.gameLoaded');
   Client.socket.emit('gameLoaded');
+  // get user's ETH address and pass to game
+  game.setClientAddress(App.account);
 };
 
 Client.playGame = function(_nonce, _x, _y) {
