@@ -57,16 +57,16 @@ App = {
        });
      },
 
-     playGame: function(_nonce) {
+     playGame: function() {
        App.contracts.Hashminer.deployed().then(function(instance) {
-         return instance.playGame(_nonce, {
+         return instance.playGame({
            from: App.account,
            value: web3.toWei(50, "finney"),
            gas: 500000
          });
-       }).then(function(result) {
+       /*}).then(function(result) {
          //transaction was mined
-         console.log('playGame transaction successful, nonce: ' + _nonce);
+         console.log('playGame transaction successful, nonce: ');*/
        }).catch(function(err) {
          //transaction failed
          console.log('transaction failed');

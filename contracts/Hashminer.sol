@@ -11,8 +11,7 @@ contract Hashminer {
   address owner;
   bool gameLocked;
   uint maxNumberOfPlayers = 4; // must be 2^N
-  mapping (uint => Player) public players;
-  uint[65] takenNonces; // array size must be at least maxNumberOfPlayers+1
+  address[4] activePlayers; // array size must be maxNumberOfPlayers
   uint playerCounter;
   uint gameCost = 50 finney;
   uint blockNumber;
@@ -39,7 +38,6 @@ contract Hashminer {
   );
   event LogPlayerAdded(
     uint _playerCounter,
-    uint _nonce,
     address _wallet
   );
   event LogPlayersReady(
@@ -111,28 +109,17 @@ contract Hashminer {
   }
 
   // add player to the game
-  function playGame(uint _nonce) payable public {
+  function playGame() payable public {
     // check that value transferred matches the cost to play
     require(msg.value == gameCost);
 
-    // check that game is unlocked or already active
-    require((!gameLocked) || (playerCounter > 0));
-
-    // check that the nonce is within the accepted range of values
-    require((0 <= _nonce) && (_nonce < maxNumberOfPlayers));
-
-    // check that the nonce has not been taken. This also checks that the game is not full.
-    for (uint i = 0; i < playerCounter; i++) {
-      if (_nonce == takenNonces[i]) {revert();}
-    }
-
-    // add nonce to list of already chosen ones.
-    takenNonces[playerCounter] = _nonce;
+    // check that game is unlocked or already active, and not full
+    require(((!gameLocked) || (playerCounter > 0)) && (playerCounter < maxNumberOfPlayers));
 
     // save player struct with nonce and address in players[]
-    players[_nonce] = Player(_nonce, msg.sender);
+    activePlayers[playerCounter] = msg.sender;
 
-    LogPlayerAdded(playerCounter, _nonce, msg.sender);
+    LogPlayerAdded(playerCounter, msg.sender);
 
     // add new player
     playerCounter++;
@@ -159,7 +146,7 @@ contract Hashminer {
     winningNonce = (uint(keccak256(blockNumber, blockHash)) & (maxNumberOfPlayers - 1));
 
     // transfer prize to winning player
-    winner = players[winningNonce].wallet;
+    winner =activePlayers[winningNonce];
     winner.transfer(prize);
 
     // reset playerCounter
@@ -202,19 +189,8 @@ contract Hashminer {
   }
 
   // get current players information
-  function getPlayersInfo() public view returns (address[], uint[]) {
-    // prepare output arrays
-    address[] memory playerAddresses = new address[](playerCounter);
-    uint[] memory playerNonces = new uint[](playerCounter);
-
-    // iterate over all taken nonces
-    for(uint i = 0; i < playerCounter;  i++) {
-      // save player addresses and nonces
-      playerAddresses[i] = players[takenNonces[i]].wallet;
-      playerNonces[i] = players[takenNonces[i]].nonce;
-    }
-
-    return (playerAddresses, playerNonces);
+  function getPlayersInfo() public view returns (address[4]) {
+    return (activePlayers);
   }
 
 }

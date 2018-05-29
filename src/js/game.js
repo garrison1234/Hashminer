@@ -21,10 +21,12 @@ var clientAddress;
 var minerCounter = 0;
 var precision = 3;
 var xmouse, ymouse;
+var areaBlocked;
 var xmouseClick, ymouseClick;
 var mouseBlocked;
 var minerMoving;
-var blockedNonces = [];
+var allMiners = [];
+var pendingMiners = [];
 var confirmedMiners = [];
 var style = { font: "16px Lucida Console", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" };
 var minerText = [];
@@ -122,75 +124,21 @@ var game = new Phaser.Game(config);
     xmouse = this.input.activePointer.x;
     ymouse = this.input.activePointer.y;
 
-    // determine nonce from current mouse coordinates
-    if ( (0 <= xmouse) && (xmouse <= 240) ) {
-      if ( (0 <= ymouse) && (ymouse <= 135) ) {
-        mapNonce = 0;
-      }
-      if ( (135 < ymouse) && (ymouse <= 270) ) {
-        mapNonce = 1;
-      }
-      if ( (270 <= ymouse) && (ymouse <= 405) ) {
-        mapNonce = 2;
-      }
-      if ( (405 < ymouse) && (ymouse <= 540) ) {
-        mapNonce = 3;
-      }
-    }
-
-    if ( (240 < xmouse) && (xmouse <= 480) ) {
-      if ( (0 <= ymouse) && (ymouse <= 135) ) {
-        mapNonce = 4;
-      }
-      if ( (135 < ymouse) && (ymouse <= 270) ) {
-        mapNonce = 5;
-      }
-      if ( (270 <= ymouse) && (ymouse <= 405) ) {
-        mapNonce = 6;
-      }
-      if ( (405 < ymouse) && (ymouse <= 540) ) {
-        mapNonce = 7;
-      }
-    }
-
-    if ( (480 < xmouse) && (xmouse <= 720) ) {
-      if ( (0 <= ymouse) && (ymouse <= 135) ) {
-        mapNonce = 8;
-      }
-      if ( (135 < ymouse) && (ymouse <= 270) ) {
-        mapNonce = 9;
-      }
-      if ( (270 <= ymouse) && (ymouse <= 405) ) {
-        mapNonce = 10;
-      }
-      if ( (405 < ymouse) && (ymouse <= 540) ) {
-        mapNonce = 11;
-      }
-    }
-
-    if ( (720 < xmouse) && (xmouse <= 960) ) {
-      if ( (0 <= ymouse) && (ymouse <= 135) ) {
-        mapNonce = 12;
-      }
-      if ( (135 < ymouse) && (ymouse <= 270) ) {
-        mapNonce = 13;
-      }
-      if ( (270 <= ymouse) && (ymouse <= 405) ) {
-        mapNonce = 14;
-      }
-      if ( (405 < ymouse) && (ymouse <= 540) ) {
-        mapNonce = 15;
+    for (let element of allMiners) {
+      if (((xmouse >= element.x1) && (xmouse <= element.x2)) && ((ymouse >= element.y1) && (ymouse <= element.y2))) {
+        areaBlocked = true;
+        break;
       }
     }
 
     // display current mouse position and whether position is valid (mapNonce not blocked)
-    if (blockedNonces.includes(mapNonce)) {
+    if (areaBlocked) {
       $('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' This location is already taken, chose another place to mine');
       } else {
       $('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' click to place miner');
     }
 
-    if ( !mouseBlocked && this.input.activePointer.isDown && !(blockedNonces.includes(mapNonce)) && !gameOver) {
+    if ( !mouseBlocked && this.input.activePointer.isDown && !areaBlocked && !gameOver) {
       // block mouse
       mouseBlocked = true;
 
@@ -199,7 +147,7 @@ var game = new Phaser.Game(config);
       ymouseClick = this.input.activePointer.y;
 
       // call to send transaction information to server.js
-      Client.playGame(mapNonce, xmouseClick, ymouseClick);
+      Client.playGame(xmouseClick, ymouseClick);
 
       // block mouse for 3 seconds to avoid sending transaction twice
       setTimeout(function() { mouseBlocked = false}, 3000);
@@ -320,25 +268,16 @@ var game = new Phaser.Game(config);
 
   // function called from app.js to add array of new confirmed player objects{nonce, x, y, address} sent from server.js
   game.addNewMiners = function(newPlayers) {
-      // add newPlayers array to confirmedMiners array
-      Array.prototype.push.apply(confirmedMiners, newPlayers);
-  }
-
-  // function called from app.js to block nonces already played, confirmed or in the process of being confirmed
-  game.blockNonce = function(blockedNonce) {
-    // add nonce to blockedNonces only if not already included
-    var nonceIndex = blockedNonces.indexOf(blockedNonce);
-    if (nonceIndex = -1) {
-      blockedNonces.push(blockedNonce);
-    }
-  }
-
-  // function called from app.js to unblock nonces that were played but not confirmed in time
-  game.unblockNonce = function(unblockedNonce) {
-    // remove nonce from blockedNonces only if already included
-    var nonceIndex = blockedNonces.indexOf(unblockedNonce);
-    if (nonceIndex > -1) {
-      blockedNonces.splice(nonceIndex, 1);
+    // add area limits for each new miner
+    for (let element of newPlayers) {
+      element.x1 = element.x - 14;
+      element.x2 = element.x + 14;
+      element.y1 = element.y - 14;
+      element.y2 = element.y + 14;
+      allMiners.push(element);
+      if (!element.pending){
+        confirmedMiners.push(element);
+      }
     }
   }
 

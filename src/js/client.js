@@ -5,19 +5,13 @@ Client.socket = io.connect();
 // received upon connection to server.js, passes array of current confirmed and pending miners
 Client.socket.on('allPlayers',function(_newPlayers){
   console.log('received allPlayers from server.js: ' + JSON.stringify(_newPlayers));
-    var newConfirmedMiners = [];
     for (let element of _newPlayers) {
-      // block all nonces if not already blocked
-      game.blockNonce(element.nonce);
-      // add property joined:'before' to each confirmed element and push to newConfirmedMiners
       if (!element.pending) {
         element.joined = 'before';
-        newConfirmedMiners.push(element);
       }
     }
-    console.log('newConfirmedMiners: ' + JSON.stringify(newConfirmedMiners));
     // pass newConfirmedMiners to game
-    game.addNewMiners(newConfirmedMiners);
+    game.addNewMiners(_newPlayers);
 });
 
 // new unconfirmed nonce selection received from server.js
@@ -63,10 +57,10 @@ Client.gameLoaded = function() {
   game.setClientAddress(App.account);
 };
 
-Client.playGame = function(_nonce, _x, _y) {
+Client.playGame = function(_x, _y) {
   // call to send transaction to blockchain
-  App.playGame(_nonce);
-  var player = {address: App.account, x: _x, y: _y, nonce: _nonce};
+  App.playGame();
+  var player = {x: _x, y: _y, address: App.account};
   console.log('client.playGame, nonce: ' + JSON.stringify(player));
   Client.socket.emit('selectNonce', player);
 };
