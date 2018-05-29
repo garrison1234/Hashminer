@@ -4,6 +4,7 @@ var config = {
     width: 960,
     height: 540,
     parent: 'game',
+    antialiasing: false,
     physics: {
       default: 'arcade',
       arcade: {
@@ -20,6 +21,7 @@ var config = {
 var clientAddress;
 var minerCounter = 0;
 var precision = 3;
+var cursorArea;
 var xmouse, ymouse;
 var xmouseClick, ymouseClick;
 var xdestination, ydestination;
@@ -40,10 +42,12 @@ var confirmedYcoordinates = [];
 // create phaser game instance
 var game = new Phaser.Game(config);
 
-
   function preload () {
 
     this.load.image('background', '/assets/bgfinal.png');
+    this.load.image('cursorArea', '/assets/cursorArea.png');
+    this.load.image('loading', '/assets/loading.png');
+    this.load.spritesheet('loading', '/assets/loading.png', { frameWidth: 32, frameHeight: 32 });
 
     for (var i = 1; i <= 16; i++){
       minerNumber = i.toString();
@@ -56,8 +60,32 @@ var game = new Phaser.Game(config);
   function create() {
 
     this.add.image(480, 270, 'background');
+    cursorArea = this.add.image(480, 270, 'cursorArea');
 
-    //create animations
+
+    // create loading animations
+    this.anims.create({
+        key: ('playerMinerLoading'),
+        frames: this.anims.generateFrameNumbers('loading', { start: 0, end: 3 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: ('otherMinerLoading'),
+        frames: this.anims.generateFrameNumbers('loading', { start: 4, end: 7 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: ('cannotPlaceMiner'),
+        frames: this.anims.generateFrameNumbers('loading', { start: 8, end: 11 }),
+        frameRate: 10,
+        repeat: -1
+    });
+
+    // create miner animations
     for (var j = 1; j <= 16; j++){
 
       minerNumber = j.toString();
@@ -122,6 +150,9 @@ var game = new Phaser.Game(config);
     // get current mouse coordinates
     xmouse = this.input.activePointer.x;
     ymouse = this.input.activePointer.y;
+
+    cursorArea.x = xmouse;
+    cursorArea.y = ymouse;
 
     // determine nonce from current mouse coordinates
     if ( (0 <= xmouse) && (xmouse <= 240) ) {
@@ -234,6 +265,11 @@ var game = new Phaser.Game(config);
       // save moving miner object in movingMiner
       var movingMiner = activeMiners[minerCounter];
 
+      // animate miner text along with the miner sprite
+      minerText[minerCounter].x = Math.floor(movingMiner.x - 14);
+      minerText[minerCounter].y = Math.floor(movingMiner.y + 12);
+
+
       //move miner to desired x coordinate
       if ( (Math.abs(movingMiner.y - ydestination)) > precision ) {
         movingMiner.setVelocityX(0);
@@ -271,19 +307,11 @@ var game = new Phaser.Game(config);
       }
     }
 
-    // update all miner text positions
-    for (var l = 0; l < activeMiners.length; l++) {
-    minerText[l].x = Math.floor(activeMiners[l].x - 14);
-    minerText[l].y = Math.floor(activeMiners[l].y + 12);
-  }
-
     // Replace all miners with losers/winning animations
     if (gameOver) {
       for (var l = 0; l <= 3; l++) {
         var element = activeMiners[l];
-        var elementText = minerText[l];
         element.disableBody(true, true);
-        elementText.disableBody(true, true);
         console.log('confirmedMiners[' + l + ']: ' + confirmedMiners[l].nonce + ', ' + 'winningNonce: ' + winningNonce);
         if (confirmedMiners[l].nonce == winningNonce) {
             activeMiners[l] = this.physics.add.sprite(confirmedXcoordinates[l], confirmedYcoordinates[l], ('minerwin' + ((l + 1).toString())))
@@ -303,7 +331,7 @@ var game = new Phaser.Game(config);
         var element = activeMiners[l];
         var elementText = minerText[l];
         element.disableBody(true, true);
-        elementText.disableBody(true, true);
+        elementText.destroy();
       }
       minerCounter = 0;
       blockedNonces = [];
