@@ -22,6 +22,7 @@ var minerCounter = 0;
 var precision = 3;
 var xmouse, ymouse;
 var xmouseClick, ymouseClick;
+var xdestination, ydestination;
 var mouseBlocked;
 var minerMoving;
 var blockedNonces = [];
@@ -208,8 +209,8 @@ var game = new Phaser.Game(config);
     if ( (confirmedMiners.length > minerCounter) && !minerMoving && !gameOver ) {
 
       // define the destination coordinates
-      var xdestination = confirmedMiners[minerCounter].x;
-      var ydestination = confirmedMiners[minerCounter].y;
+      xdestination = confirmedMiners[minerCounter].x;
+      ydestination = confirmedMiners[minerCounter].y;
       var newMinerAddress
       if (confirmedMiners[minerCounter].address == clientAddress ) {
           newMinerAddress = 'You';
@@ -274,8 +275,9 @@ var game = new Phaser.Game(config);
     for (var l = 0; l < activeMiners.length; l++) {
     minerText[l].x = Math.floor(activeMiners[l].x - 14);
     minerText[l].y = Math.floor(activeMiners[l].y + 12);
-    }
+  }
 
+    // Replace all miners with losers/winning animations
     if (gameOver) {
       for (var l = 0; l <= 3; l++) {
         var element = activeMiners[l];
@@ -295,6 +297,7 @@ var game = new Phaser.Game(config);
       gameOver = false;
     }
 
+    // delete all sprites from map
     if (deletingMiners) {
       for (var l = 0; l <= 3; l++) {
         var element = activeMiners[l];
