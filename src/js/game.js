@@ -22,6 +22,7 @@ var clientAddress;
 var minerCounter = 0;
 var precision = 3;
 var cursorArea;
+var mapAreaValid;
 var xmouse, ymouse;
 var xmouseClick, ymouseClick;
 var xdestination, ydestination;
@@ -45,7 +46,8 @@ var game = new Phaser.Game(config);
   function preload () {
 
     this.load.image('background', '/assets/bgfinal.png');
-    this.load.image('cursorArea', '/assets/cursorArea.png');
+    this.load.image('cursorAllowed', '/assets/cursorArea.png');
+    this.load.image('cursorBlocked', '/assets/cursorBlocked.png');
     this.load.image('loading', '/assets/loading.png');
     this.load.spritesheet('loading', '/assets/loading.png', { frameWidth: 32, frameHeight: 32 });
 
@@ -60,7 +62,8 @@ var game = new Phaser.Game(config);
   function create() {
 
     this.add.image(480, 270, 'background');
-    cursorArea = this.add.image(480, 270, 'cursorArea');
+
+    cursorArea = this.add.sprite(0, 0, 'cursorBlocked');
 
 
     // create loading animations
@@ -147,12 +150,9 @@ var game = new Phaser.Game(config);
 
   function update() {
 
-    // get current mouse coordinates
-    xmouse = this.input.activePointer.x;
-    ymouse = this.input.activePointer.y;
-
-    cursorArea.x = xmouse;
-    cursorArea.y = ymouse;
+    // get current mouse coordinates. Coordinates vary in 20s in x and 23s in y
+    xmouse = 20 * Math.floor(this.input.activePointer.x / 20);
+    ymouse = 23 * Math.floor(this.input.activePointer.y / 23);
 
     // determine nonce from current mouse coordinates
     if ( (0 <= xmouse) && (xmouse <= 240) ) {
@@ -215,14 +215,35 @@ var game = new Phaser.Game(config);
       }
     }
 
+    // determine if mouse position is valid for adding new miner
+    if ( (ymouse < 80) || (ymouse > 460) || (xmouse < 80) || (xmouse > 880) ) {
+      mapAreaValid = false;
+    } else {
+      mapAreaValid = true;
+    }
+
+    // update cursor coordinates. The offset is due to dimensions of the cursor area square
+    cursorArea.x = xmouse + 10;
+    cursorArea.y = ymouse + 12;
+    // turn cursor red if in area that isn't allowed. Turn gray is allowed.
+    if ( (blockedNonces.includes(mapNonce)) || !mapAreaValid) {
+      cursorArea.destroy();
+      cursorArea = this.add.sprite(cursorArea.x, cursorArea.y, 'cursorBlocked');
+    } else {
+      cursorArea.destroy();
+      cursorArea = this.add.sprite(cursorArea.x, cursorArea.y, 'cursorAllowed');
+    }
+
     // display current mouse position and whether position is valid (mapNonce not blocked)
     if (blockedNonces.includes(mapNonce)) {
-      $('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' This location is already taken, chose another place to mine');
-      } else {
+      $('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' This location is already taken or pending confirmation, chose another place to mine');
+    } else if (!mapAreaValid){
+      $('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' invalid location, chose another place to mine');
+    } else {
       $('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' click to place miner');
     }
 
-    if ( !mouseBlocked && this.input.activePointer.isDown && !(blockedNonces.includes(mapNonce)) && !gameOver) {
+    if ( !mouseBlocked && this.input.activePointer.isDown && !(blockedNonces.includes(mapNonce)) && !gameOver && mapAreaValid) {
       // block mouse
       mouseBlocked = true;
 

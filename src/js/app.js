@@ -155,12 +155,12 @@ App = {
           console.log('received game finished event');
           console.log('event information: ' + JSON.stringify(event.args._winningNonce));
           $('#reveal-button').prop('disabled', true);
+          // update account, game and players information
+          App.displayPlayersInfo();
+          App.displayGameInfo();
+          App.displayAccountInfo();
           Client.animateFinal(event.args._winningNonce);
           console.log('call Client.animateFinal with winningNonce: ' + event.args._winningNonce);
-          // update account, game and players information
-          App.displayAccountInfo();
-          App.displayGameInfo();
-          App.displayPlayersInfo();
         } else {
           console.error(error);
         }

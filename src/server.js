@@ -75,7 +75,7 @@ PlayerReadyEvent.watch(function(err,res) {
     setTimeout(function(){
       console.log("unblock button");
       io.sockets.emit("unblockButton")
-    }, 10000)
+    }, 15000) //HA 3 blocks at 5s per block
   } else {
     console.log(err);
   }
