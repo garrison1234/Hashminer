@@ -32,7 +32,7 @@ var confirmedSelections = [];
 var gameInfo = [];
 var hashminerAbi = JSON.parse(fs.readFileSync("../build/contracts/Hashminer.json")).abi
 var hashminer = web3.eth.contract(hashminerAbi)
-var address = "0x345ca3e014aaf5dca488057592ee47305d9b3e10"
+var address = "0x625b914e3836f1e477ae2e11f8537a94126b8139"
 var instance = hashminer.at(address.toLowerCase())
 confirmedSelections = helper.loadStartingState(instance.getPlayersInfo())
 gameInfo = instance.getGameInfo()
@@ -41,6 +41,13 @@ maxPlayers = gameInfo[2].toNumber()
 currentBlock = web3.eth.blockNumber
 console.log("current : " + currentBlock);
 console.log("drawBlock : " + drawBlock);
+
+if(debug) {
+  console.log("Starting state");
+  confirmed = helper.addPendingField(confirmedSelections,false)
+  console.log(confirmed.concat(helper.addPendingField(pendingSelections)));
+
+}
 
 var PlayEvent = instance.LogPlayerAdded({},{fromBlock:"latest",toBlock:"latest"})
 PlayEvent.watch(function(err,res) {
@@ -64,15 +71,17 @@ PlayEvent.watch(function(err,res) {
   if(!result[2])
     io.sockets.emit("newConfirmed", confirmedSelections[confirmedSelections.length-1])
 })
-
+var globalTimer;
 var PlayerReadyEvent = instance.LogPlayersReady({}, {fromBlock:"latest", toBlock:"latest"})
 PlayerReadyEvent.watch(function(err,res) {
   if(!err) {
+    if(debug) {
     console.log("PLAYER READY EVENT")
     console.log(JSON.stringify(res))
+    }
     //Should start a 3 block timeout to unblock button
     //Could pull blocknumber and compare for a while
-    setTimeout(function(){
+  globalTimer = setTimeout(function(){
       console.log("unblock button");
       io.sockets.emit("unblockButton")
     }, 15000) //HA 3 blocks at 5s per block
@@ -84,12 +93,15 @@ PlayerReadyEvent.watch(function(err,res) {
 var FinishEvent = instance.LogGameFinished({},{fromBlock:"latest", toBlock:"latest"})
 FinishEvent.watch(function(err,res) {
   if(!err){
+    if(debug){
     console.log("------------------------------------");
     console.log("REVEAL WINNER EVENT");
     console.log(JSON.stringify(res));
+    console.log("------------------------------------");
+    }
     pendingSelections = []
     confirmedSelections = []
-    console.log("------------------------------------");
+    clearTimeout(globalTimer)
   } else {
     console.log(err)
   }
