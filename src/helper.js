@@ -54,6 +54,14 @@ var getXandY = function(nonce) {
 }
 
 module.exports = {
+
+  containsPending : function(pendingSelections, obj) {
+    for(var i = 0; i < pendingSelections.length; i++) {
+      if(pendingSelections[i] === obj )
+        return [true, i]
+    }
+    return [false]
+  },
   nonceValid : function (array, nonce) {
     for(var i = 0; i < array.length; i++) {
       if(array[i].nonce === nonce) return false;}
@@ -137,5 +145,10 @@ module.exports = {
     }
     removePendingErrors()
     return [pendingSelections, confirmedSelections, noChange]
+  },
+
+  currentTimeInMillis : function () {
+    date = new Date()
+    return date.getTime()
   }
 }

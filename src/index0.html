@@ -24,6 +24,10 @@ client.socket.on("unblockButton" ,() => {
   console.log("button is unblocked");
 })
 
+client.socket.on("removeSelection", (data)=>{
+  console.log(data +" is removed from pending");
+})
+
 function gameLoaded() {
   console.log("Connection to game")
   client.socket.emit("gameLoaded")

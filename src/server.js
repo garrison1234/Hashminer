@@ -13,23 +13,25 @@ app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
 app.use('/assets',express.static(__dirname + '/assets'));
 app.use('/fonts',express.static(__dirname + '/fonts'));
-app.use('/',express.static(__dirname + '/'));
+//app.use('/',express.static(__dirname + '/'));
 app.use('/build',express.static(__dirname+ '/build'));
 app.use('/contracts',express.static(__dirname+ '/contracts'));
 
 app.get('/',function(req,res){
-  res.sendFile(__dirname+'/index.html');
+  res.sendFile(__dirname+'/index0.html');
   //HA res.sendFile(__dirname+'/index.html');
-  res.sendFile(__dirname+'/game.html');
+  //res.sendFile(__dirname+'/game.html');
 });
 
 server.listen(process.env.PORT || 8081,function(){
   console.log('Listening on '+server.address().port);
 });
-var debug = true;
-var pendingSelections = [];
-var confirmedSelections = [];
-var gameInfo = [];
+var debug = true
+var pendingTime = 180000
+var pendingIntervalActive = false
+var pendingSelections = []
+var confirmedSelections = []
+var gameInfo = []
 var hashminerAbi = JSON.parse(fs.readFileSync("../build/contracts/Hashminer.json")).abi
 var hashminer = web3.eth.contract(hashminerAbi)
 var address = "0x625b914e3836f1e477ae2e11f8537a94126b8139"
@@ -39,8 +41,6 @@ gameInfo = instance.getGameInfo()
 drawBlock = gameInfo[5]
 maxPlayers = gameInfo[2].toNumber()
 currentBlock = web3.eth.blockNumber
-console.log("current : " + currentBlock);
-console.log("drawBlock : " + drawBlock);
 
 if(debug) {
   console.log("Starting state");
@@ -81,7 +81,7 @@ PlayerReadyEvent.watch(function(err,res) {
     }
     //Should start a 3 block timeout to unblock button
     //Could pull blocknumber and compare for a while
-  globalTimer = setTimeout(function(){
+  setTimeout(function(){
       console.log("unblock button");
       io.sockets.emit("unblockButton")
     }, 15000) //HA 3 blocks at 5s per block
@@ -107,8 +107,6 @@ FinishEvent.watch(function(err,res) {
   }
 })
 
-
-
 io.on('connection',function(socket){
   socket.on("gameLoaded",function(){
     confirmed = helper.addPendingField(confirmedSelections,false)
@@ -122,17 +120,16 @@ io.on('connection',function(socket){
         console.log(data.nonce);
         console.log("---------------------------------");
       }
-        pendingSelections.push({address : data.address.toLowerCase(), x: parseInt(data.x), y: parseInt(data.y), nonce: parseInt(data.nonce)})
+        pendingSelections.push({address : data.address.toLowerCase(), x: parseInt(data.x), y: parseInt(data.y), nonce: parseInt(data.nonce), time: helper.currentTimeInMillis()})
         socket.emit("newSelection", data.nonce);
+        startPendingTimer()
       } else {
         if(debug) {
         console.log("---------------------------------");
         console.log("Nonce already selected or nonce invalid");
         console.log(data.nonce);
         console.log("---------------------------------");
-      }
-      }
-      });
+      }}});
 
     socket.on("debugPlayers", function(){
       if(debug) {
@@ -146,13 +143,43 @@ io.on('connection',function(socket){
     socket.on("revealWinner", function(){
        console.log("blocking button");
         socket.emit("blockButton")
-        setTimeout(function(){
+        globalTimer = setTimeout(function(){
           console.log("unblock button");
           io.sockets.emit("unblockButton")
         }, 10000)
       });
   });
 
+  function startPendingTimer() {
+    if(pendingIntervalActive)
+      return
+    else {
+      pendingIntervalActive = true
+      pendingInterval = setInterval(function(){
+
+        var indexToRemove = []
+        for(var i = 0; i < pendingSelections.length; i++) {
+          if(helper.currentTimeInMillis() - pendingSelections[i].time > pendingTime){
+              indexToRemove.push(i)
+            }
+        }
+        for(i = 0; i < indexToRemove.length; i++) {
+          pendingSelections.splice(indexToRemove[i],1)
+        }
+        if(debug && indexToRemove.length > 0) {
+          console.log("----------------------------------")
+          console.log("PENDING AFTER REMOVE");
+          console.log(pendingSelections);
+          console.log("----------------------------------")
+
+        }
+        if(pendingSelections.length == 0) {
+          clearInterval(pendingInterval)
+          pendingIntervalActive = false
+        }
+      },1000)
+    }
+  }
 
   function initWeb3() {
     if (typeof web3 !== 'undefined') {
