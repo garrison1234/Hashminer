@@ -32,7 +32,7 @@ var confirmedSelections = [];
 var gameInfo = [];
 var hashminerAbi = JSON.parse(fs.readFileSync("../build/contracts/Hashminer.json")).abi
 var hashminer = web3.eth.contract(hashminerAbi)
-var address = "0x625b914e3836f1e477ae2e11f8537a94126b8139"
+var address = "0x345ca3e014aaf5dca488057592ee47305d9b3e10"
 var instance = hashminer.at(address.toLowerCase())
 confirmedSelections = helper.loadStartingState(instance.getPlayersInfo())
 gameInfo = instance.getGameInfo()
@@ -90,6 +90,7 @@ PlayerReadyEvent.watch(function(err,res) {
   }
 })
 
+var buttonTimer; //HA added buttonTimer for revealWinner block / unblock
 var FinishEvent = instance.LogGameFinished({},{fromBlock:"latest", toBlock:"latest"})
 FinishEvent.watch(function(err,res) {
   if(!err){
@@ -101,7 +102,8 @@ FinishEvent.watch(function(err,res) {
     }
     pendingSelections = []
     confirmedSelections = []
-    clearTimeout(globalTimer)
+    clearTimeout(buttonTimer) //HA changed this to buttonTimer
+    console.log("clearTimeout(buttonTimer)");
   } else {
     console.log(err)
   }
@@ -146,7 +148,7 @@ io.on('connection',function(socket){
     socket.on("revealWinner", function(){
        console.log("blocking button");
         socket.emit("blockButton")
-        setTimeout(function(){
+        buttonTimer = setTimeout(function(){ //HA added buttonTimer variable for timer after revealWinner button is clicked
           console.log("unblock button");
           io.sockets.emit("unblockButton")
         }, 10000)

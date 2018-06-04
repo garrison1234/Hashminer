@@ -127,7 +127,7 @@ App = {
 
          // listen to LogPlayerAdded event
         instance.LogPlayerAdded({}, {}).watch(function(error, event) {
-          console.log('received player added event');
+          console.log('received LogPlayerAdded event');
           if (!error) {
             // update game, players and account information
             App.displayGameInfo();
@@ -141,6 +141,7 @@ App = {
         // listen to LogPlayersReady event
        instance.LogPlayersReady({}, {}).watch(function(error, event) {
          if (!error) {
+           console.log('received LogPlayersReady event');
            // update game information
            $('#reveal-button').prop('disabled', false);
            App.displayGameInfo();
@@ -152,7 +153,7 @@ App = {
        // listen to LogGameFinished event
       instance.LogGameFinished({}, {}).watch(function(error, event) {
         if (!error) {
-          console.log('received game finished event');
+          console.log('received LogGameFinished event');
           console.log('event information: ' + JSON.stringify(event.args._winningNonce));
           $('#reveal-button').prop('disabled', true);
           // update account, game and players information
