@@ -13,13 +13,13 @@ app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
 app.use('/assets',express.static(__dirname + '/assets'));
 app.use('/fonts',express.static(__dirname + '/fonts'));
-//app.use('/',express.static(__dirname + '/'));
+app.use('/',express.static(__dirname + '/'));
 app.use('/build',express.static(__dirname+ '/build'));
 app.use('/contracts',express.static(__dirname+ '/contracts'));
 
 app.get('/',function(req,res){
-  res.sendFile(__dirname+'/index0.html');
-  //HA res.sendFile(__dirname+'/index.html');
+  //res.sendFile(__dirname+'/index0.html');
+  res.sendFile(__dirname+'/index.html');
   //res.sendFile(__dirname+'/game.html');
 });
 
@@ -34,7 +34,7 @@ var confirmedSelections = []
 var gameInfo = []
 var hashminerAbi = JSON.parse(fs.readFileSync("../build/contracts/Hashminer.json")).abi
 var hashminer = web3.eth.contract(hashminerAbi)
-var address = "0x625b914e3836f1e477ae2e11f8537a94126b8139"
+var address = "0xc49df21fee770c33fdd3333dab76afc4ce70382a"
 var instance = hashminer.at(address.toLowerCase())
 confirmedSelections = helper.loadStartingState(instance.getPlayersInfo())
 gameInfo = instance.getGameInfo()

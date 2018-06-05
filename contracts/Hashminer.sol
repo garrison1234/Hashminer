@@ -10,7 +10,7 @@ contract Hashminer {
   // state variables
   address owner;
   bool gameLocked;
-  uint maxNumberOfPlayers = 4; // must be 2^N
+  uint maxNumberOfPlayers = 16; // must be 2^N
   mapping (uint => Player) public players;
   uint[65] takenNonces; // array size must be at least maxNumberOfPlayers+1
   uint playerCounter;
@@ -19,7 +19,7 @@ contract Hashminer {
   bytes32 blockHash;
   uint winningNonce;
   address winner;
-  uint prize = 50 finney;
+  uint prize = 750 finney;
   uint callerIncentive = 2 finney;
   address caller;
 

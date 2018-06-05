@@ -255,7 +255,7 @@ var game = new Phaser.Game(config);
       Client.playGame(mapNonce, xmouseClick, ymouseClick);
 
       // block mouse for 3 seconds to avoid sending transaction twice
-      setTimeout(function() { mouseBlocked = false}, 3000);
+      setTimeout(function() { mouseBlocked = false}, 1000);
     }
 
     if ( (confirmedMiners.length > minerCounter) && !minerMoving && !gameOver ) {
@@ -330,7 +330,7 @@ var game = new Phaser.Game(config);
 
     // Replace all miners with losers/winning animations
     if (gameOver) {
-      for (var l = 0; l <= 3; l++) {
+      for (var l = 0; l <= 15; l++) {
         var element = activeMiners[l];
         element.disableBody(true, true);
         console.log('confirmedMiners[' + l + ']: ' + confirmedMiners[l].nonce + ', ' + 'winningNonce: ' + winningNonce);
@@ -348,7 +348,7 @@ var game = new Phaser.Game(config);
 
     // delete all sprites from map
     if (deletingMiners) {
-      for (var l = 0; l <= 3; l++) {
+      for (var l = 0; l <= 15; l++) {
         var element = activeMiners[l];
         var elementText = minerText[l];
         element.disableBody(true, true);
