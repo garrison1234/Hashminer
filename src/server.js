@@ -7,7 +7,7 @@ var Web3 = require('web3');
 var contract = require("truffle-contract");
 var fs = require("fs");
 var web3
-web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+//web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545")); HA-deploying to Heroku
 
 app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
@@ -33,7 +33,7 @@ var pendingSelections = []
 var confirmedSelections = []
 var gameInfo = []
 var hashminerAbi = JSON.parse(fs.readFileSync("build/contracts/Hashminer.json")).abi //HA changed this for npm start script to run (package.json)
-var hashminer = web3.eth.contract(hashminerAbi)
+//var hashminer = web3.eth.contract(hashminerAbi) HA-deploying to Heroku
 var address = "0xc49df21fee770c33fdd3333dab76afc4ce70382a"
 var instance = hashminer.at(address.toLowerCase())
 confirmedSelections = helper.loadStartingState(instance.getPlayersInfo())
@@ -181,11 +181,11 @@ io.on('connection',function(socket){
     }
   }
 
-  function initWeb3() {
+  /*function initWeb3() {
     if (typeof web3 !== 'undefined') {
       var web3 = new Web3(web3.currentProvider);
     } else {
       var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
     }
     return web3
-  }
+  } HA-deploying to Heroku */
