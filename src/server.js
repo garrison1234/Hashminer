@@ -7,7 +7,7 @@ var Web3 = require('web3');
 var contract = require("truffle-contract");
 var fs = require("fs");
 var web3
-//web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545")); HA-deploying to Heroku
+web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO"));
 
 app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
@@ -20,7 +20,6 @@ app.use('/contracts',express.static(__dirname+ '/contracts'));
 app.get('/',function(req,res){
   //res.sendFile(__dirname+'/index0.html');
   res.sendFile(__dirname+'/index.html');
-  //res.sendFile(__dirname+'/game.html');
 });
 
 server.listen(process.env.PORT || 8081,function(){
@@ -33,11 +32,12 @@ var pendingSelections = []
 var confirmedSelections = []
 var gameInfo = []
 var hashminerAbi = JSON.parse(fs.readFileSync("build/contracts/Hashminer.json")).abi //HA changed this for npm start script to run (package.json)
-//var hashminer = web3.eth.contract(hashminerAbi) HA-deploying to Heroku
-//var address = "0xc49df21fee770c33fdd3333dab76afc4ce70382a"
-var instance = hashminer.at(address.toLowerCase())
-confirmedSelections = helper.loadStartingState(instance.getPlayersInfo())
-gameInfo = instance.getGameInfo()
+var hashminer = new web3.eth.Contract(hashminerAbi, '0x190d632dfa964bdf8108d05f87e8e59b97931e7f') //HA for web3 1.0
+//var address = "0x190d632dfa964bdf8108d05f87e8e59b97931e7f" //HA rinkeby address
+//var instance = hashminer.at(address.toLowerCase())
+console.log(hashminer.methods.getPlayersInfo());
+confirmedSelections = helper.loadStartingState(hashminer.methods.getPlayersInfo()) //change this to promise logic (see web.js 1.0.x docs)
+gameInfo = hashminer.methods.getGameInfo()
 drawBlock = gameInfo[5]
 maxPlayers = gameInfo[2].toNumber()
 currentBlock = web3.eth.blockNumber
@@ -181,11 +181,11 @@ io.on('connection',function(socket){
     }
   }
 
-  /*function initWeb3() {
+  function initWeb3() {
     if (typeof web3 !== 'undefined') {
       var web3 = new Web3(web3.currentProvider);
     } else {
       var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
     }
     return web3
-  } HA-deploying to Heroku */
+  }
