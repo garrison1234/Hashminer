@@ -1,3 +1,8 @@
+var HDWalletProvider = require("truffle-hdwallet-provider");
+
+var infura_apikey = "LkO37PKVOQPojiMpZpPO";
+var nmemonic = "lounge raven arm clay decrease erupt gas trust camera assault situate into";
+
 module.exports = {
      // See <http://truffleframework.com/docs/advanced/configuration>
      // to customize your Truffle configuration!
@@ -16,7 +21,7 @@ module.exports = {
            host: "localhost",
            port: 8545,
            network_id: 4, //rinkeby test network
-           gas: 4700000
+           gas: 4700000,
          }
 
      }

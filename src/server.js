@@ -6,6 +6,7 @@ var helper = require("./helper.js")
 var Web3 = require('web3');
 var contract = require("truffle-contract");
 var fs = require("fs");
+//var HDWalletProvider = require("truffle-hdwallet-provider");
 var web3
 web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO"));
 
@@ -32,17 +33,22 @@ var pendingSelections = []
 var confirmedSelections = []
 var gameInfo = []
 var hashminerAbi = JSON.parse(fs.readFileSync("build/contracts/Hashminer.json")).abi //HA changed this for npm start script to run (package.json)
-var hashminer = new web3.eth.Contract(hashminerAbi, '0x190d632dfa964bdf8108d05f87e8e59b97931e7f') //HA for web3 1.0
+var instance = new web3.eth.Contract(hashminerAbi, '0x190d632dfa964bdf8108d05f87e8e59b97931e7f') //HA for web3 1.0
+//var mnemonic = "";
+//var provider =  new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO")
+//console.log(provider.wallets);
 //var address = "0x190d632dfa964bdf8108d05f87e8e59b97931e7f" //HA rinkeby address
 //var instance = hashminer.at(address.toLowerCase())
-console.log(hashminer.methods.getPlayersInfo());
-confirmedSelections = helper.loadStartingState(hashminer.methods.getPlayersInfo()) //change this to promise logic (see web.js 1.0.x docs)
-gameInfo = hashminer.methods.getGameInfo()
-drawBlock = gameInfo[5]
-maxPlayers = gameInfo[2].toNumber()
-currentBlock = web3.eth.blockNumber
+instance.methods.getGameInfo().call({}, function(error, result){
+  console.log(result);
+});
+//confirmedSelections = helper.loadStartingState(hashminer.methods.getPlayersInfo()) //change this to promise logic (see web.js 1.0.x docs)
+//gameInfo = hashminer.methods.getGameInfo()
+//drawBlock = gameInfo[5]
+//maxPlayers = gameInfo[2].toNumber()
+//currentBlock = web3.eth.blockNumber
 
-if(debug) {
+/*if(debug) {
   console.log("Starting state");
   confirmed = helper.addPendingField(confirmedSelections,false)
   console.log(confirmed.concat(helper.addPendingField(pendingSelections)));
@@ -180,7 +186,7 @@ io.on('connection',function(socket){
       },1000)
     }
   }
-
+*/
   function initWeb3() {
     if (typeof web3 !== 'undefined') {
       var web3 = new Web3(web3.currentProvider);
