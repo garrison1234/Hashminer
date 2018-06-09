@@ -3,12 +3,12 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var helper = require("./helper.js")
-var Web3 = require('web3');
+const Web3 = require('web3');
 var contract = require("truffle-contract");
 var fs = require("fs");
 //var HDWalletProvider = require("truffle-hdwallet-provider");
-var web3
-web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO"));
+//var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO"));
+const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws'));
 
 app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
@@ -33,57 +33,55 @@ var pendingSelections = []
 var confirmedSelections = []
 var gameInfo = []
 var hashminerAbi = JSON.parse(fs.readFileSync("build/contracts/Hashminer.json")).abi //HA changed this for npm start script to run (package.json)
-var instance = new web3.eth.Contract(hashminerAbi, '0x190d632dfa964bdf8108d05f87e8e59b97931e7f') //HA for web3 1.0
+var address = "0x190d632dfa964bdf8108d05f87e8e59b97931e7f" //HA rinkeby address
+var instance = new web3.eth.Contract(hashminerAbi, address) //HA for web3 1.0
 //var mnemonic = "";
 //var provider =  new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO")
-//console.log(provider.wallets);
-//var address = "0x190d632dfa964bdf8108d05f87e8e59b97931e7f" //HA rinkeby address
-//var instance = hashminer.at(address.toLowerCase())
-instance.methods.getGameInfo().call({}, function(error, result){
-  console.log(result);
+
+instance.methods.getPlayersInfo().call({}, function(error, result){
+  confirmedSelections = helper.loadStartingState(result);
+  if(debug) {
+    console.log("Starting state");
+    confirmed = helper.addPendingField(confirmedSelections,false)
+    console.log(confirmed.concat(helper.addPendingField(pendingSelections)));
+  }
 });
-//confirmedSelections = helper.loadStartingState(hashminer.methods.getPlayersInfo()) //change this to promise logic (see web.js 1.0.x docs)
-//gameInfo = hashminer.methods.getGameInfo()
-//drawBlock = gameInfo[5]
-//maxPlayers = gameInfo[2].toNumber()
-//currentBlock = web3.eth.blockNumber
 
-/*if(debug) {
-  console.log("Starting state");
-  confirmed = helper.addPendingField(confirmedSelections,false)
-  console.log(confirmed.concat(helper.addPendingField(pendingSelections)));
+instance.methods.getGameInfo().call({}, function(error, result){
+  gameInfo = result;
+  drawBlock = gameInfo[5];
+  maxPlayers = gameInfo[2];
+});
 
-}
+currentBlock =  web3.eth.getBlockNumber()
+.then(function (blockNumber){
+  return blockNumber;
+});
 
-var PlayEvent = instance.LogPlayerAdded({},{fromBlock:"latest",toBlock:"latest"})
-PlayEvent.watch(function(err,res) {
-  if(!err){
-    var playEvent = {address:res.args._wallet.toLowerCase(),nonce:res.args._nonce.toNumber(),counter:res.args._playerCounter.toNumber()}
-    var result = helper.parsePlayEvent(playEvent, pendingSelections, confirmedSelections);
-    pendingSelections = result[0]
-    confirmedSelections = result[1]
-    if(debug) {
-    console.log("---------------------------------");
-    console.log("In event Play:");
-    console.log("pending selections");
-    console.log(JSON.stringify(pendingSelections));
-    console.log("Confirmed selections");
-    console.log(JSON.stringify(confirmedSelections));
-    console.log("---------------------------------");
+instance.events.LogPlayerAdded({}, function(error, event){
+  var playEvent = {address:event.returnValues._wallet.toLowerCase(), nonce:event.returnValues._nonce, counter:event.returnValues._playerCounter};
+  var result = helper.parsePlayEvent(playEvent, pendingSelections, confirmedSelections);
+  pendingSelections = result[0]
+  confirmedSelections = result[1]
+  if(debug) {
+  console.log("---------------------------------");
+  console.log("In event Play:");
+  console.log("pending selections");
+  console.log(JSON.stringify(pendingSelections));
+  console.log("Confirmed selections");
+  console.log(JSON.stringify(confirmedSelections));
+  console.log("---------------------------------");
   }
-  } else {
-    console.log(err)
-  }
-  if(!result[2])
+  if(!result[2]){
     io.sockets.emit("newConfirmed", confirmedSelections[confirmedSelections.length-1])
-})
+  }
+});
+
 var globalTimer;
-var PlayerReadyEvent = instance.LogPlayersReady({}, {fromBlock:"latest", toBlock:"latest"})
-PlayerReadyEvent.watch(function(err,res) {
-  if(!err) {
+instance.events.LogPlayersReady({}, function(error, event){
     if(debug) {
     console.log("PLAYER READY EVENT")
-    console.log(JSON.stringify(res))
+    console.log(JSON.stringify(event))
     }
     //Should start a 3 block timeout to unblock button
     //Could pull blocknumber and compare for a while
@@ -91,27 +89,19 @@ PlayerReadyEvent.watch(function(err,res) {
       console.log("unblock button");
       io.sockets.emit("unblockButton")
     }, 15000) //HA 3 blocks at 5s per block
-  } else {
-    console.log(err);
-  }
-})
+});
 
-var FinishEvent = instance.LogGameFinished({},{fromBlock:"latest", toBlock:"latest"})
-FinishEvent.watch(function(err,res) {
-  if(!err){
+instance.events.LogGameFinished({}, function(error, event){
     if(debug){
     console.log("------------------------------------");
     console.log("REVEAL WINNER EVENT");
-    console.log(JSON.stringify(res));
+    console.log(JSON.stringify(event));
     console.log("------------------------------------");
     }
     pendingSelections = []
     confirmedSelections = []
     clearTimeout(globalTimer)
-  } else {
-    console.log(err)
-  }
-})
+});
 
 io.on('connection',function(socket){
   socket.on("gameLoaded",function(){
@@ -186,7 +176,67 @@ io.on('connection',function(socket){
       },1000)
     }
   }
-*/
+
+/*
+
+var PlayEvent = instance.LogPlayerAdded({},{fromBlock:"latest",toBlock:"latest"})
+PlayEvent.watch(function(err,res) {
+  if(!err){
+    var playEvent = {address:res.args._wallet.toLowerCase(),nonce:res.args._nonce.toNumber(),counter:res.args._playerCounter.toNumber()}
+    var result = helper.parsePlayEvent(playEvent, pendingSelections, confirmedSelections);
+    pendingSelections = result[0]
+    confirmedSelections = result[1]
+    if(debug) {
+    console.log("---------------------------------");
+    console.log("In event Play:");
+    console.log("pending selections");
+    console.log(JSON.stringify(pendingSelections));
+    console.log("Confirmed selections");
+    console.log(JSON.stringify(confirmedSelections));
+    console.log("---------------------------------");
+  }
+  } else {
+    console.log(err)
+  }
+  if(!result[2])
+    io.sockets.emit("newConfirmed", confirmedSelections[confirmedSelections.length-1])
+})
+var globalTimer;
+var PlayerReadyEvent = instance.LogPlayersReady({}, {fromBlock:"latest", toBlock:"latest"})
+PlayerReadyEvent.watch(function(err,res) {
+  if(!err) {
+    if(debug) {
+    console.log("PLAYER READY EVENT")
+    console.log(JSON.stringify(res))
+    }
+    //Should start a 3 block timeout to unblock button
+    //Could pull blocknumber and compare for a while
+  setTimeout(function(){
+      console.log("unblock button");
+      io.sockets.emit("unblockButton")
+    }, 15000) //HA 3 blocks at 5s per block
+  } else {
+    console.log(err);
+  }
+})
+
+var FinishEvent = instance.LogGameFinished({},{fromBlock:"latest", toBlock:"latest"})
+FinishEvent.watch(function(err,res) {
+  if(!err){
+    if(debug){
+    console.log("------------------------------------");
+    console.log("REVEAL WINNER EVENT");
+    console.log(JSON.stringify(res));
+    console.log("------------------------------------");
+    }
+    pendingSelections = []
+    confirmedSelections = []
+    clearTimeout(globalTimer)
+  } else {
+    console.log(err)
+  }
+}) */
+
   function initWeb3() {
     if (typeof web3 !== 'undefined') {
       var web3 = new Web3(web3.currentProvider);

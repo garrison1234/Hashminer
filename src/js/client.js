@@ -4,12 +4,11 @@ Client.socket = io.connect();
 
 // received upon connection to server.js, passes array of current confirmed and pending miners
 Client.socket.on('allPlayers',function(_newPlayers){
-  console.log('received allPlayers from server.js: ' + JSON.stringify(_newPlayers));
+  console.log('received allPlayers from server: ' + _newPlayers);
     var newConfirmedMiners = [];
     for (let element of _newPlayers) {
       // block all nonces if not already blocked
-      console.log('nonce: ' + element.nonce);
-      game.blockNonce(element.nonce);
+      game.blockNonce(Number(element.nonce));
       // add property joined:'before' to each confirmed element and push to newConfirmedMiners
       if (!element.pending) {
         element.joined = 'before';
@@ -58,10 +57,7 @@ Client.socket.on('blockButton',function(){
 });
 
 Client.gameLoaded = function() {
-  console.log('client.gameLoaded');
   Client.socket.emit('gameLoaded');
-  // get user's ETH address and pass to game
-  game.setClientAddress(App.account);
 };
 
 Client.playGame = function(_nonce, _x, _y) {

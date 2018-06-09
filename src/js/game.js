@@ -145,6 +145,7 @@ var game = new Phaser.Game(config);
     }
 
     // ask server.js to send current players information
+    clientAddress = App.account;
     Client.gameLoaded();
   }
 
@@ -263,8 +264,8 @@ var game = new Phaser.Game(config);
       // define the destination coordinates
       xdestination = confirmedMiners[minerCounter].x;
       ydestination = confirmedMiners[minerCounter].y;
-      var newMinerAddress
-      if (confirmedMiners[minerCounter].address == clientAddress ) {
+      var newMinerAddress;
+      if (confirmedMiners[minerCounter].address.toLowerCase() == clientAddress ) {
           newMinerAddress = 'You';
       } else {
           newMinerAddress = confirmedMiners[minerCounter].address.substring(0, 6) + '...';
@@ -365,10 +366,10 @@ var game = new Phaser.Game(config);
 
   }
 
-  // set client's ETH address
+  /*// set client's ETH address
   game.setClientAddress = function(_clientAddress) {
       clientAddress = _clientAddress;
-  }
+  }*/
 
   // function called from app.js to add array of new confirmed player objects{nonce, x, y, address} sent from server.js
   game.addNewMiners = function(newPlayers) {

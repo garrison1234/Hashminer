@@ -71,8 +71,8 @@ module.exports = {
   loadStartingState : function (playersInfo) {
     var confirmedSelections = []
     for(var i = 0; i < playersInfo[0].length;i++) {
-      var coor = getXandY(playersInfo[1][i].toNumber())
-      var selection = { address: playersInfo[0][i], x:coor[0],y:coor[1],nonce:playersInfo[1][i].toNumber()}
+      var coor = getXandY(Number(playersInfo[1][i])); //HA changed toNumber() to Number()
+      var selection = { address: playersInfo[0][i], x:coor[0],y:coor[1],nonce:playersInfo[1][i]}; //HA removed toNumber()
       confirmedSelections.push(selection)
     }
     return confirmedSelections
