@@ -90,18 +90,19 @@ App = {
          return instance.getGameInfo();
        }).then(function(gameInformation) {
          // retrieve the game information from the contract.
+         $('#contractAddress').text("Contract Address: " + App.contracts.Hashminer.address)
          $('#owner').text(gameInformation[0]);
          $('#gameLocked').text(gameInformation[1]);
-         $('#maxNumberOfPlayers').text(gameInformation[2]);
-         $('#playerCounter').text(gameInformation[3]);
-         $('#gameCost').text(web3.fromWei(gameInformation[4], "ether") + " ETH");
-         $('#blockNumber').text(gameInformation[5]);
-         $('#blockHash').text(gameInformation[6]);
-         $('#winningNonce').text(gameInformation[7]);
-         $('#winner').text(gameInformation[8]);
-         $('#prize').text(web3.fromWei(gameInformation[9], "ether") + " ETH");
-         $('#callerIncentive').text(web3.fromWei(gameInformation[10], "ether") + " ETH");
-         $('#caller').text(gameInformation[11]);
+         $('#maxNumberOfPlayers').text("The winner can be revealed after " + gameInformation[2] + " players join");
+         $('#playerCounter').text("Players currently in game: " + gameInformation[3]);
+         $('#gameCost').text("Cost to play: " + web3.fromWei(gameInformation[4], "ether") + " ETH");
+         $('#blockNumber').text("Number of block that determined winner: " +gameInformation[5]);
+         //$('#blockHash').text("Block Hash: " + gameInformation[6].substring(0, 10) + "...");
+         $('#winner').text("Previous game winner: " + gameInformation[8]);
+         $('#winningNonce').text("Previous game winning nonce: " + gameInformation[7]);
+         $('#prize').text("Current game prize is: " + web3.fromWei(gameInformation[9], "ether") + " ETH");
+         $('#callerIncentive').text("The reward for determining the winner is: " + web3.fromWei(gameInformation[10], "ether") + " ETH");
+         $('#caller').text("Last user to reveal winner: " + gameInformation[11]);
        }).catch(function(err) {
        });
      },
@@ -113,7 +114,7 @@ App = {
        }).then(function(playersInformation) {
          $('#players-table > tbody').empty();
          for(i = 0; i < (playersInformation[0].length); i++) {
-           $('#players-table > tbody:last-child').append('<tr><td><p>' + playersInformation[0][i].slice(0,8) + '...' +
+           $('#players-table > tbody:last-child').append('<tr><td><p>' + playersInformation[0][i] +
             '</p></td><td><p>' + playersInformation[1][i] + '</p></td></tr>');
          }
        }).catch(function(err) {

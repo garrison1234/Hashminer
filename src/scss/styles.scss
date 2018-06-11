@@ -1,0 +1,14 @@
+// Variable overrides
+
+$body-bg: #ced4da;
+
+.jumbotron {
+  background-color: #ced4da !important;
+}
+
+.card {
+  background-color: #ced4da !important;
+}
+
+// Bootstrap Sass files
+@import "node_modules/bootstrap/scss/bootstrap";
