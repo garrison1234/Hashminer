@@ -39,16 +39,16 @@
       <div class="row">
         <div class="col-sm-12 col-md-2 col-lg-3">
           <div class="card mb-4">
-            <div class="card-body text-center">
-                <h5 class="card-title">User information</h5>
-                <p id="account" class="text-center"></p>
-                <p id="accountBalance" class="text-center" style="display:inline;"></p>
+            <div class="card-body">
+                <h5 class="card-title text-center">User Information</h5>
+                <p id="account"></p>
+                <p id="accountBalance" style="display:inline;"></p>
                 <a id="metaMaskLink" href="https://metamask.io/" target="_blank" style="display:inline;"></a>
             </div>
           </div>
           <div class="card mb-4">
             <div class="card-body">
-                <h5 class="card-title text-center">Game instructions</h5>
+                <h5 class="card-title text-center">Game Instructions</h5>
                 <ul>
                   <li>Click on a valid area on map to join game</li>
                   <li id="maxNumberOfPlayers"></li>
@@ -66,11 +66,16 @@
         <div class="col-sm-12 col-md-2 col-lg-3">
           <div class="card mb-4">
             <div class="card-body">
-                <h5 class="card-title text-center">Game Information</h5>
+                <h5 class="card-title text-center">Current Game Information</h5>
                 <p id="contractAddress"></p>
                 <p id="gameCost"></p>
                 <p id="prize"></p>
                 <p id="playerCounter"></p>
+            </div>
+          </div>
+          <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title text-center">Previous Game Information</h5>
                 <p id="winner"></p>
                 <p id="winningNonce"></p>
                 <p id="blockNumber"></p>
