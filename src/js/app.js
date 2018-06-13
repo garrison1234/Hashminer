@@ -15,13 +15,20 @@ App = {
        if(typeof web3 !== 'undefined') {
          //reuse the provider of the Web3 object injected by Metamask
          App.web3Provider = web3.currentProvider;
+
+         App.displayAccountInfo();
        } else {
          //create a new provider and plug it directly into our local node
-         App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
+         //App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
+         App.web3Provider = new Web3.providers.HttpProvider('https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO');
+
+         $('#account').text("MetaMask Chrome extension is disabled. Enable it to view account information");
+         $('#account').addClass("text-danger");
+         $('#accountBalance').text("To get MetaMask, click ");
+         $('#metaMaskLink').text("here");
+         $('#otherTab').prop('disabled', false);
        }
        web3 = new Web3(App.web3Provider);
-
-       App.displayAccountInfo();
 
        return App.initContract();
      },
@@ -33,6 +40,7 @@ App = {
          if(err === null) {
            App.account = account;
            $('#account').text("Account: "+ account);
+           $('#account').removeClass("text-danger");
            web3.eth.getBalance(account, function(err, balance) {
              if(err === null) {
                $('#accountBalance').text("Balance: " + web3.fromWei(balance, "ether") + " ETH");
@@ -40,6 +48,10 @@ App = {
            })
          }
        });
+       if(App.account == 0){
+         $('#account').addClass("text-danger");
+         $('#accountBalance').text("To view account information, unlock MetaMask and reload site");
+       }
      },
 
      // retrieve the Hashminer contract

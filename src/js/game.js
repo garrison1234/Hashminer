@@ -22,6 +22,7 @@ var clientAddress;
 var minerCounter = 0;
 var precision = 3;
 var cursorArea;
+var instructionsText;
 var mapAreaValid;
 var xmouse, ymouse;
 var xmouseClick, ymouseClick;
@@ -30,7 +31,7 @@ var mouseBlocked;
 var minerMoving;
 var blockedNonces = [];
 var confirmedMiners = [];
-var style = { font: "16px Lucida Console", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" };
+var style = { font: "16px Lucida Console", fill: "#060dff", wordWrap: true, wordWrapWidth: 20, align: "center" };
 var minerText = [];
 var activeMiners = [];
 var mapNonce;
@@ -65,6 +66,7 @@ var game = new Phaser.Game(config);
 
     cursorArea = this.add.sprite(0, 0, 'cursorBlocked');
 
+    instructionsText = this.add.text(8, 520, '', { font: "12px Lucida Console", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
 
     // create loading animations
     this.anims.create({
@@ -236,12 +238,21 @@ var game = new Phaser.Game(config);
     }
 
     // display current mouse position and whether position is valid (mapNonce not blocked)
-    if (blockedNonces.includes(mapNonce)) {
-      $('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' This location is already taken or pending confirmation, chose another place to mine');
-    } else if (!mapAreaValid){
-      $('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' invalid location, chose another place to mine');
+    if (!mapAreaValid){
+      instructionsText.destroy();
+      instructionsText = this.add.text(8, 520, 'Invalid location, chose another place to mine',
+      { font: "12px Lucida Console", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
+      //$('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' invalid location, chose another place to mine');
+    } else if (blockedNonces.includes(mapNonce)) {
+      instructionsText.destroy()
+      instructionsText = this.add.text(8, 520, 'This location is already taken or pending confirmation, chose another place to mine',
+      { font: "12px Lucida Console", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
+      //$('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' This location is already taken or pending confirmation, chose another place to mine');
     } else {
-      $('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' click to place miner');
+      instructionsText.destroy()
+      instructionsText = this.add.text(8, 520, 'Click to place miner. Place corresponds to nonce: ' + mapNonce,
+      { font: "12px Lucida Console", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
+      //$('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' click to place miner');
     }
 
     if ( !mouseBlocked && this.input.activePointer.isDown && !(blockedNonces.includes(mapNonce)) && !gameOver && mapAreaValid) {
@@ -334,10 +345,13 @@ var game = new Phaser.Game(config);
       for (var l = 0; l <= 15; l++) {
         var element = activeMiners[l];
         element.disableBody(true, true);
-        console.log('confirmedMiners[' + l + ']: ' + confirmedMiners[l].nonce + ', ' + 'winningNonce: ' + winningNonce);
         if (confirmedMiners[l].nonce == winningNonce) {
-            activeMiners[l] = this.physics.add.sprite(confirmedXcoordinates[l], confirmedYcoordinates[l], ('minerwin' + ((l + 1).toString())))
-            activeMiners[l].anims.play(('win' + ((l + 1).toString())), true);
+          instructionsText.destroy();
+          instructionsText = this.add.text(8, 520, 'Game finished. ' + 'User ' + confirmedMiners[l].address
+          + 'wins with nonce: ' + confirmedMiners[l].nonce + '!',
+          { font: "12px Lucida Console", fill: "##00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
+          activeMiners[l] = this.physics.add.sprite(confirmedXcoordinates[l], confirmedYcoordinates[l], ('minerwin' + ((l + 1).toString())))
+          activeMiners[l].anims.play(('win' + ((l + 1).toString())), true);
         } else {
           activeMiners[l] = this.physics.add.sprite(confirmedXcoordinates[l], confirmedYcoordinates[l], ('miner' + ((l + 1).toString())))
           activeMiners[l].anims.play(('lose' + ((l + 1).toString())), true);
