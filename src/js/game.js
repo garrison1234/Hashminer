@@ -403,10 +403,13 @@ var game = new Phaser.Game(config);
   // function called from app.js to unblock nonces that were played but not confirmed in time
   game.unblockNonce = function(unblockedNonce) {
     // remove nonce from blockedNonces only if already included
+    console.log('blockedNonces: ' + blockedNonces);
     var nonceIndex = blockedNonces.indexOf(unblockedNonce);
+    console.log("nonceIndex");
     if (nonceIndex > -1) {
       blockedNonces.splice(nonceIndex, 1);
     }
+    console.log('blockedNonces: ' + blockedNonces);
   }
 
   game.unblockMouse = function() {

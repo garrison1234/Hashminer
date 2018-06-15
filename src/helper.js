@@ -113,12 +113,15 @@ module.exports = {
     var modifyArrays = function () {
       if(noRepetition()) {
       var index = findIndexPending()
+      console.log('index: ' + index);
       if (typeof index !== 'undefined') {
         console.log("here");
         confirmedSelections.push({address: pendingSelections[index].address, x:pendingSelections[index].x,y:pendingSelections[index].y,nonce:pendingSelections[index].nonce})
         pendingSelections.splice(index,1)
       } else {
-        coor = getXandY(playEvent.nonce)
+        console.log('playEvent.nonce: ' + playEvent.nonce);
+        coor = getXandY(Number(playEvent.nonce));
+        console.log('coor:' + coor);
         confirmedSelections.push({address : playEvent.address, x:coor[0], y:coor[1], nonce : playEvent.nonce})
       }}
     }

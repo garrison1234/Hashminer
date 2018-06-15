@@ -6,9 +6,12 @@ var helper = require("./helper.js")
 const Web3 = require('web3');
 var contract = require("truffle-contract");
 var fs = require("fs");
-//var HDWalletProvider = require("truffle-hdwallet-provider");
-//var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO"));
-const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws'));
+
+// web3 provider
+//var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545")); // Ganache
+//var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO")); // rinkeby HttpProvider
+const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws')); // rinkeby WebsocketProvider (still in Beta)
+
 
 app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
@@ -26,17 +29,14 @@ app.get('/',function(req,res){
 server.listen(process.env.PORT || 8081,function(){
   console.log('Listening on '+server.address().port);
 });
-var debug = true
-var pendingTime = 180000
-var pendingIntervalActive = false
-var pendingSelections = []
-var confirmedSelections = []
-var gameInfo = []
-var hashminerAbi = JSON.parse(fs.readFileSync("build/contracts/Hashminer.json")).abi //HA changed this for npm start script to run (package.json)
-var address = "0x190d632dfa964bdf8108d05f87e8e59b97931e7f" //HA rinkeby address
-var instance = new web3.eth.Contract(hashminerAbi, address) //HA for web3 1.0
-//var mnemonic = "";
-//var provider =  new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO")
+var debug = true;
+var pendingTimer = [];
+var pendingSelections = [];
+var confirmedSelections = [];
+var gameInfo = [];
+var hashminerAbi = JSON.parse(fs.readFileSync("build/contracts/Hashminer.json")).abi; //HA changed this for npm start script to run (package.json)
+var address = "0x190d632dfa964bdf8108d05f87e8e59b97931e7f"; //HA rinkeby address
+var instance = new web3.eth.Contract(hashminerAbi, address); //HA for web3 1.0
 
 instance.methods.getPlayersInfo().call({}, function(error, result){
   confirmedSelections = helper.loadStartingState(result);
@@ -60,6 +60,11 @@ currentBlock =  web3.eth.getBlockNumber()
 
 instance.events.LogPlayerAdded({}, function(error, event){
   var playEvent = {address:event.returnValues._wallet.toLowerCase(), nonce:event.returnValues._nonce, counter:event.returnValues._playerCounter};
+  console.log('playEvent.address: ' + playEvent.address);
+  console.log('playEvent.nonce: ' + playEvent.nonce);
+  console.log('playEvent.counter: ' + playEvent.counter);
+  console.log('pending timer cancelled for nonce: ' + playEvent.nonce);
+  clearTimeout(pendingTimer[playEvent.nonce]);
   var result = helper.parsePlayEvent(playEvent, pendingSelections, confirmedSelections);
   pendingSelections = result[0]
   confirmedSelections = result[1]
@@ -98,9 +103,9 @@ instance.events.LogGameFinished({}, function(error, event){
     console.log(JSON.stringify(event));
     console.log("------------------------------------");
     }
-    pendingSelections = []
-    confirmedSelections = []
-    clearTimeout(globalTimer)
+    pendingSelections = [];
+    confirmedSelections = [];
+    clearTimeout(globalTimer);
 });
 
 io.on('connection',function(socket){
@@ -116,9 +121,15 @@ io.on('connection',function(socket){
         console.log(data.nonce);
         console.log("---------------------------------");
       }
-        pendingSelections.push({address : data.address.toLowerCase(), x: parseInt(data.x), y: parseInt(data.y), nonce: parseInt(data.nonce), time: helper.currentTimeInMillis()})
+        var newPendingSelection = {
+          address : data.address.toLowerCase(),
+          x: parseInt(data.x),
+          y: parseInt(data.y),
+          nonce: parseInt(data.nonce),
+          time: helper.currentTimeInMillis()};
+        pendingSelections.push(newPendingSelection);
         socket.emit("newSelection", data.nonce);
-        startPendingTimer()
+        startPendingTimer(newPendingSelection.nonce);
       } else {
         if(debug) {
         console.log("---------------------------------");
@@ -146,96 +157,35 @@ io.on('connection',function(socket){
       });
   });
 
-  function startPendingTimer() {
-    if(pendingIntervalActive)
-      return
-    else {
-      pendingIntervalActive = true
-      pendingInterval = setInterval(function(){
+  function startPendingTimer(nonce) {
+    // start timer for selected nonce
+    console.log('timer started for nonce: ' + nonce);
+    pendingTimer[nonce] = setTimeout(function(){
 
-        var indexToRemove = []
-        for(var i = 0; i < pendingSelections.length; i++) {
-          if(helper.currentTimeInMillis() - pendingSelections[i].time > pendingTime){
-              indexToRemove.push(i)
-            }
+      //var indexToRemove = []
+      /*for(var i = 0; i < pendingSelections.length; i++) {
+        if(helper.currentTimeInMillis() - pendingSelections[i].time > pendingTime){
+            indexToRemove.push(i)
+          }
+      }*/
+      /*for(i = 0; i < indexToRemove.length; i++) {
+        pendingSelections.splice(indexToRemove[i],1)
+      }*/
+
+      var newPendingSelections = [];
+      pendingSelections.forEach(function(element){
+        if(element.nonce != nonce){
+          newPendingSelections.push(element);
         }
-        for(i = 0; i < indexToRemove.length; i++) {
-          pendingSelections.splice(indexToRemove[i],1)
-        }
-        if(debug && indexToRemove.length > 0) {
-          console.log("----------------------------------")
-          console.log("PENDING AFTER REMOVE");
-          console.log(pendingSelections);
-          console.log("----------------------------------")
+      });
+      pendingSelections = newPendingSelections;
 
-        }
-        if(pendingSelections.length == 0) {
-          clearInterval(pendingInterval)
-          pendingIntervalActive = false
-        }
-      },1000)
-    }
-  }
+      io.sockets.emit("nonceCancelled", nonce);
 
-/*
+      console.log('timer expired for nonce: ' + nonce);
 
-var PlayEvent = instance.LogPlayerAdded({},{fromBlock:"latest",toBlock:"latest"})
-PlayEvent.watch(function(err,res) {
-  if(!err){
-    var playEvent = {address:res.args._wallet.toLowerCase(),nonce:res.args._nonce.toNumber(),counter:res.args._playerCounter.toNumber()}
-    var result = helper.parsePlayEvent(playEvent, pendingSelections, confirmedSelections);
-    pendingSelections = result[0]
-    confirmedSelections = result[1]
-    if(debug) {
-    console.log("---------------------------------");
-    console.log("In event Play:");
-    console.log("pending selections");
-    console.log(JSON.stringify(pendingSelections));
-    console.log("Confirmed selections");
-    console.log(JSON.stringify(confirmedSelections));
-    console.log("---------------------------------");
+    }, 60000);
   }
-  } else {
-    console.log(err)
-  }
-  if(!result[2])
-    io.sockets.emit("newConfirmed", confirmedSelections[confirmedSelections.length-1])
-})
-var globalTimer;
-var PlayerReadyEvent = instance.LogPlayersReady({}, {fromBlock:"latest", toBlock:"latest"})
-PlayerReadyEvent.watch(function(err,res) {
-  if(!err) {
-    if(debug) {
-    console.log("PLAYER READY EVENT")
-    console.log(JSON.stringify(res))
-    }
-    //Should start a 3 block timeout to unblock button
-    //Could pull blocknumber and compare for a while
-  setTimeout(function(){
-      console.log("unblock button");
-      io.sockets.emit("unblockButton")
-    }, 15000) //HA 3 blocks at 5s per block
-  } else {
-    console.log(err);
-  }
-})
-
-var FinishEvent = instance.LogGameFinished({},{fromBlock:"latest", toBlock:"latest"})
-FinishEvent.watch(function(err,res) {
-  if(!err){
-    if(debug){
-    console.log("------------------------------------");
-    console.log("REVEAL WINNER EVENT");
-    console.log(JSON.stringify(res));
-    console.log("------------------------------------");
-    }
-    pendingSelections = []
-    confirmedSelections = []
-    clearTimeout(globalTimer)
-  } else {
-    console.log(err)
-  }
-}) */
 
   function initWeb3() {
     if (typeof web3 !== 'undefined') {
