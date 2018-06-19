@@ -48,7 +48,7 @@ Client.socket.on('newConfirmed',function(_newPlayer){
 
 Client.socket.on('unblockButton',function(){
   console.log('received unblockButton from server.js: ');
-    $('#reveal-button').prop('disabled', false);
+    $('#revealModal').modal('show');
 });
 
 Client.socket.on('blockButton',function(){

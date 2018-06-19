@@ -11,6 +11,12 @@ var fs = require("fs");
 //var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545")); // Ganache
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO")); // rinkeby HttpProvider
 const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws')); // rinkeby WebsocketProvider (still in Beta)
+const subscription = web3.eth.subscribe('newBlockHeaders', (error, blockHeader) => {
+  if (error) return console.error(error);
+  console.log('Successfully subscribed!');
+}).on('data', (blockHeader) => {
+  console.log('data received ');
+});
 
 
 app.use('/css',express.static(__dirname + '/css'));

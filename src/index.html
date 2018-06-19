@@ -6,16 +6,15 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:400,800">
     <link rel='stylesheet' href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="/css/bootstrap.css">
     <link rel="stylesheet" href="/css/styles.css">
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
 </head>
 
 <body>
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <!--<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand" href="#">Hashminer</a>
-
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -30,57 +29,57 @@
             </li>
           </ul>
         </div>
-      </nav>
+      </nav> -->
 
       <div class="jumbotron text-center">
         <img src="/assets/logo4.png" alt="Hashminer logo" style="height:128px;">
       </div>
-
+      </nav>
       <div class="row">
-        <div class="col-sm-12 col-md-2 col-lg-3">
+        <div class="col-sm-12 col-md-3 col-lg-2">
           <div class="card mb-4">
             <div class="card-body">
-                <h5 class="card-title text-center">User Information</h5>
-                <p id="account"></p>
-                <p id="accountBalance" style="display:inline;"></p>
-                <a id="metaMaskLink" href="https://metamask.io/" target="_blank" style="display:inline;"></a>
+                <h5 class="card-title text-center header mb-4">User Information</h5>
+                <p id="account" class='details'></p>
+                <p id="accountBalance" class='details' style="display:inline;"></p>
+                <a id="metaMaskLink" class='details' href="https://metamask.io/" target="_blank" style="display:inline;"></a>
             </div>
           </div>
           <div class="card mb-4">
             <div class="card-body">
-                <h5 class="card-title text-center">Game Instructions</h5>
-                <ul>
+                <h5 class="card-title text-center header mb-4">Game Instructions</h5>
+                <ol class='details'>
                   <li>Click on a valid area on map to join game</li>
                   <li id="maxNumberOfPlayers"></li>
-                  <li>To reveal the winner click on the button below</li>
+                  <li>Once the game is full, any player can reveal the winner by clicking on the "Reveal Winner" button</li>
                   <li id="callerIncentive"></li>
-                </ul>
+                </ol>
             </div>
-          </div>
-          <div class="text-center">
-            <button type="button" class="btn btn-primary btn-lg" data-dismiss="modal" onclick="App.revealWinner(); Client.revealWinner(); return false;"
-            id="reveal-button">Reveal Winner</button>
           </div>
         </div>
-        <div class="col-sm-12 col-md-8 col-lg-6 text-center" id="game"></div>
-        <div class="col-sm-12 col-md-2 col-lg-3">
+        <div class="col-sm-12 col-md-6 col-lg-8 text-center" id="game"></div>
+        <div class="col-sm-12 col-md-3 col-lg-2">
           <div class="card mb-4">
             <div class="card-body">
-                <h5 class="card-title text-center">Current Game Information</h5>
-                <p id="contractAddress"></p>
-                <p id="gameCost"></p>
-                <p id="prize"></p>
-                <p id="playerCounter"></p>
+                <h5 class="card-title text-center header mb-4">Current Game Information</h5>
+                <p class='details' style="display:inline;">Contract Address:</p>
+                <a id="contractAddress" class='details'
+                href="https://rinkeby.etherscan.io/address/0x190d632dfa964bdf8108d05f87e8e59b97931e7f" target="_blank">
+                </a>
+                <p id="contractAddress" class='details'></p>
+                <p id="gameCost" class='details'></p>
+                <p id="prize" class='details'></p>
+                <p id="playerCounter" class='details'></p>
             </div>
           </div>
           <div class="card mb-4">
             <div class="card-body">
-                <h5 class="card-title text-center">Previous Game Information</h5>
-                <p id="winner"></p>
-                <p id="winningNonce"></p>
-                <p id="blockNumber"></p>
-                <p id="blockHash"></p>
-                <p id="caller"></p>
+                <h5 class="card-title text-center header mb-4">Previous Game Information</h5>
+                <p id="winner" class="details"></p>
+                <p id="winningNonce" class="details"></p>
+                <p id="blockNumber" class="details"></p>
+                <p id="blockHash" class="details"></p>
+                <p id="caller" class="details"></p>
             </div>
           </div>
       </div>
@@ -90,12 +89,12 @@
       <div clas="col-sm-12 col-md-8 col-lg-6 text-center">
         <div class="card mb-4 mt-4 pt-4">
 
-              <h5 class="card-title text-center">Current players</h5>
+              <h5 class="card-title text-center header mb-4">Current players</h5>
               <table class="table" id="players-table">
-                <thead class=thead-dark>
+                <thead>
                   <tr>
-                    <th scope="col">Player address</th>
-                    <th scope="col">nonce</th>
+                    <th scope="col" class="header2">Player address</th>
+                    <th scope="col" class="header2">nonce</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -106,6 +105,56 @@
       <div clas="col"></div>
     </div>
 
+    <!-- Modal -->
+  <div class="modal fade" id="welcomeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Welcome to Hashminer!</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Hashminer is an interactive raffle game that runs on the Ethereum Blockchain.</p>
+          <p>There are no house fees and the only cost to play are blockchain transaction fees</p>
+          <p>To play:</p>
+          <ol>
+            <li>Players can join the game by clicking on a valid area on the map</li>
+            <li id="maxNumberOfPlayers2"></li>
+            <li>Once the game is full, and 3 blocks have been added to the Ethereum Blockchain,
+              any player can reveal the winner by clicking on the "Reveal Winner" button</li>
+            <li id="callerIncentive2"></li>
+          </ol>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+<div class="modal fade" id="revealModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Game is full</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Click to create transaction.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="App.revealWinner(); Client.revealWinner(); return false;"
+        id="reveal-button">Reveal Winner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 </body>
 
@@ -114,12 +163,17 @@
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/bootstrap.min.js"></script>
-<script src="/js/phaser.js"></script>
+<script src="//cdn.jsdelivr.net/npm/phaser@3.10.1/dist/phaser.js"></script>
 <script src="/js/web3.min.js"></script>
 <script src="/js/truffle-contract.js"></script>
 <script src="/js/app.js"></script>
 <script src="/js/client.js"></script>
 <script src="/js/game.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.dev.js"></script>
+<script type="text/javascript">
+    $(window).on('load',function(){
+        $('#welcomeModal').modal('show');
+    });
+</script>
 
 </html>

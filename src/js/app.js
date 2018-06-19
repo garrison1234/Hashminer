@@ -23,7 +23,7 @@ App = {
          App.web3Provider = new Web3.providers.HttpProvider('https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO');
 
          $('#account').text("MetaMask Chrome extension is disabled. Enable it to view account information");
-         $('#account').addClass("text-danger");
+         $('#account').css('color', '#DC3546');
          $('#accountBalance').text("To get MetaMask, click ");
          $('#metaMaskLink').text("here");
          $('#otherTab').prop('disabled', false);
@@ -40,16 +40,19 @@ App = {
          if(err === null) {
            App.account = account;
            $('#account').text("Account: "+ account);
-           $('#account').removeClass("text-danger");
+           $('#account').css('color', '	#5b99a4');
            web3.eth.getBalance(account, function(err, balance) {
              if(err === null) {
-               $('#accountBalance').text("Balance: " + web3.fromWei(balance, "ether") + " ETH");
+               $('#accountBalance').css('color', '	#5b99a4');
+               $('#accountBalance').text("Balance: " + web3.fromWei(balance, "ether") + "Ξ");
              }
            })
          }
        });
        if(App.account == 0){
-         $('#account').addClass("text-danger");
+         $('#account').css('color', '	#FEC106');
+         $('#account').text('');
+         $('#accountBalance').css('color', '	#FEC106');
          $('#accountBalance').text("To view account information, unlock MetaMask and reload site");
        }
      },
@@ -71,6 +74,7 @@ App = {
 
      playGame: function(_nonce) {
        App.contracts.Hashminer.deployed().then(function(instance) {
+         console.log('request transaction with nonce: ' + _nonce);
          return instance.playGame(_nonce, {
            from: App.account,
            value: web3.toWei(50, "finney"),
@@ -102,19 +106,23 @@ App = {
          return instance.getGameInfo();
        }).then(function(gameInformation) {
          // retrieve the game information from the contract.
-         $('#contractAddress').text("Contract Address: " + App.contracts.Hashminer.address)
+         $('#contractAddress').text(App.contracts.Hashminer.address)
          $('#owner').text(gameInformation[0]);
          $('#gameLocked').text(gameInformation[1]);
-         $('#maxNumberOfPlayers').text("The winner can be revealed after " + gameInformation[2] + " players join");
+         $('#maxNumberOfPlayers').text("The game is full once " + gameInformation[2] + " have players joined");
+         $('#maxNumberOfPlayers2').text("The game is full once " + gameInformation[2] + " have players joined");
          $('#playerCounter').text("Players currently in game: " + gameInformation[3]);
-         $('#gameCost').text("Cost to play: " + web3.fromWei(gameInformation[4], "ether") + " ETH");
+         $('#gameCost').text("Cost to play: " + web3.fromWei(gameInformation[4], "ether") + "Ξ");
          $('#blockNumber').text("Number of block that determined winner: " +gameInformation[5]);
          //$('#blockHash').text("Block Hash: " + gameInformation[6].substring(0, 10) + "...");
          $('#winner').text("Previous game winner: " + gameInformation[8]);
          $('#winningNonce').text("Previous game winning nonce: " + gameInformation[7]);
-         $('#prize').text("Current game prize is: " + web3.fromWei(gameInformation[9], "ether") + " ETH");
-         $('#callerIncentive').text("The reward for determining the winner is: " + web3.fromWei(gameInformation[10], "ether") + " ETH");
+         $('#prize').text("Current game prize: " + web3.fromWei(gameInformation[9], "ether") + "Ξ");
+         $('#callerIncentive').text("The reward for determining the winner is "
+           + web3.fromWei(gameInformation[10], "ether") + "Ξ " + "and should be enough to cover the TX fee with moderate gas price.");
          $('#caller').text("Last user to reveal winner: " + gameInformation[11]);
+         $('#callerIncentive2').text("The reward for determining the winner is "
+           + web3.fromWei(gameInformation[10], "ether") + "Ξ " + "and should be enough to cover the TX fee with moderate gas price.");
        }).catch(function(err) {
        });
      },
@@ -126,13 +134,19 @@ App = {
        }).then(function(playersInformation) {
          $('#players-table > tbody').empty();
          for(i = 0; i < (playersInformation[0].length); i++) {
-           $('#players-table > tbody:last-child').append('<tr><td><p>' + playersInformation[0][i] +
-            '</p></td><td><p>' + playersInformation[1][i] + '</p></td></tr>');
+           $('#players-table > tbody:last-child').append('<tr><td><p class="details">' + playersInformation[0][i] +
+            '</p></td><td><p class="details">' + playersInformation[1][i] + '</p></td></tr>');
          }
        }).catch(function(err) {
        });
 
      },
+
+     /*displayModal: function() {
+       console.log('displayModal called');
+       $('#revealModal').modal('show');
+
+     },*/
 
      // listen to events triggered by the contract
      listenToEvents: function() {

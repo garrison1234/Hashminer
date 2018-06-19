@@ -1,14 +1,32 @@
 // Variable overrides
 
-$body-bg: #ced4da;
+$body-bg: #22324A;
 
 .jumbotron {
-  background-color: #ced4da !important;
+  background-color: #22324A !important;
 }
 
 .card {
-  background-color: #ced4da !important;
+  background-color: #22324A !important;
+  font-family: 'Press Start 2P', cursive;;
+  color: #5b99a4 !important;
+  border-color: #9cc1c9 !important;
 }
 
+.row {
+  background-color: #22324A !important;
+}
+
+.header {
+  font-size: 14px;
+}
+
+.header2 {
+  font-size: 12px;
+}
+
+.details {
+  font-size: 10px;
+}
 // Bootstrap Sass files
 @import "node_modules/bootstrap/scss/bootstrap";

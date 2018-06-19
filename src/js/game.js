@@ -2,7 +2,7 @@
 var config = {
     type: Phaser.AUTO,
     width: 960,
-    height: 540,
+    height: 560,
     parent: 'game',
     antialiasing: false,
     physics: {
@@ -23,15 +23,14 @@ var minerCounter = 0;
 var precision = 3;
 var cursorArea;
 var instructionsText;
+var coordinatesText;
 var mapAreaValid;
 var xmouse, ymouse;
-var xmouseClick, ymouseClick;
 var xdestination, ydestination;
 var mouseBlocked;
 var minerMoving;
 var blockedNonces = [];
 var confirmedMiners = [];
-var style = { font: "16px Lucida Console", fill: "#060dff", wordWrap: true, wordWrapWidth: 20, align: "center" };
 var minerText = [];
 var activeMiners = [];
 var mapNonce;
@@ -44,7 +43,28 @@ var confirmedYcoordinates = [];
 // create phaser game instance
 var game = new Phaser.Game(config);
 
+//  The Google WebFont Loader will look for this object, so create it before loading the script.
+WebFontConfig = {
+
+    //  'active' means all requested fonts have finished loading
+    //  We set a 1 second delay before calling 'createText'.
+    //  For some reason if we don't the browser cannot render the text the first time it's created.
+    active: function() { this.time.events.add(Phaser.Timer.SECOND, createText, this); },
+
+    //  The Google Fonts we want to load (specify as many as you like in the array)
+    google: {
+      families: ['Aldrich']
+    }
+
+};
+
   function preload () {
+    this.load.script('webfont', '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js');
+     //this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+     //this.scale.pageAlignHorizontally = true;
+     //this.scale.pageAlignVertically = false;
+     //this.scale.setScreenSize(true);
+
 
     this.load.image('background', '/assets/bgfinal.png');
     this.load.image('cursorAllowed', '/assets/cursorArea.png');
@@ -62,11 +82,14 @@ var game = new Phaser.Game(config);
 
   function create() {
 
-    this.add.image(480, 270, 'background');
+    this.add.image(480, 280, 'background');
 
     cursorArea = this.add.sprite(0, 0, 'cursorBlocked');
 
-    instructionsText = this.add.text(8, 520, '', { font: "12px Lucida Console", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
+    //instructionsText = this.add.text(8, 520, '', { font: "12px Lucida Console", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
+    instructionsText = this.add.text(8, 560, '', { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
+    coordinatesText = this.add.text(8, 8, '', { font: "12px Lucida Console", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
+    coordinatesText = this.add.text(8, 8, '', { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
 
     // create loading animations
     this.anims.create({
@@ -240,31 +263,37 @@ var game = new Phaser.Game(config);
     // display current mouse position and whether position is valid (mapNonce not blocked)
     if (!mapAreaValid){
       instructionsText.destroy();
-      instructionsText = this.add.text(8, 520, 'Invalid location, chose another place to mine',
-      { font: "12px Lucida Console", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
+      instructionsText = this.add.text(360, 545, 'Invalid location, chose another place to mine',
+      { font: "12px Aldrich", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
+
+
       //$('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' invalid location, chose another place to mine');
     } else if (blockedNonces.includes(mapNonce)) {
       instructionsText.destroy()
-      instructionsText = this.add.text(8, 520, 'This location is already taken or pending confirmation, chose another place to mine',
-      { font: "12px Lucida Console", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
+      instructionsText = this.add.text(233, 545, 'This location is already taken or pending confirmation, chose another place to mine',
+      { font: "12px Aldrich", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
       //$('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' This location is already taken or pending confirmation, chose another place to mine');
     } else {
       instructionsText.destroy()
-      instructionsText = this.add.text(8, 520, 'Click to place miner. Place corresponds to nonce: ' + mapNonce,
-      { font: "12px Lucida Console", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
+      instructionsText = this.add.text(335, 545, 'Click to place miner. Place corresponds to nonce: ' + mapNonce,
+      { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
       //$('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' click to place miner');
     }
+
+    coordinatesText.destroy();
+    coordinatesText = this.add.text(8, 8, 'x: ' + xmouse + 'y: ' + ymouse,
+    { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
 
     if ( !mouseBlocked && this.input.activePointer.isDown && !(blockedNonces.includes(mapNonce)) && !gameOver && mapAreaValid) {
       // block mouse
       mouseBlocked = true;
 
       // get destination coordinates from current mouse location
-      xmouseClick = this.input.activePointer.x;
-      ymouseClick = this.input.activePointer.y;
+      //xmouseClick = this.input.activePointer.x;
+      //ymouseClick = this.input.activePointer.y;
 
       // call to send transaction information to server.js
-      Client.playGame(mapNonce, xmouseClick, ymouseClick);
+      Client.playGame(mapNonce, xmouse, ymouse);
 
       // block mouse for 3 seconds to avoid sending transaction twice
       setTimeout(function() { mouseBlocked = false}, 1000);
@@ -284,10 +313,12 @@ var game = new Phaser.Game(config);
 
       if (confirmedMiners[minerCounter].joined == 'before') {
           activeMiners[minerCounter] = this.physics.add.sprite(xdestination, ydestination, ('miner' + ((minerCounter + 1).toString())))
-          minerText[minerCounter] = this.add.text(xdestination, ydestination, newMinerAddress, style);
+          minerText[minerCounter] = this.add.text(xdestination, ydestination, newMinerAddress,
+            { font: "12px Aldrich", fill: "#049AC5", wordWrap: true, wordWrapWidth: 20, align: "center" });
       } else {
           activeMiners[minerCounter] = this.physics.add.sprite(509, 0, ('miner' + ((minerCounter + 1).toString())))
-          minerText[minerCounter] = this.add.text(509, 0, newMinerAddress, style);
+          minerText[minerCounter] = this.add.text(509, 0, newMinerAddress,
+            { font: "12px Aldrich", fill: "	#049AC5", wordWrap: true, wordWrapWidth: 20, align: "center" });
       }
 
       minerMoving = true;
@@ -330,7 +361,9 @@ var game = new Phaser.Game(config);
           movingMiner.anims.play(('right' + ((minerCounter + 1).toString())), true);
         } else {
           movingMiner.setVelocityX(0);
+          console.log('movingMiner.x: ' + movingMiner.x);
           movingMiner.x = Math.round(movingMiner.x);
+          console.log('movingMiner.x: ' + movingMiner.x);
           movingMiner.anims.play(('mine' + ((minerCounter + 1).toString())), true);
           // increase minerCounter
           minerCounter++;
@@ -349,7 +382,7 @@ var game = new Phaser.Game(config);
           instructionsText.destroy();
           instructionsText = this.add.text(8, 520, 'Game finished. ' + 'User ' + confirmedMiners[l].address
           + 'wins with nonce: ' + confirmedMiners[l].nonce + '!',
-          { font: "12px Lucida Console", fill: "##00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
+          { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
           activeMiners[l] = this.physics.add.sprite(confirmedXcoordinates[l], confirmedYcoordinates[l], ('minerwin' + ((l + 1).toString())))
           activeMiners[l].anims.play(('win' + ((l + 1).toString())), true);
         } else {
@@ -380,18 +413,28 @@ var game = new Phaser.Game(config);
 
   }
 
-  /*// set client's ETH address
-  game.setClientAddress = function(_clientAddress) {
-      clientAddress = _clientAddress;
-  }*/
 
-  // function called from app.js to add array of new confirmed player objects{nonce, x, y, address} sent from server.js
+  // add array of new confirmed player objects{address, x, y, nonce} sent from server.js
   game.addNewMiners = function(newPlayers) {
       // add newPlayers array to confirmedMiners array
       Array.prototype.push.apply(confirmedMiners, newPlayers);
   }
 
-  // function called from app.js to block nonces already played, confirmed or in the process of being confirmed
+  /*// add pending miner sprite if nonce has not been taken already
+  game.addPendingSelection = function(newPendingSelection) {
+    // if a pendingMiner with new nonce is not in pendingMiners, push and add sprite
+    var nonceInPendingMiners = false;
+    pendingMiners.forEach(function(element){
+      if(element.nonce == newPendingSelection.nonce){
+        nonceInPendingMiners = true;
+      }
+    });
+    if(!nonceInPendingMiners){
+      pendingMiners.push(newPendingSelection);
+    }
+  }*/
+
+  // block nonces already played, confirmed or in the process of being confirmed
   game.blockNonce = function(blockedNonce) {
     // add nonce to blockedNonces only if not already included
     var nonceIndex = blockedNonces.indexOf(blockedNonce);
