@@ -1,5 +1,8 @@
 .jumbotron {
-  background-color: #22324A !important; }
+  background-color: #22324A !important;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 80px;
+  color: #5b99a4 !important; }
 
 .card {
   background-color: #22324A !important;
