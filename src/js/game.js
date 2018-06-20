@@ -59,7 +59,10 @@ WebFontConfig = {
 };
 
   function preload () {
-    this.load.script('webfont', '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js');
+    this.load.script(
+    'webfont',
+    '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js'
+    );
      //this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
      //this.scale.pageAlignHorizontally = true;
      //this.scale.pageAlignVertically = false;
@@ -88,7 +91,7 @@ WebFontConfig = {
 
     //instructionsText = this.add.text(8, 520, '', { font: "12px Lucida Console", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
     instructionsText = this.add.text(8, 560, '', { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
-    coordinatesText = this.add.text(8, 8, '', { font: "12px Lucida Console", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
+    //coordinatesText = this.add.text(8, 8, '', { font: "12px Lucida Console", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
     coordinatesText = this.add.text(8, 8, '', { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
 
     // create loading animations
@@ -280,9 +283,9 @@ WebFontConfig = {
       //$('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' click to place miner');
     }
 
-    coordinatesText.destroy();
+    /*coordinatesText.destroy();
     coordinatesText = this.add.text(8, 8, 'x: ' + xmouse + 'y: ' + ymouse,
-    { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
+    { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });*/
 
     if ( !mouseBlocked && this.input.activePointer.isDown && !(blockedNonces.includes(mapNonce)) && !gameOver && mapAreaValid) {
       // block mouse

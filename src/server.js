@@ -29,6 +29,7 @@ app.use('/contracts',express.static(__dirname+ '/contracts'));
 
 app.get('/',function(req,res){
   //res.sendFile(__dirname+'/index0.html');
+  //res.sendFile(__dirname+'/game.html');
   res.sendFile(__dirname+'/index.html');
 });
 

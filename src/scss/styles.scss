@@ -31,5 +31,25 @@ $body-bg: #22324A;
 .details {
   font-size: 10px;
 }
+
+.modal-content {
+  background-color: #22324A !important;
+  font-family: 'Press Start 2P', cursive;
+  color: #5b99a4 !important;
+}
+
+.modal-title {
+  background-color: #22324A !important;
+  font-family: 'Press Start 2P', cursive;
+  color: #5b99a4 !important;
+  font-size: 16px;
+}
+
+.modal-body {
+  background-color: #22324A !important;
+  font-family: 'Press Start 2P', cursive;
+  color: #5b99a4 !important;
+  font-size: 12px;
+}
 // Bootstrap Sass files
 @import "node_modules/bootstrap/scss/bootstrap";

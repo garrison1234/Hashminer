@@ -22,7 +22,7 @@ App = {
          //App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
          App.web3Provider = new Web3.providers.HttpProvider('https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO');
 
-         $('#account').text("MetaMask Chrome extension is disabled. Enable it to view account information");
+         $('#account').text("MetaMask Chrome extension is disabled. Enable it to view account information and play.");
          $('#account').css('color', '#DC3546');
          $('#accountBalance').text("To get MetaMask, click ");
          $('#metaMaskLink').text("here");
