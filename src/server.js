@@ -100,7 +100,7 @@ instance.events.LogPlayersReady({}, function(error, event){
   setTimeout(function(){
       console.log("unblock button");
       io.sockets.emit("unblockButton")
-    }, 15000) //HA 3 blocks at 5s per block
+    }, 50000) //HA 3 blocks at 5s per block
 });
 
 instance.events.LogGameFinished({}, function(error, event){

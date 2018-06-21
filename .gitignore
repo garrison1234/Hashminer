@@ -1,7 +1,7 @@
 # Truffle
 
 # Node
-node_module
+/node_modules
 package-lock.json
 
 # Mac specific
