@@ -18,7 +18,8 @@ var config = {
     }
 };
 
-var clientAddress;
+var web3LoadTimer;
+var newPlayers = [];
 var minerCounter = 0;
 var precision = 3;
 var cursorArea;
@@ -30,7 +31,7 @@ var xdestination, ydestination;
 var mouseBlocked;
 var minerMoving;
 var blockedNonces = [];
-var confirmedMiners = [];
+var confirmedMiners = [16];
 var minerText = [];
 var activeMiners = [];
 var mapNonce;
@@ -49,7 +50,7 @@ WebFontConfig = {
     //  'active' means all requested fonts have finished loading
     //  We set a 1 second delay before calling 'createText'.
     //  For some reason if we don't the browser cannot render the text the first time it's created.
-    active: function() { this.time.events.add(Phaser.Timer.SECOND, createText, this); },
+    //active: function() { this.time.events.add(Phaser.Timer.SECOND, createText, this); },
 
     //  The Google Fonts we want to load (specify as many as you like in the array)
     google: {
@@ -172,9 +173,13 @@ WebFontConfig = {
 
     }
 
-    // ask server.js to send current players information
-    clientAddress = App.account;
-    Client.gameLoaded();
+    // start timer to let web3 information load (syncronicity problems with account information)
+    setTimeout( () => {
+      web3LoadTimer = true;
+      // ask server.js to send current players information
+      Client.gameLoaded();
+    }, 1000);
+
   }
 
   function update() {
@@ -268,8 +273,6 @@ WebFontConfig = {
       instructionsText.destroy();
       instructionsText = this.add.text(360, 545, 'Invalid location, chose another place to mine',
       { font: "12px Aldrich", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
-
-
       //$('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' invalid location, chose another place to mine');
     } else if (blockedNonces.includes(mapNonce)) {
       instructionsText.destroy()
@@ -291,10 +294,6 @@ WebFontConfig = {
       // block mouse
       mouseBlocked = true;
 
-      // get destination coordinates from current mouse location
-      //xmouseClick = this.input.activePointer.x;
-      //ymouseClick = this.input.activePointer.y;
-
       // call to send transaction information to server.js
       Client.playGame(mapNonce, xmouse, ymouse);
 
@@ -302,79 +301,82 @@ WebFontConfig = {
       setTimeout(function() { mouseBlocked = false}, 1000);
     }
 
-    if ( (confirmedMiners.length > minerCounter) && !minerMoving && !gameOver ) {
-
+    // move each element of newPlayers to confirmedMiners and create sprites and text for each
+    newPlayers.forEach( (element, index) => {
+      confirmedMiners[minerCounter] = {};
       // define the destination coordinates
-      xdestination = confirmedMiners[minerCounter].x;
-      ydestination = confirmedMiners[minerCounter].y;
-      var newMinerAddress;
-      if (confirmedMiners[minerCounter].address.toLowerCase() == clientAddress ) {
-          newMinerAddress = 'You';
+      confirmedMiners[minerCounter].xdestination = element.x;
+      confirmedMiners[minerCounter].ydestination = element.y;
+      if (element.address.toLowerCase() == App.account ) {
+          confirmedMiners[minerCounter].address = 'You';
       } else {
-          newMinerAddress = confirmedMiners[minerCounter].address.substring(0, 6) + '...';
+          confirmedMiners[minerCounter].address = element.address.substring(0, 6) + '...';
       }
 
-      if (confirmedMiners[minerCounter].joined == 'before') {
-          activeMiners[minerCounter] = this.physics.add.sprite(xdestination, ydestination, ('miner' + ((minerCounter + 1).toString())))
-          minerText[minerCounter] = this.add.text(xdestination, ydestination, newMinerAddress,
-            { font: "12px Aldrich", fill: "#049AC5", wordWrap: true, wordWrapWidth: 20, align: "center" });
+      if (element.joined == 'before') {
+        confirmedMiners[minerCounter].moving = false;
+        confirmedMiners[minerCounter].sprite = this.physics.add.sprite(element.x, element.y, ('miner' + ((minerCounter + 1).toString())))
+        confirmedMiners[minerCounter].text = this.add.text((element.x + 12), element.y, confirmedMiners[minerCounter].address,
+          { font: "12px Aldrich", fill: "#049AC5", wordWrap: true, wordWrapWidth: 20, align: "center" });
+        confirmedMiners[minerCounter].sprite.anims.play(('mine' + ((index + 1).toString())), true);
       } else {
-          activeMiners[minerCounter] = this.physics.add.sprite(509, 0, ('miner' + ((minerCounter + 1).toString())))
-          minerText[minerCounter] = this.add.text(509, 0, newMinerAddress,
-            { font: "12px Aldrich", fill: "	#049AC5", wordWrap: true, wordWrapWidth: 20, align: "center" });
+        confirmedMiners[minerCounter].moving = true;
+        confirmedMiners[minerCounter].sprite = this.physics.add.sprite(509, 0, ('miner' + ((minerCounter + 1).toString())))
+        confirmedMiners[minerCounter].text = this.add.text(509, 0, confirmedMiners[minerCounter].address,
+          { font: "12px Aldrich", fill: "	#049AC5", wordWrap: true, wordWrapWidth: 20, align: "center" });
       }
+      newPlayers.splice(index, 1);
+      console.log('confirmedMiners[' + minerCounter + ']: ' + JSON.stringify(confirmedMiners[minerCounter]));
+      minerCounter++;
+    });
 
-      minerMoving = true;
-    }
-
-    //animate miner moving to its destination
-    if (minerMoving) {
-      // save moving miner object in movingMiner
-      var movingMiner = activeMiners[minerCounter];
-
-      // animate miner text along with the miner sprite
-      minerText[minerCounter].x = Math.floor(movingMiner.x - 14);
-      minerText[minerCounter].y = Math.floor(movingMiner.y + 12);
+    //animate all miners to their destinations
+    confirmedMiners.forEach( (element, index) => {
+      if(element.moving){
+        // animate miner text along with the miner sprite
+        element.text.x = Math.floor(element.sprite.x + 12);
+        element.text.y = Math.floor(element.sprite.y);
 
 
-      //move miner to desired x coordinate
-      if ( (Math.abs(movingMiner.y - ydestination)) > precision ) {
-        movingMiner.setVelocityX(0);
-        if ( (movingMiner.y - ydestination) > precision) {
-          movingMiner.setVelocityY(-80);
-          movingMiner.anims.play(('up' + ((minerCounter + 1).toString())), true);
-        } else if ( (movingMiner.y - ydestination) < -precision) {
-          movingMiner.setVelocityY(80);
-          movingMiner.anims.play(('down' + ((minerCounter + 1).toString())), true);
-        } else {
-          movingMiner.setVelocityY(0);
-          movingMiner.anims.play(('up' + ((minerCounter + 1).toString())), false);
-          movingMiner.anims.play(('down' + ((minerCounter + 1).toString())), false);
-          movingMiner.y = Math.round(movingMiner.y);
+        //move miner to desired x coordinate
+        if ( (Math.abs(element.sprite.y - element.ydestination)) > precision ) {
+          element.sprite.setVelocityX(0);
+          if ( (element.sprite.y - element.ydestination) > precision) {
+            element.sprite.setVelocityY(-80);
+            element.sprite.anims.play(('up' + ((index + 1).toString())), true);
+          } else if ( (element.sprite.y - element.ydestination) < -precision) {
+            element.sprite.setVelocityY(80);
+            element.sprite.anims.play(('down' + ((index + 1).toString())), true);
+          } else {
+            element.sprite.setVelocityY(0);
+            element.sprite.anims.play(('up' + ((index + 1).toString())), false);
+            element.sprite.anims.play(('down' + ((index + 1).toString())), false);
+            element.sprite.y = Math.round(element.sprite.y);
+          }
+        }
+        //move miner to desired y coordinate
+        if ( (Math.abs(element.sprite.y - element.ydestination)) < precision ) {
+          element.sprite.setVelocityY(0);
+          if ((element.sprite.x - element.xdestination) > precision) {
+            element.sprite.setVelocityX(-80);
+            element.sprite.anims.play(('left' + ((index + 1).toString())), true);
+          } else if ((element.sprite.x - element.xdestination) < -precision) {
+            element.sprite.setVelocityX(80);
+            element.sprite.anims.play(('right' + ((index + 1).toString())), true);
+          } else {
+            element.sprite.setVelocityX(0);
+            //console.log('element.sprite.x: ' + element.sprite.x);
+            element.sprite.x = Math.round(element.sprite.x);
+            element.sprite.y = Math.round(element.sprite.y);
+            //console.log('element.sprite.x: ' + element.sprite.x);
+            element.sprite.anims.play(('mine' + ((index + 1).toString())), true);
+            // miner stops moving
+            element.moving = false;
+          }
         }
       }
-      //move miner to desired y coordinate
-      if ( (Math.abs(movingMiner.y - ydestination)) < precision ) {
-        movingMiner.setVelocityY(0);
-        if ((movingMiner.x - xdestination) > precision) {
-          movingMiner.setVelocityX(-80);
-          movingMiner.anims.play(('left' + ((minerCounter + 1).toString())), true);
-        } else if ((movingMiner.x - xdestination) < -precision) {
-          movingMiner.setVelocityX(80);
-          movingMiner.anims.play(('right' + ((minerCounter + 1).toString())), true);
-        } else {
-          movingMiner.setVelocityX(0);
-          console.log('movingMiner.x: ' + movingMiner.x);
-          movingMiner.x = Math.round(movingMiner.x);
-          console.log('movingMiner.x: ' + movingMiner.x);
-          movingMiner.anims.play(('mine' + ((minerCounter + 1).toString())), true);
-          // increase minerCounter
-          minerCounter++;
-          // miner stops moving
-          minerMoving = false;
-        }
-      }
-    }
+    });
+
 
     // Replace all miners with losers/winning animations
     if (gameOver) {
@@ -418,24 +420,11 @@ WebFontConfig = {
 
 
   // add array of new confirmed player objects{address, x, y, nonce} sent from server.js
-  game.addNewMiners = function(newPlayers) {
-      // add newPlayers array to confirmedMiners array
-      Array.prototype.push.apply(confirmedMiners, newPlayers);
+  game.addNewMiners = function(receivedPlayers) {
+      // add receivedPlayers array to newPlayers array
+      Array.prototype.push.apply(newPlayers, receivedPlayers);
+      console.log(newPlayers);
   }
-
-  /*// add pending miner sprite if nonce has not been taken already
-  game.addPendingSelection = function(newPendingSelection) {
-    // if a pendingMiner with new nonce is not in pendingMiners, push and add sprite
-    var nonceInPendingMiners = false;
-    pendingMiners.forEach(function(element){
-      if(element.nonce == newPendingSelection.nonce){
-        nonceInPendingMiners = true;
-      }
-    });
-    if(!nonceInPendingMiners){
-      pendingMiners.push(newPendingSelection);
-    }
-  }*/
 
   // block nonces already played, confirmed or in the process of being confirmed
   game.blockNonce = function(blockedNonce) {

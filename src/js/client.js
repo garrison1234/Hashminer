@@ -4,7 +4,7 @@ Client.socket = io.connect();
 
 // received upon connection to server.js, passes array of current confirmed and pending miners
 Client.socket.on('allPlayers',function(_newPlayers){
-  console.log('received allPlayers from server: ' + _newPlayers);
+  console.log('received allPlayers from server: ' + JSON.stringify(_newPlayers));
     var newConfirmedMiners = [];
     for (let element of _newPlayers) {
       // block all nonces if not already blocked
