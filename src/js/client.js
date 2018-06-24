@@ -15,7 +15,6 @@ Client.socket.on('allPlayers',function(_newPlayers){
         newConfirmedMiners.push(element);
       }
     }
-    console.log('newConfirmedMiners: ' + newConfirmedMiners);
     // pass newConfirmedMiners to game
     game.addNewMiners(newConfirmedMiners);
 });
@@ -48,12 +47,12 @@ Client.socket.on('newConfirmed',function(_newPlayer){
 
 Client.socket.on('unblockButton',function(){
   console.log('received unblockButton from server.js: ');
-    $('#revealModal').modal('show');
+  App.revealWinnerModalShow();
 });
 
 Client.socket.on('blockButton',function(){
   console.log('received blockButton from server.js: ');
-    $('#reveal-button').prop('disabled', true);
+    App.revealWinnerModalHide();
 });
 
 Client.gameLoaded = function() {

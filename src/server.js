@@ -11,6 +11,8 @@ var fs = require("fs");
 //var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545")); // Ganache
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO")); // rinkeby HttpProvider
 const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws')); // rinkeby WebsocketProvider (still in Beta)
+
+// check if socket provider subscription is working
 const subscription = web3.eth.subscribe('newBlockHeaders', (error, blockHeader) => {
   if (error) return console.error(error);
   console.log('Successfully subscribed!');
@@ -70,8 +72,8 @@ instance.events.LogPlayerAdded({}, function(error, event){
   console.log('playEvent.address: ' + playEvent.address);
   console.log('playEvent.nonce: ' + playEvent.nonce);
   console.log('playEvent.counter: ' + playEvent.counter);
-  console.log('pending timer cancelled for nonce: ' + playEvent.nonce);
   clearTimeout(pendingTimer[playEvent.nonce]);
+  console.log('if there was a timer for nonce: ' + playEvent.nonce + ', it is now cancelled');
   var result = helper.parsePlayEvent(playEvent, pendingSelections, confirmedSelections);
   pendingSelections = result[0]
   confirmedSelections = result[1]
@@ -100,7 +102,7 @@ instance.events.LogPlayersReady({}, function(error, event){
   setTimeout(function(){
       console.log("unblock button");
       io.sockets.emit("unblockButton")
-    }, 50000) //HA 3 blocks at 5s per block
+    }, 50000) //HA 3 blocks at 15s per block
 });
 
 instance.events.LogGameFinished({}, function(error, event){
@@ -160,7 +162,7 @@ io.on('connection',function(socket){
         globalTimer = setTimeout(function(){
           console.log("unblock button");
           io.sockets.emit("unblockButton")
-        }, 10000)
+        }, 60000)
       });
   });
 

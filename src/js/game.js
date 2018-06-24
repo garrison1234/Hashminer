@@ -27,19 +27,14 @@ var instructionsText;
 var coordinatesText;
 var mapAreaValid;
 var xmouse, ymouse;
-var xdestination, ydestination;
 var mouseBlocked;
-var minerMoving;
 var blockedNonces = [];
 var confirmedMiners = [16];
-var minerText = [];
-var activeMiners = [];
 var mapNonce;
+var gameFull = false;
 var gameOver = false;
 var deletingMiners = false;
 var winningNonce;
-var confirmedXcoordinates = [];
-var confirmedYcoordinates = [];
 
 // create phaser game instance
 var game = new Phaser.Game(config);
@@ -60,15 +55,11 @@ WebFontConfig = {
 };
 
   function preload () {
+
     this.load.script(
     'webfont',
     '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js'
     );
-     //this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-     //this.scale.pageAlignHorizontally = true;
-     //this.scale.pageAlignVertically = false;
-     //this.scale.setScreenSize(true);
-
 
     this.load.image('background', '/assets/bgfinal.png');
     this.load.image('cursorAllowed', '/assets/cursorArea.png');
@@ -90,12 +81,10 @@ WebFontConfig = {
 
     cursorArea = this.add.sprite(0, 0, 'cursorBlocked');
 
-    //instructionsText = this.add.text(8, 520, '', { font: "12px Lucida Console", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
     instructionsText = this.add.text(8, 560, '', { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
-    //coordinatesText = this.add.text(8, 8, '', { font: "12px Lucida Console", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
     coordinatesText = this.add.text(8, 8, '', { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
 
-    // create loading animations
+    /*// create loading animations
     this.anims.create({
         key: ('playerMinerLoading'),
         frames: this.anims.generateFrameNumbers('loading', { start: 0, end: 3 }),
@@ -115,7 +104,7 @@ WebFontConfig = {
         frames: this.anims.generateFrameNumbers('loading', { start: 8, end: 11 }),
         frameRate: 10,
         repeat: -1
-    });
+    });*/
 
     // create miner animations
     for (var j = 1; j <= 16; j++){
@@ -269,28 +258,23 @@ WebFontConfig = {
     }
 
     // display current mouse position and whether position is valid (mapNonce not blocked)
-    if (!mapAreaValid){
-      instructionsText.destroy();
-      instructionsText = this.add.text(360, 545, 'Invalid location, chose another place to mine',
-      { font: "12px Aldrich", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
-      //$('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' invalid location, chose another place to mine');
-    } else if (blockedNonces.includes(mapNonce)) {
-      instructionsText.destroy()
-      instructionsText = this.add.text(233, 545, 'This location is already taken or pending confirmation, chose another place to mine',
-      { font: "12px Aldrich", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
-      //$('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' This location is already taken or pending confirmation, chose another place to mine');
-    } else {
-      instructionsText.destroy()
-      instructionsText = this.add.text(335, 545, 'Click to place miner. Place corresponds to nonce: ' + mapNonce,
-      { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
-      //$('#mouse-position').text('Mouse position: x='+ xmouse + ' y=' + ymouse + ' click to place miner');
+    if (!gameOver && !gameFull) {
+      if (!mapAreaValid){
+        instructionsText.destroy();
+        instructionsText = this.add.text(360, 545, 'Invalid location. Choose another place to mine',
+        { font: "12px Aldrich", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
+      } else if (blockedNonces.includes(mapNonce)) {
+        instructionsText.destroy()
+        instructionsText = this.add.text(233, 545, 'This location is already taken or pending confirmation. choose another location to mine',
+        { font: "12px Aldrich", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
+      } else {
+        instructionsText.destroy()
+        instructionsText = this.add.text(335, 545, 'Click to place miner. This location corresponds to nonce: ' + mapNonce,
+        { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
+      }
     }
 
-    /*coordinatesText.destroy();
-    coordinatesText = this.add.text(8, 8, 'x: ' + xmouse + 'y: ' + ymouse,
-    { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });*/
-
-    if ( !mouseBlocked && this.input.activePointer.isDown && !(blockedNonces.includes(mapNonce)) && !gameOver && mapAreaValid) {
+    if ( !mouseBlocked && this.input.activePointer.isDown && !(blockedNonces.includes(mapNonce)) && !gameOver && !deletingMiners && mapAreaValid) {
       // block mouse
       mouseBlocked = true;
 
@@ -307,27 +291,31 @@ WebFontConfig = {
       // define the destination coordinates
       confirmedMiners[minerCounter].xdestination = element.x;
       confirmedMiners[minerCounter].ydestination = element.y;
+      confirmedMiners[minerCounter].nonce = element.nonce;
+      confirmedMiners[minerCounter].address = element.address;
       if (element.address.toLowerCase() == App.account ) {
-          confirmedMiners[minerCounter].address = 'You';
+          confirmedMiners[minerCounter].addressShort = 'You';
       } else {
-          confirmedMiners[minerCounter].address = element.address.substring(0, 6) + '...';
+          confirmedMiners[minerCounter].addressShort = element.address.substring(0, 6) + '...';
       }
 
       if (element.joined == 'before') {
         confirmedMiners[minerCounter].moving = false;
         confirmedMiners[minerCounter].sprite = this.physics.add.sprite(element.x, element.y, ('miner' + ((minerCounter + 1).toString())))
-        confirmedMiners[minerCounter].text = this.add.text((element.x + 12), element.y, confirmedMiners[minerCounter].address,
+        confirmedMiners[minerCounter].text = this.add.text((element.x + 12), element.y, confirmedMiners[minerCounter].addressShort,
           { font: "12px Aldrich", fill: "#049AC5", wordWrap: true, wordWrapWidth: 20, align: "center" });
         confirmedMiners[minerCounter].sprite.anims.play(('mine' + ((index + 1).toString())), true);
       } else {
         confirmedMiners[minerCounter].moving = true;
         confirmedMiners[minerCounter].sprite = this.physics.add.sprite(509, 0, ('miner' + ((minerCounter + 1).toString())))
-        confirmedMiners[minerCounter].text = this.add.text(509, 0, confirmedMiners[minerCounter].address,
+        confirmedMiners[minerCounter].text = this.add.text(509, 0, confirmedMiners[minerCounter].addressShort,
           { font: "12px Aldrich", fill: "	#049AC5", wordWrap: true, wordWrapWidth: 20, align: "center" });
       }
       newPlayers.splice(index, 1);
-      console.log('confirmedMiners[' + minerCounter + ']: ' + JSON.stringify(confirmedMiners[minerCounter]));
       minerCounter++;
+      if(minerCounter == 16) {
+        gameFull = true;
+      }
     });
 
     //animate all miners to their destinations
@@ -376,54 +364,59 @@ WebFontConfig = {
         }
       }
     });
-
+    if (gameFull && !gameOver) {
+      instructionsText.destroy();
+      instructionsText = this.add.text(480, 520, 'Game is full.',
+      { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
+    }
 
     // Replace all miners with losers/winning animations
     if (gameOver) {
-      for (var l = 0; l <= 15; l++) {
-        var element = activeMiners[l];
-        element.disableBody(true, true);
-        if (confirmedMiners[l].nonce == winningNonce) {
-          instructionsText.destroy();
-          instructionsText = this.add.text(8, 520, 'Game finished. ' + 'User ' + confirmedMiners[l].address
-          + 'wins with nonce: ' + confirmedMiners[l].nonce + '!',
+      gameFull = false;
+      instructionsText.destroy();
+      confirmedMiners.forEach( (element, index) => {
+        element.sprite.disableBody(true, true);
+        if(element.nonce == winningNonce) {
+          instructionsText = this.add.text(8, 520, 'Game finished. ' + 'User ' + element.address
+          + 'wins with nonce: ' + element.nonce + '!',
           { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
-          activeMiners[l] = this.physics.add.sprite(confirmedXcoordinates[l], confirmedYcoordinates[l], ('minerwin' + ((l + 1).toString())))
-          activeMiners[l].anims.play(('win' + ((l + 1).toString())), true);
+          element.sprite = this.physics.add.sprite(element.xdestination, element.ydestination, ('minerwin' + ((index + 1).toString())))
+          console.log('winning sprite:' + element.sprite);
+          element.sprite.anims.play(('win' + ((index + 1).toString())), true);
         } else {
-          activeMiners[l] = this.physics.add.sprite(confirmedXcoordinates[l], confirmedYcoordinates[l], ('miner' + ((l + 1).toString())))
-          activeMiners[l].anims.play(('lose' + ((l + 1).toString())), true);
+          console.log('losing sprite:' + element.sprite);
+          element.sprite = this.physics.add.sprite(element.xdestination, element.ydestination, ('miner' + ((index + 1).toString())))
+          element.sprite.anims.play(('lose' + ((index + 1).toString())), true);
         }
-      }
-      setTimeout(function() { deletingMiners = true}, 10000);
+      });
+      setTimeout(function() { deletingMiners = true}, 15000);
       gameOver = false;
     }
 
     // delete all sprites from map
     if (deletingMiners) {
-      for (var l = 0; l <= 15; l++) {
-        var element = activeMiners[l];
-        var elementText = minerText[l];
-        element.disableBody(true, true);
-        elementText.destroy();
-      }
+      confirmedMiners.forEach( element => {
+        element.sprite.disableBody(true, true);
+        element.text.destroy();
+      });
       minerCounter = 0;
       blockedNonces = [];
       confirmedMiners = [];
-      activeMiners = [];
-      confirmedXcoordinates = [];
-      confirmedYcoordinates = [];
       deletingMiners = false;
+      gameFull = false;
     }
 
   }
-
 
   // add array of new confirmed player objects{address, x, y, nonce} sent from server.js
   game.addNewMiners = function(receivedPlayers) {
       // add receivedPlayers array to newPlayers array
       Array.prototype.push.apply(newPlayers, receivedPlayers);
       console.log(newPlayers);
+      // add new players to blockedNonces, if they weren't already
+      receivedPlayers.forEach( element => {
+        blockedNonces.push(parseInt(element.nonce));
+      });
   }
 
   // block nonces already played, confirmed or in the process of being confirmed
@@ -447,14 +440,8 @@ WebFontConfig = {
     console.log('blockedNonces: ' + blockedNonces);
   }
 
-  game.unblockMouse = function() {
-    mouseBlocked = false;
-  }
-
   game.animateFinal = function(_winningNonce) {
     console.log('game.animateFinal, _winningNonce:' + _winningNonce);
-    confirmedXcoordinates = confirmedMiners.map(a => a.x);
-    confirmedYcoordinates = confirmedMiners.map(a => a.y);
     winningNonce = _winningNonce;
     gameOver = true;
   }

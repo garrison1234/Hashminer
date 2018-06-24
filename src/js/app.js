@@ -2,10 +2,11 @@ App = {
      web3Provider: null,
      contracts: {},
      account: 0x0,
+     currentPlayers: null,
 
      init: function() {
         // block revealWinner button upon loading
-        $('#reveal-button').prop('disabled', true);
+        //$('#reveal-button').prop('disabled', true);
         return App.initWeb3();
      },
 
@@ -132,6 +133,7 @@ App = {
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.getPlayersInfo();
        }).then(function(playersInformation) {
+         App.currentPlayers = playersInformation[0];
          $('#players-table > tbody').empty();
          for(i = 0; i < (playersInformation[0].length); i++) {
            $('#players-table > tbody:last-child').append('<tr><td><p class="details">' + playersInformation[0][i] +
@@ -142,11 +144,19 @@ App = {
 
      },
 
-     /*displayModal: function() {
-       console.log('displayModal called');
-       $('#revealModal').modal('show');
+     // display window with reveal-winner button
+     revealWinnerModalShow: function() {
+       // check that user account is playing
+       if(App.currentPlayers.indexOf(App.account) != -1){
+        $('#revealModal').modal('show');
+       }
+     },
 
-     },*/
+     // display window with reveal-winner button
+     revealWinnerModalHide: function() {
+       // check that user account is playing
+      $('#revealModal').modal('hide');
+     },
 
      // listen to events triggered by the contract
      listenToEvents: function() {
@@ -169,7 +179,7 @@ App = {
        instance.LogPlayersReady({}, {}).watch(function(error, event) {
          if (!error) {
            // update game information
-           $('#reveal-button').prop('disabled', false);
+           //$('#reveal-button').prop('disabled', false);
            App.displayGameInfo();
          } else {
            console.error(error);
@@ -181,7 +191,7 @@ App = {
         if (!error) {
           console.log('received game finished event');
           console.log('event information: ' + JSON.stringify(event.args._winningNonce));
-          $('#reveal-button').prop('disabled', true);
+          //$('#reveal-button').prop('disabled', true);
           // update account, game and players information
           App.displayPlayersInfo();
           App.displayGameInfo();

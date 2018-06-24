@@ -92,25 +92,31 @@ module.exports = {
       }
       return;
     }
+    console.log('confirmedSelections: ' + confirmedSelections);
+    console.log('playEvent: ' + playEvent);
     var noRepetition = function () {
+      console.log('confirmedSelections.length: ' + confirmedSelections.length);
       for(var i = 0; i < confirmedSelections.length; i++) {
+        console.log('confirmedSelections[' + i + '].address: ' + confirmedSelections[i].address);
+        console.log('playEvent.address: ' + playEvent.address);
+        console.log('confirmedSelections[' + i + '].nonce: ' + confirmedSelections[i].nonce);
+        console.log('playEvent.nonce: ' + playEvent.nonce);
         if(confirmedSelections[i].address == playEvent.address && confirmedSelections[i].nonce === playEvent.nonce ){
           return false
         }
       }
       return true
     }
+    console.log('pendingSelections' + pendingSelections);
     var removePendingErrors = function () {
-      for(var i =0; i<pendingSelections.length; i++) {
+      for(var i =0; i < pendingSelections.length; i++) {
         if(pendingSelections[i].nonce == playEvent.nonce) {
           pendingSelections.splice(i,1)
         }
       }
     }
-
-
-
     var modifyArrays = function () {
+      console.log('modifyArrays function');
       if(noRepetition()) {
       var index = findIndexPending()
       console.log('index: ' + index);
@@ -121,6 +127,7 @@ module.exports = {
       } else {
         console.log('playEvent.nonce: ' + playEvent.nonce);
         coor = getXandY(Number(playEvent.nonce));
+        console.log('nonce:' + playEvent.nonce);
         console.log('coor:' + coor);
         confirmedSelections.push({address : playEvent.address, x:coor[0], y:coor[1], nonce : playEvent.nonce})
       }}
