@@ -36,7 +36,7 @@
         HASHMINΞR
       </div>
       </nav>
-      <div class="row">
+      <div class="row ">
         <div class="col-sm-12 col-md-3 col-lg-2">
           <div class="card mb-4">
             <div class="card-body">
@@ -46,21 +46,18 @@
                 <a id="metaMaskLink" class='details' href="https://metamask.io/" target="_blank" style="display:inline;"></a>
             </div>
           </div>
-          <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title text-center header mb-4">Game Instructions</h5>
-                <ol class='details'>
-                  <li>Click on a valid area on map to join game</li>
-                  <li id="maxNumberOfPlayers"></li>
-                  <li>Once the game is full, any player can reveal the winner by clicking on the "Reveal Winner" button</li>
-                  <li id="callerIncentive"></li>
-                </ol>
-            </div>
-          </div>
+          <button type="button" class="btn btn-primary mb-4" data-toggle="modal" data-target="#instructionsModal">
+            Game Instructions
+          </button>
+          <button type="button" class="btn btn-primary mb-4" data-toggle="modal" data-target="#faqModal">
+            FAQ
+          </button>
           <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title text-center header mb-4">Donations</h5>
-                <p id="account" class='details'>0x2932b7a2355d6fecc4b5c0b6bd44cc31df247a2e</p>
+                <p id="account" class='details'>ETH: 0x2932b7a2355d6fecc4b5c0b6bd44cc31df247a2e</p>
+                <p id="account" class='details'>BTC: 3E9n1w3hhbEgxtYzfFMMEFhnMtNFYQDtYA</p>
+                <p id="account" class='details'>LTC: La6f2hg6sVpZbbhq893LAQRFS99NzVLSKc</p>
             </div>
           </div>
         </div>
@@ -114,7 +111,7 @@
       <div clas="col"></div>
     </div>
 
-    <!-- Modal -->
+    <!-- Welcome Modal -->
   <div class="modal fade" id="welcomeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -125,15 +122,13 @@
           </button>
         </div>
         <div class="modal-body">
-          <p>Hashminer is an interactive raffle game that runs on the Ethereum Blockchain.</p>
-          <p>There are no house fees and the only cost to play are blockchain transaction fees</p>
+          <p>Place your miner on the map and win real Ether!</p>
+          <p>Hashminer is an interactive raffle game with no house fees. The cost to play is Ξ0.05 plus transaction fees.</p>
           <p>To play:</p>
           <ol>
-            <li>Clicking on a valid area on the map and confirm the transaction on MetaMask to join game</li>
-            <li id="maxNumberOfPlayers2"></li>
-            <li>Once the game is full, and 3 blocks have been added to the Ethereum Blockchain,
-              any player can reveal the winner by clicking on the "Reveal Winner" button</li>
-            <li id="callerIncentive2"></li>
+            <li>Click on a valid area on the map and confirm the transaction on MetaMask to join game</li>
+            <li>The game is full once 16 players have joined</li>
+            <li>Afterwards, the winning player is revealed and the prize of Ξ0.78 is transferred automatically!</li>
           </ol>
         </div>
         <div class="modal-footer">
@@ -143,7 +138,87 @@
     </div>
   </div>
 
-  <!-- Modal -->
+  <!-- Game instructions Modal -->
+<div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Game Instructions</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Place your miner on the map and win real Ether!</p>
+        <p>Hashminer is an interactive raffle game with no house fees. The cost to play is Ξ0.05 plus transaction fees.</p>
+        <p>To play:</p>
+        <ol>
+          <li>Click on a valid area on the map and confirm the transaction on MetaMask to join game</li>
+          <li>The game is full once 16 players have joined</li>
+          <li>Once the game is full, any player can reveal the winner and the prize of Ξ0.798 is transferred automatically!</li>
+        </ol>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ Modal -->
+<div class="modal fade" id="faqModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal-dialog" role="document">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="exampleModalLabel">FAQ</h5>
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <ul>
+        <li><b>How does the game work?</b></li>
+        <dd class="details">The map is divided into 16 areas. Every time a miner is added to the map by confirming the transaction through
+          MetaMask, the corresponding area number is sent to the Ethereum blockchain and is stored in a smart contract. This continues until
+          16 players have joined. The winning area number is then determined by the hash of the 3rd block after the last player joined. Anyone can reveal
+        the winner by clicking the "Reveal Winner" button that appears, and then confirming the transaction through MetaMask. The transaction fee is
+        repaid automatically.</dd>
+        <li><b>Are there really no house fees such as the ones in casinos?</b></li>
+        <dd class="details">- This game has 0 house fees since the creator of the game does not receive a fraction prize (can be verified in the smart contract code).
+          Almost the entirety of the funds collected from the players is collected by the winner, with only a small amount (Ξ0.002) being transferred
+          to the address that calls the function to reveal the winner in order to recover the transaction fee of doing so. </dd>
+        <li><b>Can a truly random number be produced on the Ethereum blockchain?</b></li>
+        <dd class="details">- As mentioned above, the winner of the game is determined by the hash of the 3rd block published after the last player joins the game.
+        This hash incredibly difficult to predict and the consensus algorithm of the blockchain depends on it. However, a possible issue is that
+      a miner on the Ethereum blockchain could choose not to publish a block if the outcome does not benefit them. Still, they would lose the
+    block reward in doing so. The following should hold so that even a dishonest miner is dissuaded from cheating:</dd>
+        <dd class="details">Cost to Play < (Block Reward - Uncle Reward)</dd>
+        <li><b>Is this an open source project?</b></li>
+        <dd class="details">- Yes. You can find all the source code <a class='details' href="https://github.com/garrison1234/Hashminer" target="_blank">here</a> </dd>
+        <li><b>What was the motivation for this project</b></li>
+        <dd class="details">I wanted to learn how to develop a real-world application on the Ethereum Blockchain. I found many betting games but none with a
+        graphical interface. Also, I believe that thanks to the open blockchain, casino fees will disappear in the future. By making this open source,
+      it is also my goal to contribute to the Ethereum space.</dd>
+        <li><b>Who created this?</b></li>
+        <dd class="details">This project was created by Hector Andrade, with the help of Jonathan Fillion. I am very interested in collaborating
+        in other projects. You can contact me at
+        <script language="JavaScript">
+        var username = "handrade88";
+        var hostname = "gmail.com";
+        var linktext = username + "@" + hostname ;
+        document.write("<a href='" + "mail" + "to:" + username + "@" + hostname + "'>" + linktext + ".</a>");
+        </script>
+        </dd>
+      </ul>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+    </div>
+  </div>
+</div>
+</div>
+
+  <!-- Reveal Modal -->
 <div class="modal fade" id="revealModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">

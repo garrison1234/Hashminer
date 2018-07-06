@@ -269,7 +269,7 @@ WebFontConfig = {
         { font: "12px Aldrich", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
       } else {
         instructionsText.destroy()
-        instructionsText = this.add.text(335, 545, 'Click to place miner. This location corresponds to nonce: ' + mapNonce,
+        instructionsText = this.add.text(335, 545, 'Map area: ' + mapNonce + '. Click to place miner!',
         { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
       }
     }

@@ -19,23 +19,13 @@ contract Hashminer {
   bytes32 blockHash;
   uint winningNonce;
   address winner;
-  uint prize = 750 finney;
+  uint prize = 798 finney;
   uint callerIncentive = 2 finney;
   address caller;
 
   // events
   event LogGameLock(
     bool _gameLocked
-  );
-  event LogGameOptionsSet(
-    uint _maxNumberOfPlayers,
-    uint _gameCost,
-    uint _prize,
-    uint _callerIncentive
-  );
-  event LogHouseWithdraw(
-    address _wallet,
-    uint _withdrawAmount
   );
   event LogPlayerAdded(
     uint _playerCounter,
@@ -78,36 +68,6 @@ contract Hashminer {
     // lock/unlock game
     gameLocked = !gameLocked;
     LogGameLock(gameLocked);
-  }
-
-  // change game settings
-  function setGameOptions(uint _maxNumberOfPlayers, uint _gameCost,
-    uint _prize, uint _callerIncentive) public {
-    // only allow the contract owner to make changes
-    require(msg.sender == owner);
-
-    // check that game is locked and not active. This ensures game rules are not changed during game
-    require(gameLocked && (playerCounter == 0));
-
-    // change game settings
-    maxNumberOfPlayers = _maxNumberOfPlayers;
-    gameCost = _gameCost;
-    prize = _prize;
-    callerIncentive = _callerIncentive;
-    LogGameOptionsSet(maxNumberOfPlayers, gameCost, prize, callerIncentive);
-  }
-
-  // transfer funds from house to given an address
-  function houseWithdraw(uint _withdrawAmount, address _wallet) public {
-    // only allow the contract owner to withdraw
-    require(msg.sender == owner);
-
-    // check that game is locked and not active. This ensures there will be enough funds to pay the current game winner
-    require(gameLocked && (playerCounter == 0));
-
-    // transfer to  address _wallet
-    _wallet.transfer(_withdrawAmount);
-    LogHouseWithdraw(_wallet, _withdrawAmount);
   }
 
   // add player to the game
