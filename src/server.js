@@ -20,7 +20,6 @@ const subscription = web3.eth.subscribe('newBlockHeaders', (error, blockHeader) 
   console.log('data received ');
 });
 
-
 app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
 app.use('/assets',express.static(__dirname + '/assets'));
@@ -67,62 +66,15 @@ currentBlock =  web3.eth.getBlockNumber()
   return blockNumber;
 });
 
-instance.events.LogPlayerAdded({}, function(error, event){
-  var playEvent = {address:event.returnValues._wallet.toLowerCase(), nonce:event.returnValues._nonce, counter:event.returnValues._playerCounter};
-  console.log('playEvent.address: ' + playEvent.address);
-  console.log('playEvent.nonce: ' + playEvent.nonce);
-  console.log('playEvent.counter: ' + playEvent.counter);
-  clearTimeout(pendingTimer[playEvent.nonce]);
-  console.log('if there was a timer for nonce: ' + playEvent.nonce + ', it is now cancelled');
-  var result = helper.parsePlayEvent(playEvent, pendingSelections, confirmedSelections);
-  pendingSelections = result[0]
-  confirmedSelections = result[1]
-  if(debug) {
-  console.log("---------------------------------");
-  console.log("In event Play:");
-  console.log("pending selections");
-  console.log(JSON.stringify(pendingSelections));
-  console.log("Confirmed selections");
-  console.log(JSON.stringify(confirmedSelections));
-  console.log("---------------------------------");
-  }
-  if(!result[2]){
-    io.sockets.emit("newConfirmed", confirmedSelections[confirmedSelections.length-1])
-  }
-});
-
-var globalTimer;
-instance.events.LogPlayersReady({}, function(error, event){
-    if(debug) {
-    console.log("PLAYER READY EVENT")
-    console.log(JSON.stringify(event))
-    }
-    //Should start a 3 block timeout to unblock button
-    //Could pull blocknumber and compare for a while
-  setTimeout(function(){
-      console.log("unblock button");
-      io.sockets.emit("unblockButton")
-    }, 50000) //HA 3 blocks at 15s per block
-});
-
-instance.events.LogGameFinished({}, function(error, event){
-    if(debug){
-    console.log("------------------------------------");
-    console.log("REVEAL WINNER EVENT");
-    console.log(JSON.stringify(event));
-    console.log("------------------------------------");
-    }
-    pendingSelections = [];
-    confirmedSelections = [];
-    clearTimeout(globalTimer);
-});
-
 io.on('connection',function(socket){
   socket.on("gameLoaded",function(){
     confirmed = helper.addPendingField(confirmedSelections,false)
     socket.emit("allPlayers", confirmed.concat(helper.addPendingField(pendingSelections, true)));
     });
     socket.on("selectNonce", function(data){
+
+      console.log(JSON.stringify(data));
+
       if(helper.nonceValid(pendingSelections.concat(confirmedSelections), parseInt(data.nonce))){
         if(debug) {
         console.log("---------------------------------");

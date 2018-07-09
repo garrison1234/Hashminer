@@ -54,7 +54,7 @@ App = {
          $('#account').css('color', '	#FEC106');
          $('#account').text('');
          $('#accountBalance').css('color', '	#FEC106');
-         $('#accountBalance').text("To view account information, unlock MetaMask and reload site");
+         $('#accountBalance').text("To play, unlock MetaMask and reload site");
        }
      },
 
