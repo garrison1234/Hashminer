@@ -46,7 +46,7 @@ var hashminerAbi = JSON.parse(fs.readFileSync("build/contracts/Hashminer.json"))
 var address = "0x190d632dfa964bdf8108d05f87e8e59b97931e7f"; //HA rinkeby address
 var instance = new web3.eth.Contract(hashminerAbi, address); //HA for web3 1.0
 
-instance.methods.getPlayersInfo().call({}, function(error, result){
+/*instance.methods.getPlayersInfo().call({}, function(error, result){
   confirmedSelections = helper.loadStartingState(result);
   if(debug) {
     console.log("Starting state");
@@ -64,13 +64,13 @@ instance.methods.getGameInfo().call({}, function(error, result){
 currentBlock =  web3.eth.getBlockNumber()
 .then(function (blockNumber){
   return blockNumber;
-});
+});*/
 
 io.on('connection',function(socket){
-  socket.on("gameLoaded",function(){
+  /*socket.on("gameLoaded",function(){
     confirmed = helper.addPendingField(confirmedSelections,false)
     socket.emit("allPlayers", confirmed.concat(helper.addPendingField(pendingSelections, true)));
-    });
+  });*/
     socket.on("selectNonce", function(data){
 
       console.log(JSON.stringify(data));
@@ -118,20 +118,11 @@ io.on('connection',function(socket){
       });
   });
 
-  function startPendingTimer(nonce) {
+  // Timer for miner confirmation, commented since WebsocketProvider isn't reliable
+  /*function startPendingTimer(nonce) {
     // start timer for selected nonce
     console.log('timer started for nonce: ' + nonce);
     pendingTimer[nonce] = setTimeout(function(){
-
-      //var indexToRemove = []
-      /*for(var i = 0; i < pendingSelections.length; i++) {
-        if(helper.currentTimeInMillis() - pendingSelections[i].time > pendingTime){
-            indexToRemove.push(i)
-          }
-      }*/
-      /*for(i = 0; i < indexToRemove.length; i++) {
-        pendingSelections.splice(indexToRemove[i],1)
-      }*/
 
       var newPendingSelections = [];
       pendingSelections.forEach(function(element){
@@ -146,7 +137,7 @@ io.on('connection',function(socket){
       console.log('timer expired for nonce: ' + nonce);
 
     }, 60000);
-  }
+  }*/
 
   function initWeb3() {
     if (typeof web3 !== 'undefined') {

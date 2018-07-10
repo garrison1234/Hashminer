@@ -413,13 +413,13 @@ WebFontConfig = {
       // add receivedPlayers array to newPlayers array
       Array.prototype.push.apply(newPlayers, receivedPlayers);
       console.log(newPlayers);
-      // add new players to blockedNonces, if they weren't already
-      receivedPlayers.forEach( element => {
-        blockedNonces.push(parseInt(element.nonce));
-      });
+    var nonceIndex = blockedNonces.indexOf(blockedNonce);
+    if (nonceIndex = -1) {
+      blockedNonces.push(blockedNonce);
+    }
   }
 
-  // block nonces already played, confirmed or in the process of being confirmed
+  // block nonce
   game.blockNonce = function(blockedNonce) {
     // add nonce to blockedNonces only if not already included
     var nonceIndex = blockedNonces.indexOf(blockedNonce);

@@ -2,6 +2,8 @@ App = {
      web3Provider: null,
      contracts: {},
      account: 0x0,
+     blockedNonces: null,
+     currentAddresses: null,
      currentPlayers: null,
 
      init: function() {
@@ -68,8 +70,8 @@ App = {
          //listen to events
          App.listenToEvents();
          // displays all information
-         App.displayGameInfo();
-         App.displayPlayersInfo();
+         App.getGameInfo();
+         App.getPlayersInfo();
        });
      },
 
@@ -101,8 +103,8 @@ App = {
        });
      },
 
-     displayGameInfo: function() {
-       console.log('displayGameInfo called');
+     getGameInfo: function() {
+       console.log('getGameInfo called');
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.getGameInfo();
        }).then(function(gameInformation) {
@@ -128,13 +130,20 @@ App = {
        });
      },
 
-     displayPlayersInfo: function() {
-       console.log('displayPlayersInfo called');
+     // gets all players info, adds players to game and blocks nonces if they aren't already (this is the most important function for the game logic)
+     getPlayersInfo: function() {
+       console.log('getPlayersInfo called');
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.getPlayersInfo();
        }).then(function(playersInformation) {
-         App.currentPlayers = playersInformation[0];
          $('#players-table > tbody').empty();
+         App.currentAddresses = playersInformation[0];
+         App.currentAddresses.forEach(element => {
+           var index = App.currentPlayers.indexOf(blockedNonce);
+           if (nonceIndex = -1) {
+             blockedNonces.push(blockedNonce);
+           }
+         });
          for(i = 0; i < (playersInformation[0].length); i++) {
            $('#players-table > tbody:last-child').append('<tr><td><p class="details">' + playersInformation[0][i] +
             '</p></td><td><p class="details">' + playersInformation[1][i] + '</p></td></tr>');
@@ -147,7 +156,7 @@ App = {
      // display window with reveal-winner button
      revealWinnerModalShow: function() {
        // check that user account is playing
-       if(App.currentPlayers.indexOf(App.account) != -1){
+       if(App.currentAddresses.indexOf(App.account) != -1){
         $('#revealModal').modal('show');
        }
      },
@@ -167,8 +176,8 @@ App = {
           console.log('received player added event');
           if (!error) {
             // update game, players and account information
-            App.displayGameInfo();
-            App.displayPlayersInfo();
+            App.getGameInfo();
+            App.getPlayersInfo();
             App.displayAccountInfo();
           } else {
             console.error(error);
@@ -180,7 +189,7 @@ App = {
          if (!error) {
            // update game information
            //$('#reveal-button').prop('disabled', false);
-           App.displayGameInfo();
+           App.getGameInfo();
          } else {
            console.error(error);
          }
@@ -193,8 +202,8 @@ App = {
           console.log('event information: ' + JSON.stringify(event.args._winningNonce));
           //$('#reveal-button').prop('disabled', true);
           // update account, game and players information
-          App.displayPlayersInfo();
-          App.displayGameInfo();
+          App.getPlayersInfo();
+          App.getGameInfo();
           App.displayAccountInfo();
           Client.animateFinal(event.args._winningNonce);
           console.log('call Client.animateFinal with winningNonce: ' + event.args._winningNonce);
@@ -207,7 +216,7 @@ App = {
      instance.LogGameOptionsSet({}, {}).watch(function(error, event) {
        if (!error) {
          // update game information
-         App.displayGameInfo();
+         App.getGameInfo();
        } else {
          console.error(error);
        }
@@ -217,7 +226,7 @@ App = {
     instance.LogGameLock({}, {}).watch(function(error, event) {
       if (!error) {
         // update game information
-        App.displayGameInfo();
+        App.getGameInfo();
       } else {
         console.error(error);
       }
