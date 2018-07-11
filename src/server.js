@@ -10,15 +10,15 @@ var fs = require("fs");
 // web3 provider
 //var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545")); // Ganache
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO")); // rinkeby HttpProvider
-const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws')); // rinkeby WebsocketProvider (still in Beta)
+//const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws')); // rinkeby WebsocketProvider (still in Beta)
 
 // check if socket provider subscription is working
-const subscription = web3.eth.subscribe('newBlockHeaders', (error, blockHeader) => {
+/*const subscription = web3.eth.subscribe('newBlockHeaders', (error, blockHeader) => {
   if (error) return console.error(error);
   console.log('Successfully subscribed!');
 }).on('data', (blockHeader) => {
   console.log('data received ');
-});
+});*/
 
 app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
@@ -41,10 +41,10 @@ var debug = true;
 var pendingTimer = [];
 var pendingSelections = [];
 var confirmedSelections = [];
-var gameInfo = [];
-var hashminerAbi = JSON.parse(fs.readFileSync("build/contracts/Hashminer.json")).abi; //HA changed this for npm start script to run (package.json)
+//var gameInfo = [];
+/*var hashminerAbi = JSON.parse(fs.readFileSync("build/contracts/Hashminer.json")).abi; //HA changed this for npm start script to run (package.json)
 var address = "0x190d632dfa964bdf8108d05f87e8e59b97931e7f"; //HA rinkeby address
-var instance = new web3.eth.Contract(hashminerAbi, address); //HA for web3 1.0
+var instance = new web3.eth.Contract(hashminerAbi, address); //HA for web3 1.0*/
 
 /*instance.methods.getPlayersInfo().call({}, function(error, result){
   confirmedSelections = helper.loadStartingState(result);
@@ -75,7 +75,6 @@ io.on('connection',function(socket){
 
       console.log(JSON.stringify(data));
 
-      if(helper.nonceValid(pendingSelections.concat(confirmedSelections), parseInt(data.nonce))){
         if(debug) {
         console.log("---------------------------------");
         console.log("new pending selection made");
@@ -86,28 +85,11 @@ io.on('connection',function(socket){
           address : data.address.toLowerCase(),
           x: parseInt(data.x),
           y: parseInt(data.y),
-          nonce: parseInt(data.nonce),
-          time: helper.currentTimeInMillis()};
+          nonce: parseInt(data.nonce)};
         pendingSelections.push(newPendingSelection);
-        socket.emit("newSelection", data.nonce);
-        startPendingTimer(newPendingSelection.nonce);
-      } else {
-        if(debug) {
-        console.log("---------------------------------");
-        console.log("Nonce already selected or nonce invalid");
-        console.log(data.nonce);
-        console.log("---------------------------------");
-      }}});
-
-    socket.on("debugPlayers", function(){
-      if(debug) {
-      console.log("---------------------------------");
-      console.log("DEBUG PLAYER");
-      confirmed = helper.addPendingField(confirmedSelections, false)
-      console.log(confirmed.concat(helper.addPendingField(pendingSelections)))
-      console.log("---------------------------------");
+        socket.emit("newSelection", newPendingSelection);
     }
-  });
+
     socket.on("revealWinner", function(){
        console.log("blocking button");
         socket.emit("blockButton")

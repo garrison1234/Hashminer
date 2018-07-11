@@ -278,6 +278,9 @@ WebFontConfig = {
       // block mouse
       mouseBlocked = true;
 
+      // call to generate transaction
+      App.playGame(mapNonce);
+
       // call to send transaction information to server.js
       Client.playGame(mapNonce, xmouse, ymouse);
 
@@ -409,14 +412,10 @@ WebFontConfig = {
   }
 
   // add array of new confirmed player objects{address, x, y, nonce} sent from server.js
-  game.addNewMiners = function(receivedPlayers) {
+  game.addNewMiner = function(receivedPlayer) {
       // add receivedPlayers array to newPlayers array
-      Array.prototype.push.apply(newPlayers, receivedPlayers);
+      newPlayers.push(receivedPlayer);
       console.log(newPlayers);
-    var nonceIndex = blockedNonces.indexOf(blockedNonce);
-    if (nonceIndex = -1) {
-      blockedNonces.push(blockedNonce);
-    }
   }
 
   // block nonce
@@ -431,13 +430,10 @@ WebFontConfig = {
   // function called from app.js to unblock nonces that were played but not confirmed in time
   game.unblockNonce = function(unblockedNonce) {
     // remove nonce from blockedNonces only if already included
-    console.log('blockedNonces: ' + blockedNonces);
     var nonceIndex = blockedNonces.indexOf(unblockedNonce);
-    console.log("nonceIndex");
     if (nonceIndex > -1) {
       blockedNonces.splice(nonceIndex, 1);
     }
-    console.log('blockedNonces: ' + blockedNonces);
   }
 
   game.animateFinal = function(_winningNonce) {

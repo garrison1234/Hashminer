@@ -2,9 +2,9 @@ App = {
      web3Provider: null,
      contracts: {},
      account: 0x0,
-     blockedNonces: null,
-     currentAddresses: null,
-     currentPlayers: null,
+     blockedNonces: [],
+     confirmedNonces: [],
+     confirmedPlayers: [],
 
      init: function() {
         // block revealWinner button upon loading
@@ -71,7 +71,7 @@ App = {
          App.listenToEvents();
          // displays all information
          App.getGameInfo();
-         App.getPlayersInfo();
+         App.getPreviousPlayers();
        });
      },
 
@@ -131,26 +131,40 @@ App = {
      },
 
      // gets all players info, adds players to game and blocks nonces if they aren't already (this is the most important function for the game logic)
-     getPlayersInfo: function() {
-       console.log('getPlayersInfo called');
+     getPreviousPlayers: function() {
+       console.log('getPreviousPlayers called');
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.getPlayersInfo();
        }).then(function(playersInformation) {
-         $('#players-table > tbody').empty();
-         App.currentAddresses = playersInformation[0];
-         App.currentAddresses.forEach(element => {
-           var index = App.currentPlayers.indexOf(blockedNonce);
+         // add new addresses and nonces to App.confirmedAddresses and App.confirmedNonces
+         var receivedNonces = playersInformation[1];
+         receivedNonces.forEach((element, index) => {
+           element = parseInt(element);
+           // check if nonce is already in App.confirmedNonces
+           var nonceIndex = App.confirmedNonces.indexOf(element);
            if (nonceIndex = -1) {
-             blockedNonces.push(blockedNonce);
+             App.confirmedNonces.push(element);
+             App.blockedNonces.push(element);
+             // generate x,y coordinates
+             do {
+               var xcoordinate = Math.round(Math.trunc(element/4 + 1) * Math.random() * 240);
+               console.log(xcoordinate);
+               var ycoordinate = Math.round((element % 4 + 1) * Math.random() * 135);
+               console.log(ycoordinate);
+             } while ((ycoordinate < 80) || (ycoordinate > 460) || (xcoordinate < 80) || (xcoordinate > 880));
+             var newConfirmedPlayer =  {"address":playersInformation[0][index],
+             "nonce":element, "pending":false, "x":xcoordinate, "y":ycoordinate};
+             game.addNewMiner(newConfirmedPlayer);
+             App.confirmedPlayers.push(newConfirmedPlayer);
            }
          });
-         for(i = 0; i < (playersInformation[0].length); i++) {
-           $('#players-table > tbody:last-child').append('<tr><td><p class="details">' + playersInformation[0][i] +
-            '</p></td><td><p class="details">' + playersInformation[1][i] + '</p></td></tr>');
-         }
+         $('#players-table > tbody').empty();
+         App.confirmedPlayers.forEach(element => {
+           $('#players-table > tbody:last-child').append('<tr><td><p class="details">' + element.address +
+            '</p></td><td><p class="details">' + element.nonce + '</p></td></tr>');
+         });
        }).catch(function(err) {
        });
-
      },
 
      // display window with reveal-winner button
@@ -177,7 +191,7 @@ App = {
           if (!error) {
             // update game, players and account information
             App.getGameInfo();
-            App.getPlayersInfo();
+            App.updatePlayers();
             App.displayAccountInfo();
           } else {
             console.error(error);
@@ -202,10 +216,10 @@ App = {
           console.log('event information: ' + JSON.stringify(event.args._winningNonce));
           //$('#reveal-button').prop('disabled', true);
           // update account, game and players information
-          App.getPlayersInfo();
+          App.updatePlayers();
           App.getGameInfo();
           App.displayAccountInfo();
-          Client.animateFinal(event.args._winningNonce);
+          game.animateFinal(event.args._winningNonce);
           console.log('call Client.animateFinal with winningNonce: ' + event.args._winningNonce);
         } else {
           console.error(error);
