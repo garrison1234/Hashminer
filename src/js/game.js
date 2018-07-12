@@ -163,11 +163,11 @@ WebFontConfig = {
     }
 
     // start timer to let web3 information load (syncronicity problems with account information)
-    setTimeout( () => {
+    /*setTimeout( () => {
       web3LoadTimer = true;
       // ask server.js to send current players information
       Client.gameLoaded();
-    }, 1000);
+    }, 1000);*/
 
   }
 
@@ -342,7 +342,7 @@ WebFontConfig = {
             element.sprite.setVelocityY(0);
             element.sprite.anims.play(('up' + ((index + 1).toString())), false);
             element.sprite.anims.play(('down' + ((index + 1).toString())), false);
-            element.sprite.y = Math.round(element.sprite.y);
+            element.sprite.y = Math.round(element.sprite.y / 23) * 23 + 12;
           }
         }
         //move miner to desired y coordinate
@@ -357,8 +357,7 @@ WebFontConfig = {
           } else {
             element.sprite.setVelocityX(0);
             //console.log('element.sprite.x: ' + element.sprite.x);
-            element.sprite.x = Math.round(element.sprite.x);
-            element.sprite.y = Math.round(element.sprite.y);
+            element.sprite.x = Math.round(element.sprite.x / 20) * 20 + 10;
             //console.log('element.sprite.x: ' + element.sprite.x);
             element.sprite.anims.play(('mine' + ((index + 1).toString())), true);
             // miner stops moving

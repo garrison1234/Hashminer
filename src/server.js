@@ -38,9 +38,9 @@ server.listen(process.env.PORT || 8081,function(){
   console.log('Listening on '+server.address().port);
 });
 var debug = true;
-var pendingTimer = [];
+/*var pendingTimer = [];
 var pendingSelections = [];
-var confirmedSelections = [];
+var confirmedSelections = [];*/
 //var gameInfo = [];
 /*var hashminerAbi = JSON.parse(fs.readFileSync("build/contracts/Hashminer.json")).abi; //HA changed this for npm start script to run (package.json)
 var address = "0x190d632dfa964bdf8108d05f87e8e59b97931e7f"; //HA rinkeby address
@@ -72,24 +72,25 @@ io.on('connection',function(socket){
     socket.emit("allPlayers", confirmed.concat(helper.addPendingField(pendingSelections, true)));
   });*/
     socket.on("selectNonce", function(data){
-
       console.log(JSON.stringify(data));
-
         if(debug) {
         console.log("---------------------------------");
         console.log("new pending selection made");
         console.log(data.nonce);
         console.log("---------------------------------");
       }
+      // check that there is an address, coordinates are valid, and nonce is valid
+      console.log(selectionValid(data));
+      if(selectionValid(data)) {
         var newPendingSelection = {
           address : data.address.toLowerCase(),
           x: parseInt(data.x),
           y: parseInt(data.y),
           nonce: parseInt(data.nonce)};
-        pendingSelections.push(newPendingSelection);
+        //pendingSelections.push(newPendingSelection);
         socket.emit("newSelection", newPendingSelection);
-    }
-
+      }
+    });
     socket.on("revealWinner", function(){
        console.log("blocking button");
         socket.emit("blockButton")
@@ -99,6 +100,34 @@ io.on('connection',function(socket){
         }, 60000)
       });
   });
+
+  function selectionValid(selection) {
+    var address = selection.address.toLowerCase();
+    var x = parseInt(selection.x);
+    var y = parseInt(selection.y);
+    var nonce = parseInt(selection.nonce);
+    console.log('address: ' + address);
+    console.log('x: ' + x);
+    console.log('y: ' + y);
+    console.log('nonce: ' + nonce);  
+    if(address && ((nonce > -1) && (nonce < 16))) {
+      var xmin = Math.trunc(nonce/4) * 240;
+      var xmax = xmin + 240;
+      if(x <= xmax && x >= xmin && x > 80 && x < 880) {
+        var ymin = (nonce % 4) * 135;
+        var ymax = ymin + 135;
+        if(y <= ymax && y >= ymin && y > 80 && y < 560) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
 
   // Timer for miner confirmation, commented since WebsocketProvider isn't reliable
   /*function startPendingTimer(nonce) {

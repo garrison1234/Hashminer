@@ -20,9 +20,9 @@ Client.socket = io.connect();
 });*/
 
 // new unconfirmed nonce selection received from server.js
-Client.socket.on('newSelection',function(_nonce){
-  console.log('received newSelection from server.js: ' + _nonce);
-    game.blockNonce(_nonce);
+Client.socket.on('newSelection',function(newSelection){
+  console.log('received newSelection from server.js: ' + newSelection);
+    //game.blockNonce(newSelection);
 });
 
 // previously selected nonce was cancelled due to timeout
@@ -61,7 +61,7 @@ Client.socket.on('blockButton',function(){
 
 Client.playGame = function(_nonce, _x, _y) {
   // call to send transaction to blockchain
-  var player = {address: App.account, x: _x, y: _y, };
+  var player = {address: App.account, x: _x, y: _y, nonce:_nonce};
   console.log('client.playGame, player: ' + JSON.stringify(player));
   Client.socket.emit('selectNonce', player);
 };

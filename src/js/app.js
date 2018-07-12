@@ -147,13 +147,13 @@ App = {
              App.blockedNonces.push(element);
              // generate x,y coordinates
              do {
-               var xcoordinate = Math.round(Math.trunc(element/4 + 1) * Math.random() * 240);
+               var xcoordinate = Math.trunc(element/4) * 240 + Math.round(Math.random() * 12) * 20 + 10;
                console.log(xcoordinate);
-               var ycoordinate = Math.round((element % 4 + 1) * Math.random() * 135);
+               var ycoordinate = (element % 4) * 138 + Math.round(Math.random() * 5) * 23 + 12;
                console.log(ycoordinate);
              } while ((ycoordinate < 80) || (ycoordinate > 460) || (xcoordinate < 80) || (xcoordinate > 880));
              var newConfirmedPlayer =  {"address":playersInformation[0][index],
-             "nonce":element, "pending":false, "x":xcoordinate, "y":ycoordinate};
+             "nonce":element, "joined":"before", "x":xcoordinate, "y":ycoordinate};
              game.addNewMiner(newConfirmedPlayer);
              App.confirmedPlayers.push(newConfirmedPlayer);
            }
