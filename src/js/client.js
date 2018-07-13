@@ -21,8 +21,17 @@ Client.socket = io.connect();
 
 // new unconfirmed nonce selection received from server.js
 Client.socket.on('newSelection',function(newSelection){
-  console.log('received newSelection from server.js: ' + newSelection);
-    //game.blockNonce(newSelection);
+  console.log('received newSelection from server.js: ' + JSON.stringify(newSelection));
+  // block received selection's nonce
+  game.blockNonce(newSelection.nonce);
+  // add timer to received selection
+  newSelection.timer = setTimeout(function() {
+    console.log("unblock nonce: " + newSelection.nonce);
+    game.unblockNonce(newSelection.nonce);
+  }, 60000);
+  // push received selection to App.pendingPlayers
+  App.pendingPlayers.push(newSelection);
+  console.log('App.pendingPlayers: ' + JSON.stringify(App.pendingPlayers));
 });
 
 // previously selected nonce was cancelled due to timeout

@@ -2,9 +2,7 @@ App = {
      web3Provider: null,
      contracts: {},
      account: 0x0,
-     blockedNonces: [],
-     confirmedNonces: [],
-     confirmedPlayers: [],
+     pendingPlayers: [],
 
      init: function() {
         // block revealWinner button upon loading
@@ -70,6 +68,7 @@ App = {
          //listen to events
          App.listenToEvents();
          // displays all information
+         App.updatePlayersInfo();
          App.getGameInfo();
          App.getPreviousPlayers();
        });
@@ -136,35 +135,45 @@ App = {
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.getPlayersInfo();
        }).then(function(playersInformation) {
-         // add new addresses and nonces to App.confirmedAddresses and App.confirmedNonces
          var receivedNonces = playersInformation[1];
          receivedNonces.forEach((element, index) => {
            element = parseInt(element);
-           // check if nonce is already in App.confirmedNonces
-           var nonceIndex = App.confirmedNonces.indexOf(element);
-           if (nonceIndex = -1) {
-             App.confirmedNonces.push(element);
-             App.blockedNonces.push(element);
-             // generate x,y coordinates
-             do {
-               var xcoordinate = Math.trunc(element/4) * 240 + Math.round(Math.random() * 12) * 20 + 10;
-               console.log(xcoordinate);
-               var ycoordinate = (element % 4) * 138 + Math.round(Math.random() * 5) * 23 + 12;
-               console.log(ycoordinate);
-             } while ((ycoordinate < 80) || (ycoordinate > 460) || (xcoordinate < 80) || (xcoordinate > 880));
-             var newConfirmedPlayer =  {"address":playersInformation[0][index],
-             "nonce":element, "joined":"before", "x":xcoordinate, "y":ycoordinate};
-             game.addNewMiner(newConfirmedPlayer);
-             App.confirmedPlayers.push(newConfirmedPlayer);
-           }
-         });
-         $('#players-table > tbody').empty();
-         App.confirmedPlayers.forEach(element => {
-           $('#players-table > tbody:last-child').append('<tr><td><p class="details">' + element.address +
-            '</p></td><td><p class="details">' + element.nonce + '</p></td></tr>');
+           game.blockNonce(element);
+           // generate x,y coordinates
+           var previousCoordinates = App.generateCoordinates(element)
+           var newConfirmedPlayer =  {"address":playersInformation[0][index],
+           "nonce":element, "joined":"before", "x":previousCoordinates[0], "y":previousCoordinates[1]};
+           game.addNewMiner(newConfirmedPlayer);
          });
        }).catch(function(err) {
        });
+     },
+
+     // update player addresses and nonces on table
+     updatePlayersInfo: function() {
+       App.contracts.Hashminer.deployed().then(function(instance) {
+         return instance.getPlayersInfo();
+       }).then(function(playersInformation) {
+         var playerAddresses = playersInformation[0];
+         var playerNonces = playersInformation[1];
+           $('#players-table > tbody').empty();
+           playerAddresses.forEach((element, index) => {
+             $('#players-table > tbody:last-child').append('<tr><td><p class="details">' + element +
+              '</p></td><td><p class="details">' + playerNonces[index] + '</p></td></tr>');
+           });
+         }).catch(function(err) {
+       });
+     },
+
+     //generate random coordinates for a given nonce
+     generateCoordinates: function(nonce) {
+       do {
+         var xcoordinate = Math.trunc(nonce/4) * 240 + Math.round(Math.random() * 12) * 20 + 10;
+         console.log(xcoordinate);
+         var ycoordinate = (nonce % 4) * 138 + Math.round(Math.random() * 5) * 23 + 12;
+         console.log(ycoordinate);
+       } while ((ycoordinate < 80) || (ycoordinate > 460) || (xcoordinate < 80) || (xcoordinate > 880));
+       return [xcoordinate, ycoordinate];
      },
 
      // display window with reveal-winner button
@@ -189,9 +198,33 @@ App = {
         instance.LogPlayerAdded({}, {}).watch(function(error, event) {
           console.log('received player added event');
           if (!error) {
+            // get new player nonce
+            var newPlayerNonce = event.args._nonce;
+            var pendingIndex;
+            //check if any element in pendingPlayers is equal to the new confirmed player
+            App.pendingPlayers.forEach((element, index) => {
+              if(element.nonce == newPlayerNonce) {
+                // save array index
+                pendingIndex = index;
+              }
+            });
+            // if new player was pending, place on map with the saved coordinates and remove from pendingPlayers
+            if(pendingIndex > -1){
+              // add to map
+              game.addNewMiner(App.pendingPlayers[pendingIndex]);
+              // remove from pending players array
+              App.pendingPlayers.splice(pendingIndex, 1);
+            } else {
+              // generate random coordinates for the nonce
+              var newCoordinates = App.generateCoordinates(newPlayerNonce);
+              // create a new player object
+              var newPlayerFromEvent = {address: event.args._wallet, x: newCoordinates[0], y:newCoordinates[1], nonce:newPlayerNonce };
+              // pass to game to add player to map
+              game.addNewMiner(newPlayerFromEvent);
+            }
             // update game, players and account information
             App.getGameInfo();
-            App.updatePlayers();
+            App.updatePlayersInfo();
             App.displayAccountInfo();
           } else {
             console.error(error);
@@ -216,7 +249,7 @@ App = {
           console.log('event information: ' + JSON.stringify(event.args._winningNonce));
           //$('#reveal-button').prop('disabled', true);
           // update account, game and players information
-          App.updatePlayers();
+          App.updatePlayersInfo();
           App.getGameInfo();
           App.displayAccountInfo();
           game.animateFinal(event.args._winningNonce);
@@ -245,10 +278,9 @@ App = {
         console.error(error);
       }
     });
-
-      });
-    }
-};
+  });
+}
+}
 
 $(function() {
      $(window).on('load', function() {
