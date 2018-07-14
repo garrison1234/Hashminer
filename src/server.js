@@ -82,6 +82,7 @@ io.on('connection',function(socket){
       // check that there is an address, coordinates are valid, and nonce is valid
       console.log(selectionValid(data));
       if(selectionValid(data)) {
+        console.log('selection is valid');
         var newPendingSelection = {
           address : data.address.toLowerCase(),
           x: parseInt(data.x),
@@ -89,28 +90,26 @@ io.on('connection',function(socket){
           nonce: parseInt(data.nonce)};
         //pendingSelections.push(newPendingSelection);
         socket.emit("newSelection", newPendingSelection);
+        console.log('server broadcasts new selection.');
       }
     });
     socket.on("revealWinner", function(){
        console.log("blocking button");
-        socket.emit("blockButton")
-        globalTimer = setTimeout(function(){
-          console.log("unblock button");
-          io.sockets.emit("unblockButton")
-        }, 60000)
+        socket.broadcast.emit("blockButton");
       });
   });
 
   function selectionValid(selection) {
-    var address = selection.address.toLowerCase();
+    // check that selection contains an address
+    var address = selection.address;
     var x = parseInt(selection.x);
     var y = parseInt(selection.y);
     var nonce = parseInt(selection.nonce);
     console.log('address: ' + address);
     console.log('x: ' + x);
     console.log('y: ' + y);
-    console.log('nonce: ' + nonce);  
-    if(address && ((nonce > -1) && (nonce < 16))) {
+    console.log('nonce: ' + nonce);
+    if((nonce > -1) && (nonce < 16)) {
       var xmin = Math.trunc(nonce/4) * 240;
       var xmax = xmin + 240;
       if(x <= xmax && x >= xmin && x > 80 && x < 880) {

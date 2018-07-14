@@ -54,10 +54,10 @@ Client.socket.on('nonceCancelled',function(_nonce){
   game.addNewMiners(newPlayer);
 });*/
 
-Client.socket.on('unblockButton',function(){
+/*Client.socket.on('unblockButton',function(){
   console.log('received unblockButton from server.js: ');
   App.revealWinnerModalShow();
-});
+});*/
 
 Client.socket.on('blockButton',function(){
   console.log('received blockButton from server.js: ');

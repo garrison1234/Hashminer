@@ -33,6 +33,7 @@ var confirmedMiners = [16];
 var mapNonce;
 var gameFull = false;
 var gameOver = false;
+var animatingFinal = false;
 var deletingMiners = false;
 var winningNonce;
 
@@ -258,18 +259,18 @@ WebFontConfig = {
     }
 
     // display current mouse position and whether position is valid (mapNonce not blocked)
-    if (!gameOver && !gameFull) {
+    if (!gameOver && !gameFull && !animatingFinal) {
       if (!mapAreaValid){
         instructionsText.destroy();
-        instructionsText = this.add.text(360, 545, 'Invalid location. Choose another place to mine',
+        instructionsText = this.add.text(330, 545, 'Invalid location. Choose another place to mine',
         { font: "12px Aldrich", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
       } else if (blockedNonces.includes(mapNonce)) {
         instructionsText.destroy()
-        instructionsText = this.add.text(233, 545, 'This location is already taken or pending confirmation. choose another location to mine',
+        instructionsText = this.add.text(220, 545, 'This location is already taken or pending confirmation. choose another location to mine',
         { font: "12px Aldrich", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
       } else {
         instructionsText.destroy()
-        instructionsText = this.add.text(335, 545, 'Map area: ' + mapNonce + '. Click to place miner!',
+        instructionsText = this.add.text(375, 545, 'Map area: ' + mapNonce + '. Click to place miner!',
         { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
       }
     }
@@ -304,7 +305,7 @@ WebFontConfig = {
 
       if (element.joined == 'before') {
         confirmedMiners[minerCounter].moving = false;
-        confirmedMiners[minerCounter].sprite = this.physics.add.sprite(element.x, element.y, ('miner' + ((minerCounter + 1).toString())))
+        confirmedMiners[minerCounter].sprite = this.physics.add.sprite(element.x, element.y, ('miner' + ((minerCounter + 1).toString())));
         confirmedMiners[minerCounter].text = this.add.text((element.x + 12), element.y, confirmedMiners[minerCounter].addressShort,
           { font: "12px Aldrich", fill: "#049AC5", wordWrap: true, wordWrapWidth: 20, align: "center" });
         confirmedMiners[minerCounter].sprite.anims.play(('mine' + ((index + 1).toString())), true);
@@ -314,12 +315,14 @@ WebFontConfig = {
         confirmedMiners[minerCounter].text = this.add.text(509, 0, confirmedMiners[minerCounter].addressShort,
           { font: "12px Aldrich", fill: "	#049AC5", wordWrap: true, wordWrapWidth: 20, align: "center" });
       }
-      newPlayers.splice(index, 1);
       minerCounter++;
       if(minerCounter == 16) {
         gameFull = true;
       }
     });
+
+    // empty newPlayers array after adding them to map
+    newPlayers = [];
 
     //animate all miners to their destinations
     confirmedMiners.forEach( (element, index) => {
@@ -368,7 +371,7 @@ WebFontConfig = {
     });
     if (gameFull && !gameOver) {
       instructionsText.destroy();
-      instructionsText = this.add.text(480, 520, 'Game is full.',
+      instructionsText = this.add.text(330, 520, 'Game is full. Waiting for winner to be revealed!',
       { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
     }
 
@@ -379,7 +382,7 @@ WebFontConfig = {
       confirmedMiners.forEach( (element, index) => {
         element.sprite.disableBody(true, true);
         if(element.nonce == winningNonce) {
-          instructionsText = this.add.text(8, 520, 'Game finished. ' + 'User ' + element.address
+          instructionsText = this.add.text(200, 520, 'Game finished. ' + 'User ' + element.address
           + 'wins with nonce: ' + element.nonce + '!',
           { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
           element.sprite = this.physics.add.sprite(element.xdestination, element.ydestination, ('minerwin' + ((index + 1).toString())))
@@ -391,8 +394,9 @@ WebFontConfig = {
           element.sprite.anims.play(('lose' + ((index + 1).toString())), true);
         }
       });
-      setTimeout(function() { deletingMiners = true}, 15000);
+      setTimeout(function() { deletingMiners = true;}, 5000);
       gameOver = false;
+      animatingFinal = true;
     }
 
     // delete all sprites from map
@@ -406,6 +410,7 @@ WebFontConfig = {
       confirmedMiners = [];
       deletingMiners = false;
       gameFull = false;
+      animatingFinal = false;
     }
 
   }

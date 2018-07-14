@@ -2,11 +2,10 @@ App = {
      web3Provider: null,
      contracts: {},
      account: 0x0,
+     playerAddresses: [],
      pendingPlayers: [],
 
      init: function() {
-        // block revealWinner button upon loading
-        //$('#reveal-button').prop('disabled', true);
         return App.initWeb3();
      },
 
@@ -75,6 +74,7 @@ App = {
      },
 
      playGame: function(_nonce) {
+
        App.contracts.Hashminer.deployed().then(function(instance) {
          console.log('request transaction with nonce: ' + _nonce);
          return instance.playGame(_nonce, {
@@ -129,6 +129,24 @@ App = {
        });
      },
 
+     showModalIfFull: function() {
+       console.log('showModalIfFull called');
+       App.contracts.Hashminer.deployed().then(function(instance) {
+         return instance.getGameInfo();
+       }).then(function(gameInformation) {
+         // check that game is full
+         if(gameInformation[3] == 16) {
+           console.log('game is full so call revealWinnerModalShow');
+           setTimeout(function() {
+             console.log("3 block timer finished");
+             // enable reveal winner alert on window
+             App.revealWinnerModalShow()
+           }, 1000);
+         }
+       }).catch(function(err) {
+       });
+     },
+
      // gets all players info, adds players to game and blocks nonces if they aren't already (this is the most important function for the game logic)
      getPreviousPlayers: function() {
        console.log('getPreviousPlayers called');
@@ -154,10 +172,10 @@ App = {
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.getPlayersInfo();
        }).then(function(playersInformation) {
-         var playerAddresses = playersInformation[0];
+         App.playerAddresses = playersInformation[0];
          var playerNonces = playersInformation[1];
            $('#players-table > tbody').empty();
-           playerAddresses.forEach((element, index) => {
+           App.playerAddresses.forEach((element, index) => {
              $('#players-table > tbody:last-child').append('<tr><td><p class="details">' + element +
               '</p></td><td><p class="details">' + playerNonces[index] + '</p></td></tr>');
            });
@@ -178,8 +196,10 @@ App = {
 
      // display window with reveal-winner button
      revealWinnerModalShow: function() {
+       console.log('revealWinnerModalShow called');
        // check that user account is playing
-       if(App.currentAddresses.indexOf(App.account) != -1){
+       if(App.playerAddresses.indexOf(App.account) != -1){
+         console.log('address playing');
         $('#revealModal').modal('show');
        }
      },
@@ -200,6 +220,7 @@ App = {
           if (!error) {
             // get new player nonce
             var newPlayerNonce = event.args._nonce;
+            game.blockNonce(newPlayerNonce);
             var pendingIndex;
             //check if any element in pendingPlayers is equal to the new confirmed player
             App.pendingPlayers.forEach((element, index) => {
@@ -212,7 +233,8 @@ App = {
             if(pendingIndex > -1){
               // add to map
               game.addNewMiner(App.pendingPlayers[pendingIndex]);
-              // remove from pending players array
+              // remove from .3pending players array
+              console.log('pending player timer: ' + App.pendingPlayers[pendingIndex].timer);
               App.pendingPlayers.splice(pendingIndex, 1);
             } else {
               // generate random coordinates for the nonce
@@ -234,9 +256,12 @@ App = {
         // listen to LogPlayersReady event
        instance.LogPlayersReady({}, {}).watch(function(error, event) {
          if (!error) {
-           // update game information
-           //$('#reveal-button').prop('disabled', false);
-           App.getGameInfo();
+           console.log('Players ready. Starting timer for 3 blocks');
+           var playersReadyTimer = setTimeout(function() {
+             console.log("3 block timer finished");
+             // enable reveal winner alert on window
+             App.revealWinnerModalShow()
+           }, 60000);
          } else {
            console.error(error);
          }
@@ -247,13 +272,13 @@ App = {
         if (!error) {
           console.log('received game finished event');
           console.log('event information: ' + JSON.stringify(event.args._winningNonce));
-          //$('#reveal-button').prop('disabled', true);
+          // hide reveal modal
+          App.revealWinnerModalHide();
           // update account, game and players information
           App.updatePlayersInfo();
           App.getGameInfo();
           App.displayAccountInfo();
           game.animateFinal(event.args._winningNonce);
-          console.log('call Client.animateFinal with winningNonce: ' + event.args._winningNonce);
         } else {
           console.error(error);
         }
