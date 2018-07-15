@@ -118,7 +118,7 @@ App = {
          $('#blockNumber').text("Number of block that determined winner: " +gameInformation[5]);
          //$('#blockHash').text("Block Hash: " + gameInformation[6].substring(0, 10) + "...");
          $('#winner').text("Previous game winner: " + gameInformation[8]);
-         $('#winningNonce').text("Previous game winning nonce: " + gameInformation[7]);
+         $('#winningNonce').text("Previous game winning map area: " + gameInformation[7]);
          $('#prize').text("Current game prize: " + web3.fromWei(gameInformation[9], "ether") + "Ξ");
          $('#callerIncentive').text("The reward for determining the winner is "
            + web3.fromWei(gameInformation[10], "ether") + "Ξ " + "and should be enough to cover the TX fee with moderate gas price.");
@@ -176,7 +176,7 @@ App = {
          var playerNonces = playersInformation[1];
            $('#players-table > tbody').empty();
            App.playerAddresses.forEach((element, index) => {
-             $('#players-table > tbody:last-child').append('<tr><td class="details">' + element +
+             $('#players-table > tbody:last-child').append('<tr><td class="details">' + index + '</td><td class="details">' + element +
               '</td><td class="details">' + playerNonces[index] + '</td></tr>');
            });
          }).catch(function(err) {

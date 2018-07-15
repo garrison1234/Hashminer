@@ -266,7 +266,7 @@ WebFontConfig = {
         { font: "12px Aldrich", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
       } else if (blockedNonces.includes(mapNonce)) {
         instructionsText.destroy()
-        instructionsText = this.add.text(220, 545, 'This location is already taken or pending confirmation. choose another location to mine',
+        instructionsText = this.add.text(215, 545, 'This location is already taken or pending confirmation. choose another location to mine',
         { font: "12px Aldrich", fill: "#DC143C", wordWrap: true, wordWrapWidth: 20, align: "center" });
       } else {
         instructionsText.destroy()
@@ -400,7 +400,7 @@ WebFontConfig = {
         element.sprite.disableBody(true, true);
         if(element.nonce == winningNonce) {
           instructionsText = this.add.text(200, 520, 'Game finished. ' + 'User ' + element.address
-          + 'wins with nonce: ' + element.nonce + '!',
+          + 'wins in map area: ' + element.nonce + '!',
           { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
           element.sprite = this.physics.add.sprite(element.xdestination, element.ydestination, ('minerwin' + ((index + 1).toString())))
           console.log('winning sprite:' + element.sprite);
