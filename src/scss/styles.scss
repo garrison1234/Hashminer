@@ -2,6 +2,14 @@
 
 $body-bg: #22324A;
 
+$theme-colors: (
+  "primary": #5b99a4
+);
+
+.btn-primary{
+  color: #22324A !important;
+}
+
 .jumbotron {
   background-color: #22324A !important;
   font-family: 'Press Start 2P', cursive;
