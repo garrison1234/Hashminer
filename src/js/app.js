@@ -2,11 +2,10 @@ App = {
      web3Provider: null,
      contracts: {},
      account: 0x0,
-     currentPlayers: null,
+     playerAddresses: [],
+     pendingPlayers: [],
 
      init: function() {
-        // block revealWinner button upon loading
-        //$('#reveal-button').prop('disabled', true);
         return App.initWeb3();
      },
 
@@ -54,7 +53,7 @@ App = {
          $('#account').css('color', '	#FEC106');
          $('#account').text('');
          $('#accountBalance').css('color', '	#FEC106');
-         $('#accountBalance').text("To view account information, unlock MetaMask and reload site");
+         $('#accountBalance').text("To play, unlock MetaMask and reload site");
        }
      },
 
@@ -68,12 +67,14 @@ App = {
          //listen to events
          App.listenToEvents();
          // displays all information
-         App.displayGameInfo();
-         App.displayPlayersInfo();
+         App.updatePlayersInfo();
+         App.getGameInfo();
+         App.getPreviousPlayers();
        });
      },
 
      playGame: function(_nonce) {
+
        App.contracts.Hashminer.deployed().then(function(instance) {
          console.log('request transaction with nonce: ' + _nonce);
          return instance.playGame(_nonce, {
@@ -101,8 +102,8 @@ App = {
        });
      },
 
-     displayGameInfo: function() {
-       console.log('displayGameInfo called');
+     getGameInfo: function() {
+       console.log('getGameInfo called');
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.getGameInfo();
        }).then(function(gameInformation) {
@@ -128,26 +129,77 @@ App = {
        });
      },
 
-     displayPlayersInfo: function() {
-       console.log('displayPlayersInfo called');
+     showModalIfFull: function() {
+       console.log('showModalIfFull called');
        App.contracts.Hashminer.deployed().then(function(instance) {
-         return instance.getPlayersInfo();
-       }).then(function(playersInformation) {
-         App.currentPlayers = playersInformation[0];
-         $('#players-table > tbody').empty();
-         for(i = 0; i < (playersInformation[0].length); i++) {
-           $('#players-table > tbody:last-child').append('<tr><td><p class="details">' + playersInformation[0][i] +
-            '</p></td><td><p class="details">' + playersInformation[1][i] + '</p></td></tr>');
+         return instance.getGameInfo();
+       }).then(function(gameInformation) {
+         // check that game is full
+         if(gameInformation[3] == 16) {
+           console.log('game is full so call revealWinnerModalShow');
+           setTimeout(function() {
+             console.log("3 block timer finished");
+             // enable reveal winner alert on window
+             App.revealWinnerModalShow()
+           }, 1000);
          }
        }).catch(function(err) {
        });
+     },
 
+     // gets all players info, adds players to game and blocks nonces if they aren't already (this is the most important function for the game logic)
+     getPreviousPlayers: function() {
+       console.log('getPreviousPlayers called');
+       App.contracts.Hashminer.deployed().then(function(instance) {
+         return instance.getPlayersInfo();
+       }).then(function(playersInformation) {
+         var receivedNonces = playersInformation[1];
+         receivedNonces.forEach((element, index) => {
+           element = parseInt(element);
+           game.blockNonce(element);
+           // generate x,y coordinates
+           var previousCoordinates = App.generateCoordinates(element)
+           var newConfirmedPlayer =  {"address":playersInformation[0][index],
+           "nonce":element, "joined":"before", "x":previousCoordinates[0], "y":previousCoordinates[1]};
+           game.addNewMiner(newConfirmedPlayer);
+         });
+       }).catch(function(err) {
+       });
+     },
+
+     // update player addresses and nonces on table
+     updatePlayersInfo: function() {
+       App.contracts.Hashminer.deployed().then(function(instance) {
+         return instance.getPlayersInfo();
+       }).then(function(playersInformation) {
+         App.playerAddresses = playersInformation[0];
+         var playerNonces = playersInformation[1];
+           $('#players-table > tbody').empty();
+           App.playerAddresses.forEach((element, index) => {
+             $('#players-table > tbody:last-child').append('<tr><td class="details">' + element +
+              '</td><td class="details">' + playerNonces[index] + '</td></tr>');
+           });
+         }).catch(function(err) {
+       });
+     },
+
+     //generate random coordinates for a given nonce
+     generateCoordinates: function(nonce) {
+       do {
+         var xcoordinate = Math.trunc(nonce/4) * 240 + Math.round(Math.random() * 12) * 20 + 10;
+         console.log(xcoordinate);
+         var ycoordinate = (nonce % 4) * 138 + Math.round(Math.random() * 5) * 23 + 12;
+         console.log(ycoordinate);
+       } while ((ycoordinate < 80) || (ycoordinate > 460) || (xcoordinate < 80) || (xcoordinate > 880));
+       return [xcoordinate, ycoordinate];
      },
 
      // display window with reveal-winner button
      revealWinnerModalShow: function() {
+       console.log('revealWinnerModalShow called');
        // check that user account is playing
-       if(App.currentPlayers.indexOf(App.account) != -1){
+      if(App.playerAddresses.indexOf(App.account) != -1){
+         console.log('address playing');
         $('#revealModal').modal('show');
        }
      },
@@ -166,9 +218,38 @@ App = {
         instance.LogPlayerAdded({}, {}).watch(function(error, event) {
           console.log('received player added event');
           if (!error) {
+            // get new player nonce
+            var newPlayerFromEvent = {address: event.args._wallet, nonce: event.args._nonce};
+            game.blockNonce(newPlayerFromEvent.nonce);
+            var pendingIndex;
+            //check if any element in pendingPlayers is equal to the new confirmed player
+            App.pendingPlayers.forEach((element, index) => {
+              if(element.nonce == newPlayerFromEvent.nonce && element.address == newPlayerFromEvent.address) {
+                // save array index
+                pendingIndex = index;
+              }
+            });
+            // if new player was pending, place on map with the saved coordinates and remove from pendingPlayers
+            if(pendingIndex > -1){
+              console.log('pending player is now confirmed');
+              console.log('new player is: ' + App.pendingPlayers[pendingIndex]);
+              // add to map
+              game.addNewMiner(App.pendingPlayers[pendingIndex]);
+              // remove from pending players array
+              App.pendingPlayers.splice(pendingIndex, 1);
+            } else {
+              console.log('confirmed player was not pending');
+              // generate random coordinates for the nonce
+              var newCoordinates = App.generateCoordinates(newPlayerFromEvent.nonce);
+              // create a new player object
+              newPlayerFromEvent.x = newCoordinates[0];
+              newPlayerFromEvent.y = newCoordinates[1];
+              // pass to game to add player to map
+              game.addNewMiner(newPlayerFromEvent);
+            }
             // update game, players and account information
-            App.displayGameInfo();
-            App.displayPlayersInfo();
+            App.getGameInfo();
+            App.updatePlayersInfo();
             App.displayAccountInfo();
           } else {
             console.error(error);
@@ -178,9 +259,12 @@ App = {
         // listen to LogPlayersReady event
        instance.LogPlayersReady({}, {}).watch(function(error, event) {
          if (!error) {
-           // update game information
-           //$('#reveal-button').prop('disabled', false);
-           App.displayGameInfo();
+           console.log('Players ready. Starting timer for 3 blocks');
+           var playersReadyTimer = setTimeout(function() {
+             console.log("3 block timer finished");
+             // enable reveal winner alert on window
+             App.revealWinnerModalShow()
+           }, 60000);
          } else {
            console.error(error);
          }
@@ -191,13 +275,13 @@ App = {
         if (!error) {
           console.log('received game finished event');
           console.log('event information: ' + JSON.stringify(event.args._winningNonce));
-          //$('#reveal-button').prop('disabled', true);
+          // hide reveal modal
+          App.revealWinnerModalHide();
           // update account, game and players information
-          App.displayPlayersInfo();
-          App.displayGameInfo();
+          App.updatePlayersInfo();
+          App.getGameInfo();
           App.displayAccountInfo();
-          Client.animateFinal(event.args._winningNonce);
-          console.log('call Client.animateFinal with winningNonce: ' + event.args._winningNonce);
+          game.animateFinal(event.args._winningNonce);
         } else {
           console.error(error);
         }
@@ -207,7 +291,7 @@ App = {
      instance.LogGameOptionsSet({}, {}).watch(function(error, event) {
        if (!error) {
          // update game information
-         App.displayGameInfo();
+         App.getGameInfo();
        } else {
          console.error(error);
        }
@@ -217,15 +301,14 @@ App = {
     instance.LogGameLock({}, {}).watch(function(error, event) {
       if (!error) {
         // update game information
-        App.displayGameInfo();
+        App.getGameInfo();
       } else {
         console.error(error);
       }
     });
-
-      });
-    }
-};
+  });
+}
+}
 
 $(function() {
      $(window).on('load', function() {

@@ -10,16 +10,15 @@ var fs = require("fs");
 // web3 provider
 //var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545")); // Ganache
 //var web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/LkO37PKVOQPojiMpZpPO")); // rinkeby HttpProvider
-const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws')); // rinkeby WebsocketProvider (still in Beta)
+//const web3 = new Web3(new Web3.providers.WebsocketProvider('wss://rinkeby.infura.io/ws')); // rinkeby WebsocketProvider (still in Beta)
 
 // check if socket provider subscription is working
-const subscription = web3.eth.subscribe('newBlockHeaders', (error, blockHeader) => {
+/*const subscription = web3.eth.subscribe('newBlockHeaders', (error, blockHeader) => {
   if (error) return console.error(error);
   console.log('Successfully subscribed!');
 }).on('data', (blockHeader) => {
   console.log('data received ');
-});
-
+});*/
 
 app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
@@ -38,16 +37,15 @@ app.get('/',function(req,res){
 server.listen(process.env.PORT || 8081,function(){
   console.log('Listening on '+server.address().port);
 });
-var debug = true;
-var pendingTimer = [];
+/*var pendingTimer = [];
 var pendingSelections = [];
-var confirmedSelections = [];
-var gameInfo = [];
-var hashminerAbi = JSON.parse(fs.readFileSync("build/contracts/Hashminer.json")).abi; //HA changed this for npm start script to run (package.json)
+var confirmedSelections = [];*/
+//var gameInfo = [];
+/*var hashminerAbi = JSON.parse(fs.readFileSync("build/contracts/Hashminer.json")).abi; //HA changed this for npm start script to run (package.json)
 var address = "0x190d632dfa964bdf8108d05f87e8e59b97931e7f"; //HA rinkeby address
-var instance = new web3.eth.Contract(hashminerAbi, address); //HA for web3 1.0
+var instance = new web3.eth.Contract(hashminerAbi, address); //HA for web3 1.0*/
 
-instance.methods.getPlayersInfo().call({}, function(error, result){
+/*instance.methods.getPlayersInfo().call({}, function(error, result){
   confirmedSelections = helper.loadStartingState(result);
   if(debug) {
     console.log("Starting state");
@@ -65,121 +63,64 @@ instance.methods.getGameInfo().call({}, function(error, result){
 currentBlock =  web3.eth.getBlockNumber()
 .then(function (blockNumber){
   return blockNumber;
-});
-
-instance.events.LogPlayerAdded({}, function(error, event){
-  var playEvent = {address:event.returnValues._wallet.toLowerCase(), nonce:event.returnValues._nonce, counter:event.returnValues._playerCounter};
-  console.log('playEvent.address: ' + playEvent.address);
-  console.log('playEvent.nonce: ' + playEvent.nonce);
-  console.log('playEvent.counter: ' + playEvent.counter);
-  clearTimeout(pendingTimer[playEvent.nonce]);
-  console.log('if there was a timer for nonce: ' + playEvent.nonce + ', it is now cancelled');
-  var result = helper.parsePlayEvent(playEvent, pendingSelections, confirmedSelections);
-  pendingSelections = result[0]
-  confirmedSelections = result[1]
-  if(debug) {
-  console.log("---------------------------------");
-  console.log("In event Play:");
-  console.log("pending selections");
-  console.log(JSON.stringify(pendingSelections));
-  console.log("Confirmed selections");
-  console.log(JSON.stringify(confirmedSelections));
-  console.log("---------------------------------");
-  }
-  if(!result[2]){
-    io.sockets.emit("newConfirmed", confirmedSelections[confirmedSelections.length-1])
-  }
-});
-
-var globalTimer;
-instance.events.LogPlayersReady({}, function(error, event){
-    if(debug) {
-    console.log("PLAYER READY EVENT")
-    console.log(JSON.stringify(event))
-    }
-    //Should start a 3 block timeout to unblock button
-    //Could pull blocknumber and compare for a while
-  setTimeout(function(){
-      console.log("unblock button");
-      io.sockets.emit("unblockButton")
-    }, 50000) //HA 3 blocks at 15s per block
-});
-
-instance.events.LogGameFinished({}, function(error, event){
-    if(debug){
-    console.log("------------------------------------");
-    console.log("REVEAL WINNER EVENT");
-    console.log(JSON.stringify(event));
-    console.log("------------------------------------");
-    }
-    pendingSelections = [];
-    confirmedSelections = [];
-    clearTimeout(globalTimer);
-});
+});*/
 
 io.on('connection',function(socket){
-  socket.on("gameLoaded",function(){
+  /*socket.on("gameLoaded",function(){
     confirmed = helper.addPendingField(confirmedSelections,false)
     socket.emit("allPlayers", confirmed.concat(helper.addPendingField(pendingSelections, true)));
-    });
+  });*/
     socket.on("selectNonce", function(data){
-      if(helper.nonceValid(pendingSelections.concat(confirmedSelections), parseInt(data.nonce))){
-        if(debug) {
-        console.log("---------------------------------");
-        console.log("new pending selection made");
-        console.log(data.nonce);
-        console.log("---------------------------------");
-      }
+      // check that there is an address, coordinates are valid, and nonce is valid
+      console.log('selection is valid>: ' + selectionValid(data));
+      if(selectionValid(data)) {
+        console.log('selection is valid');
         var newPendingSelection = {
           address : data.address.toLowerCase(),
           x: parseInt(data.x),
           y: parseInt(data.y),
-          nonce: parseInt(data.nonce),
-          time: helper.currentTimeInMillis()};
-        pendingSelections.push(newPendingSelection);
-        socket.emit("newSelection", data.nonce);
-        startPendingTimer(newPendingSelection.nonce);
-      } else {
-        if(debug) {
-        console.log("---------------------------------");
-        console.log("Nonce already selected or nonce invalid");
-        console.log(data.nonce);
-        console.log("---------------------------------");
-      }}});
-
-    socket.on("debugPlayers", function(){
-      if(debug) {
-      console.log("---------------------------------");
-      console.log("DEBUG PLAYER");
-      confirmed = helper.addPendingField(confirmedSelections, false)
-      console.log(confirmed.concat(helper.addPendingField(pendingSelections)))
-      console.log("---------------------------------");
-    }
-  });
+          nonce: parseInt(data.nonce)};
+        //pendingSelections.push(newPendingSelection);
+        socket.broadcast.emit("newSelection", newPendingSelection);
+        console.log('server broadcasts new selection: ' + JSON.stringify(newPendingSelection));
+      }
+    });
     socket.on("revealWinner", function(){
        console.log("blocking button");
-        socket.emit("blockButton")
-        globalTimer = setTimeout(function(){
-          console.log("unblock button");
-          io.sockets.emit("unblockButton")
-        }, 60000)
+        socket.broadcast.emit("blockButton");
       });
   });
 
-  function startPendingTimer(nonce) {
+  function selectionValid(selection) {
+    // check that selection contains an address
+    var address = selection.address;
+    var x = parseInt(selection.x);
+    var y = parseInt(selection.y);
+    var nonce = parseInt(selection.nonce);
+    if((nonce > -1) && (nonce < 16)) {
+      var xmin = Math.trunc(nonce/4) * 240;
+      var xmax = xmin + 240;
+      if(x <= xmax && x >= xmin && x > 80 && x < 880) {
+        var ymin = (nonce % 4) * 135;
+        var ymax = ymin + 135;
+        if(y <= ymax && y >= ymin && y > 80 && y < 560) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  // Timer for miner confirmation, commented since WebsocketProvider isn't reliable
+  /*function startPendingTimer(nonce) {
     // start timer for selected nonce
     console.log('timer started for nonce: ' + nonce);
     pendingTimer[nonce] = setTimeout(function(){
-
-      //var indexToRemove = []
-      /*for(var i = 0; i < pendingSelections.length; i++) {
-        if(helper.currentTimeInMillis() - pendingSelections[i].time > pendingTime){
-            indexToRemove.push(i)
-          }
-      }*/
-      /*for(i = 0; i < indexToRemove.length; i++) {
-        pendingSelections.splice(indexToRemove[i],1)
-      }*/
 
       var newPendingSelections = [];
       pendingSelections.forEach(function(element){
@@ -194,7 +135,7 @@ io.on('connection',function(socket){
       console.log('timer expired for nonce: ' + nonce);
 
     }, 60000);
-  }
+  }*/
 
   function initWeb3() {
     if (typeof web3 !== 'undefined') {

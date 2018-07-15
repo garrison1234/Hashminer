@@ -13,23 +13,6 @@
 </head>
 
 <body>
-      <!--<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">Hashminer</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="#">About</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">FAQ</a>
-            </li>
-          </ul>
-        </div>
-      </nav> -->
 
       <div class="jumbotron text-center">
         <!--<img src="/assets/logo5.png" alt="Hashminer logo" style="height:128px;">-->
@@ -94,13 +77,12 @@
       <div clas="col"></div>
       <div clas="col-sm-12 col-md-8 col-lg-6 text-center">
         <div class="card mb-4 mt-4 pt-4">
-
               <h5 class="card-title text-center header mb-4">Current players</h5>
               <table class="table" id="players-table">
                 <thead>
                   <tr>
                     <th scope="col" class="header2">Player address</th>
-                    <th scope="col" class="header2">nonce</th>
+                    <th scope="col" class="header2">Map area</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -117,7 +99,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel">Welcome to Hashminer!</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="App.showModalIfFull(); return false;">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -132,7 +114,7 @@
           </ol>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="App.showModalIfFull(); return false;">OK</button>
         </div>
       </div>
     </div>
@@ -159,7 +141,7 @@
         </ol>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+        <button id="welcomeOK" type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
       </div>
     </div>
   </div>
@@ -232,7 +214,7 @@
         Click to create transaction.
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="App.revealWinner(); Client.revealWinner(); return false;">Reveal Winner</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="App.revealWinner(); Client.revealWinner(); return false;">Reveal Winner</button>
       </div>
     </div>
   </div>
@@ -240,7 +222,6 @@
 
 
 </body>
-
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
@@ -252,7 +233,6 @@
 <script src="/js/app.js"></script>
 <script src="/js/client.js"></script>
 <script src="/js/game.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.dev.js"></script>
 <script type="text/javascript">
     $(window).on('load',function(){
         $('#welcomeModal').modal('show');
