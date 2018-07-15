@@ -3,10 +3,12 @@
 $body-bg: #22324A;
 
 $theme-colors: (
-  "primary": #5b99a4
+  //"primary": #5b99a4
 );
 
 .btn-primary{
+  background-color: #5b99a4 !important;
+  border-color: #5b99a4 !important;
   color: #22324A !important;
 }
 
