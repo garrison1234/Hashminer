@@ -28,7 +28,7 @@ Client.socket.on('newSelection',function(newSelection){
   newSelection.timer = setTimeout(function() {
     console.log("unblock nonce: " + newSelection.nonce);
     game.unblockNonce(newSelection.nonce);
-  }, 60000);
+  }, 75000);
   // push received selection to App.pendingPlayers
   App.pendingPlayers.push(newSelection);
   console.log('App.pendingPlayers: ' + JSON.stringify(App.pendingPlayers));
