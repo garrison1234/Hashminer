@@ -2,9 +2,6 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
-var helper = require("./helper.js")
-const Web3 = require('web3');
-var contract = require("truffle-contract");
 var fs = require("fs");
 
 app.use('/css',express.static(__dirname + '/css'));
@@ -16,8 +13,6 @@ app.use('/build',express.static(__dirname+ '/build'));
 app.use('/contracts',express.static(__dirname+ '/contracts'));
 
 app.get('/',function(req,res){
-  //res.sendFile(__dirname+'/index0.html');
-  //res.sendFile(__dirname+'/game.html');
   res.sendFile(__dirname+'/index.html');
 });
 
