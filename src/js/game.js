@@ -411,7 +411,7 @@ WebFontConfig = {
           element.sprite.anims.play(('lose' + ((index + 1).toString())), true);
         }
       });
-      setTimeout(function() { deletingMiners = true;}, 5000);
+      setTimeout(function() { deletingMiners = true;}, 20000);
       gameOver = false;
       animatingFinal = true;
     }
