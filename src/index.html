@@ -10,17 +10,6 @@
     <link rel="stylesheet" href="/css/bootstrap.css">
     <link rel="stylesheet" href="/css/styles.css">
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/bootstrap.min.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/phaser@3.10.1/dist/phaser.js"></script>
-    <script src="/js/web3.min.js"></script>
-    <script src="/js/truffle-contract.js"></script>
-    <script src="/js/app.js"></script>
-    <script src="/js/client.js"></script>
-    <script src="/js/game.js"></script>
 </head>
 
 <body>
@@ -88,7 +77,6 @@
       <div clas="col"></div>
       <div clas="col-sm-12 col-md-8 col-lg-6 text-center">
         <div class="card mb-4 mt-4 pt-4">
-
               <h5 class="card-title text-center header mb-4">Current players</h5>
               <table class="table" id="players-table">
                 <thead>
@@ -97,6 +85,8 @@
                     <th scope="col" class="header2">Map area</th>
                   </tr>
                 </thead>
+                <tbody>
+                </tbody>
               </table>
         </div>
       </div>
@@ -224,7 +214,7 @@
         Click to create transaction.
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="App.revealWinner(); Client.revealWinner(); return false;">Reveal Winner</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="App.revealWinner(); Client.revealWinner(); return false;">Reveal Winner</button>
       </div>
     </div>
   </div>
@@ -232,6 +222,17 @@
 
 
 </body>
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/phaser@3.10.1/dist/phaser.js"></script>
+<script src="/js/web3.min.js"></script>
+<script src="/js/truffle-contract.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/client.js"></script>
+<script src="/js/game.js"></script>
 <script type="text/javascript">
     $(window).on('load',function(){
         $('#welcomeModal').modal('show');

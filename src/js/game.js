@@ -282,6 +282,18 @@ WebFontConfig = {
       // call to generate transaction
       App.playGame(mapNonce);
 
+      //push to pending players
+      var newLocalPlayer = {address: App.account, x:xmouse, y:ymouse, nonce:mapNonce};
+      newLocalPlayer.timer = setTimeout(function() {
+        console.log("unblock nonce: " + newLocalPlayer.nonce);
+        game.unblockNonce(newLocalPlayer.nonce);
+      }, 60000);
+      // push received selection to App.pendingPlayers
+      App.pendingPlayers.push(newLocalPlayer);
+
+      //block nonce on map
+      game.blockNonce(mapNonce);
+
       // call to send transaction information to server.js
       Client.playGame(mapNonce, xmouse, ymouse);
 
@@ -347,26 +359,31 @@ WebFontConfig = {
             element.sprite.anims.play(('down' + ((index + 1).toString())), false);
             element.sprite.y = Math.round(element.sprite.y / 23) * 23 + 12;
           }
-        }
-        //move miner to desired y coordinate
-        if ( (Math.abs(element.sprite.y - element.ydestination)) < precision ) {
-          element.sprite.setVelocityY(0);
-          if ((element.sprite.x - element.xdestination) > precision) {
-            element.sprite.setVelocityX(-80);
-            element.sprite.anims.play(('left' + ((index + 1).toString())), true);
-          } else if ((element.sprite.x - element.xdestination) < -precision) {
-            element.sprite.setVelocityX(80);
-            element.sprite.anims.play(('right' + ((index + 1).toString())), true);
-          } else {
-            element.sprite.setVelocityX(0);
-            //console.log('element.sprite.x: ' + element.sprite.x);
-            element.sprite.x = Math.round(element.sprite.x / 20) * 20 + 10;
-            //console.log('element.sprite.x: ' + element.sprite.x);
-            element.sprite.anims.play(('mine' + ((index + 1).toString())), true);
-            // miner stops moving
-            element.moving = false;
+        } else {
+          //move miner to desired y coordinate
+          if ( (Math.abs(element.sprite.y - element.ydestination)) < precision ) {
+            element.sprite.setVelocityY(0);
+            if ((element.sprite.x - element.xdestination) > precision) {
+              element.sprite.setVelocityX(-80);
+              element.sprite.anims.play(('left' + ((index + 1).toString())), true);
+            } else if ((element.sprite.x - element.xdestination) < -precision) {
+              element.sprite.setVelocityX(80);
+              element.sprite.anims.play(('right' + ((index + 1).toString())), true);
+            } else {
+              element.sprite.setVelocityX(0);
+              //console.log('element.sprite.x: ' + element.sprite.x);
+              element.sprite.x = Math.round(element.sprite.x / 20) * 20 + 10;
+              element.sprite.y = Math.round(element.sprite.y / 23) * 23 + 12;
+              element.text.x = Math.floor(element.sprite.x + 12);
+              //console.log('element.sprite.x: ' + element.sprite.x);
+              element.sprite.anims.play(('mine' + ((index + 1).toString())), true);
+              // miner stops moving
+              element.moving = false;
+            }
           }
+
         }
+
       }
     });
     if (gameFull && !gameOver) {
@@ -415,7 +432,7 @@ WebFontConfig = {
 
   }
 
-  // add array of new confirmed player objects{address, x, y, nonce} sent from server.js
+  // receives player object{address, x, y, nonce} and pushes to newPlayers array sent from server.js
   game.addNewMiner = function(receivedPlayer) {
       // add receivedPlayers array to newPlayers array
       newPlayers.push(receivedPlayer);

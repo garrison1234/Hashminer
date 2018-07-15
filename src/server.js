@@ -37,7 +37,6 @@ app.get('/',function(req,res){
 server.listen(process.env.PORT || 8081,function(){
   console.log('Listening on '+server.address().port);
 });
-var debug = true;
 /*var pendingTimer = [];
 var pendingSelections = [];
 var confirmedSelections = [];*/
@@ -72,15 +71,8 @@ io.on('connection',function(socket){
     socket.emit("allPlayers", confirmed.concat(helper.addPendingField(pendingSelections, true)));
   });*/
     socket.on("selectNonce", function(data){
-      console.log(JSON.stringify(data));
-        if(debug) {
-        console.log("---------------------------------");
-        console.log("new pending selection made");
-        console.log(data.nonce);
-        console.log("---------------------------------");
-      }
       // check that there is an address, coordinates are valid, and nonce is valid
-      console.log(selectionValid(data));
+      console.log('selection is valid>: ' + selectionValid(data));
       if(selectionValid(data)) {
         console.log('selection is valid');
         var newPendingSelection = {
@@ -89,8 +81,8 @@ io.on('connection',function(socket){
           y: parseInt(data.y),
           nonce: parseInt(data.nonce)};
         //pendingSelections.push(newPendingSelection);
-        socket.emit("newSelection", newPendingSelection);
-        console.log('server broadcasts new selection.');
+        socket.broadcast.emit("newSelection", newPendingSelection);
+        console.log('server broadcasts new selection: ' + JSON.stringify(newPendingSelection));
       }
     });
     socket.on("revealWinner", function(){
@@ -105,10 +97,6 @@ io.on('connection',function(socket){
     var x = parseInt(selection.x);
     var y = parseInt(selection.y);
     var nonce = parseInt(selection.nonce);
-    console.log('address: ' + address);
-    console.log('x: ' + x);
-    console.log('y: ' + y);
-    console.log('nonce: ' + nonce);
     if((nonce > -1) && (nonce < 16)) {
       var xmin = Math.trunc(nonce/4) * 240;
       var xmax = xmin + 240;

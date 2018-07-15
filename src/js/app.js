@@ -176,8 +176,8 @@ App = {
          var playerNonces = playersInformation[1];
            $('#players-table > tbody').empty();
            App.playerAddresses.forEach((element, index) => {
-             $('#players-table > tbody:last-child').append('<tr><td><p class="details">' + element +
-              '</p></td><td><p class="details">' + playerNonces[index] + '</p></td></tr>');
+             $('#players-table > tbody:last-child').append('<tr><td class="details">' + element +
+              '</td><td class="details">' + playerNonces[index] + '</td></tr>');
            });
          }).catch(function(err) {
        });
@@ -198,7 +198,7 @@ App = {
      revealWinnerModalShow: function() {
        console.log('revealWinnerModalShow called');
        // check that user account is playing
-       if(App.playerAddresses.indexOf(App.account) != -1){
+      if(App.playerAddresses.indexOf(App.account) != -1){
          console.log('address playing');
         $('#revealModal').modal('show');
        }
@@ -219,28 +219,31 @@ App = {
           console.log('received player added event');
           if (!error) {
             // get new player nonce
-            var newPlayerNonce = event.args._nonce;
-            game.blockNonce(newPlayerNonce);
+            var newPlayerFromEvent = {address: event.args._wallet, nonce: event.args._nonce};
+            game.blockNonce(newPlayerFromEvent.nonce);
             var pendingIndex;
             //check if any element in pendingPlayers is equal to the new confirmed player
             App.pendingPlayers.forEach((element, index) => {
-              if(element.nonce == newPlayerNonce) {
+              if(element.nonce == newPlayerFromEvent.nonce && element.address == newPlayerFromEvent.address) {
                 // save array index
                 pendingIndex = index;
               }
             });
             // if new player was pending, place on map with the saved coordinates and remove from pendingPlayers
             if(pendingIndex > -1){
+              console.log('pending player is now confirmed');
+              console.log('new player is: ' + App.pendingPlayers[pendingIndex]);
               // add to map
               game.addNewMiner(App.pendingPlayers[pendingIndex]);
-              // remove from .3pending players array
-              console.log('pending player timer: ' + App.pendingPlayers[pendingIndex].timer);
+              // remove from pending players array
               App.pendingPlayers.splice(pendingIndex, 1);
             } else {
+              console.log('confirmed player was not pending');
               // generate random coordinates for the nonce
-              var newCoordinates = App.generateCoordinates(newPlayerNonce);
+              var newCoordinates = App.generateCoordinates(newPlayerFromEvent.nonce);
               // create a new player object
-              var newPlayerFromEvent = {address: event.args._wallet, x: newCoordinates[0], y:newCoordinates[1], nonce:newPlayerNonce };
+              newPlayerFromEvent.x = newCoordinates[0];
+              newPlayerFromEvent.y = newCoordinates[1];
               // pass to game to add player to map
               game.addNewMiner(newPlayerFromEvent);
             }
