@@ -12,6 +12,7 @@
     "jquery": "^3.3.1",
     "jsdom": "^11.10.0",
     "phaser-ce": "^2.10.6",
+    "phaser-plugin-game-scale": "github:samme/phaser-plugin-game-scale",
     "popper.js": "^1.14.3",
     "socket.io": "^2.1.0",
     "truffle-artifactor": "^3.0.5",

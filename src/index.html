@@ -16,64 +16,76 @@
 
       <div class="jumbotron text-center">
         <!--<img src="/assets/logo5.png" alt="Hashminer logo" style="height:128px;">-->
-        HASHMINΞR
+        HASHMINΞR<span class="details">Beta</span>
       </div>
       </nav>
       <div class="row">
-        <div class="col-sm-12 col-md-3 col-lg-2">
-          <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title text-center header mb-4">User Information</h5>
-                <p id="account" class='details'></p>
-                <p id="accountBalance" class='details' style="display:inline;"></p>
-                <a id="metaMaskLink" class='details' href="https://metamask.io/" target="_blank" style="display:inline;"></a>
+        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-2 mx-0 px-0">
+          <div class="row mx-0">
+            <div class="col-sm-0 col-md-0 col-lg-0 col-xl-1 mx-0 px-0"></div>
+            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-10 mx-0 px-0">
+              <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-center header mb-4">User Information</h5>
+                    <p id="account" class='details'></p>
+                    <p id="accountBalance" class='details' style="display:inline;"></p>
+                    <a id="metaMaskLink" class='details' href="https://metamask.io/" target="_blank" style="display:inline;"></a>
+                </div>
+              </div>
+              <div class="row d-flex justify-content-center">
+                  <button type="button" class="btn btn-primary mb-4" data-toggle="modal" data-target="#instructionsModal">
+                    Instructions
+                  </button>
+              </div>
+              <div class="row d-flex justify-content-center">
+                  <button type="button" class="btn btn-primary mb-4" data-toggle="modal" data-target="#faqModal">
+                    FAQ
+                  </button>
+              </div>
+              <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-center header mb-4">Donations</h5>
+                    <p id="account" class='details'>ETH: 0x2932b7a2355d6fecc4b5c0b6bd44cc31df247a2e</p>
+                    <p id="account" class='details'>BTC: 3E9n1w3hhbEgxtYzfFMMEFhnMtNFYQDtYA</p>
+                    <p id="account" class='details'>LTC: La6f2hg6sVpZbbhq893LAQRFS99NzVLSKc</p>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="row d-flex justify-content-center">
-              <button type="button" class="btn btn-primary mb-4" data-toggle="modal" data-target="#instructionsModal">
-                Instructions
-              </button>
-          </div>
-          <div class="row d-flex justify-content-center">
-              <button type="button" class="btn btn-primary mb-4" data-toggle="modal" data-target="#faqModal">
-                FAQ
-              </button>
-          </div>
-          <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title text-center header mb-4">Donations</h5>
-                <p id="account" class='details'>ETH: 0x2932b7a2355d6fecc4b5c0b6bd44cc31df247a2e</p>
-                <p id="account" class='details'>BTC: 3E9n1w3hhbEgxtYzfFMMEFhnMtNFYQDtYA</p>
-                <p id="account" class='details'>LTC: La6f2hg6sVpZbbhq893LAQRFS99NzVLSKc</p>
-            </div>
+            <div class="col-sm-0 col-md-0 col-lg-0 col-xl-1 mx-0 px-0"></div>
           </div>
         </div>
-        <div class="col-sm-12 col-md-6 col-lg-8 text-center" id="game"></div>
-        <div class="col-sm-12 col-md-3 col-lg-2">
-          <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title text-center header mb-4">Current Game Information</h5>
-                <p class='details mb-0'>Contract Address:</p>
-                <a id="contractAddress"
-                class='details' href="https://rinkeby.etherscan.io/address/0x190d632dfa964bdf8108d05f87e8e59b97931e7f"
-                target="_blank"></a>
-                <p class='details mt-4 mb-0'>Code:</p>
-                <a class='details' href="https://github.com/garrison1234/Hashminer" target="_blank">Github</a>
-                <p id="contractAddress" class='details'></p>
-                <p id="gameCost" class='details'></p>
-                <p id="prize" class='details'></p>
-                <p id="playerCounter" class='details'></p>
+        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-8 align-items-center px-0" id="game"></div>
+        <div class="col-sm-12 col-md-12 col-lg-0 mx-0 col-xl-2 px-0">
+          <div class="row mx-0">
+            <div class="col-sm-0 col-md-0 col-lg-0 col-xl-1 mx-0 px-0"></div>
+            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-10 mx-0 px-0">
+              <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-center header mb-4">Current Game Information</h5>
+                    <span class="details mt-4 mb-0">Contract Address: <a id="contractAddress"
+                    class='details' href="https://rinkeby.etherscan.io/address/0x190d632dfa964bdf8108d05f87e8e59b97931e7f"
+                    target="_blank"></a>
+                    </span><br>
+                    <span class="details mt-4 mb-0">Code: <a href="https://github.com/garrison1234/Hashminer" target="_blank">Github</a>
+                    </span>
+                    <p id="contractAddress" class='details'></p>
+                    <p id="gameCost" class='details'></p>
+                    <p id="prize" class='details'></p>
+                    <p id="playerCounter" class='details'></p>
+                </div>
+              </div>
+              <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-center header mb-4">Previous Game Information</h5>
+                    <p id="winner" class="details"></p>
+                    <p id="winningNonce" class="details"></p>
+                    <p id="blockNumber" class="details"></p>
+                    <p id="blockHash" class="details"></p>
+                    <p id="caller" class="details"></p>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title text-center header mb-4">Previous Game Information</h5>
-                <p id="winner" class="details"></p>
-                <p id="winningNonce" class="details"></p>
-                <p id="blockNumber" class="details"></p>
-                <p id="blockHash" class="details"></p>
-                <p id="caller" class="details"></p>
-            </div>
+            <div class="col-sm-0 col-md-0 col-lg-0 col-xl-1 mx-0 px-0"></div>
           </div>
       </div>
     </div>
@@ -137,7 +149,7 @@
       </div>
       <div class="modal-body">
         <p>Place your miner on the map and win real Ether!</p>
-        <p>Hashminer is an interactive raffle game with no house fees. The cost to play is Ξ0.05 plus transaction fees.</p>
+        <p>Hashminer is an interactive raffle game with no house fees. The cost to play is Ξ0.05 plus blockchain transaction fees.</p>
         <p>To play:</p>
         <ol>
           <li>Click on a valid area on the map and confirm the transaction on MetaMask to join game</li>
@@ -169,17 +181,21 @@
           MetaMask, the corresponding area number is sent to the Ethereum blockchain and is stored in a smart contract. This continues until
           16 players have joined. The winning area number is then determined by the hash of the 3rd block after the last player joined. Anyone can reveal
         the winner by clicking the "Reveal Winner" button that appears, and then confirming the transaction through MetaMask. The transaction fee is
-        repaid automatically.</dd>
+        automatically repaid to the user that reveals the winner when the transaction is executed.</dd>
         <li><b>Are there really no house fees such as the ones in casinos?</b></li>
-        <dd class="details">- This game has 0 house fees since the creator of the game does not receive a fraction prize (can be verified in the smart contract code).
-          Almost the entirety of the funds collected from the players is collected by the winner, with only a small amount (Ξ0.002) being transferred
-          to the address that calls the function to reveal the winner in order to recover the transaction fee of doing so. </dd>
+        <dd class="details">- This game has no house edge (0 house fees) since the game contract does not keep a fraction of the prize
+          (this can be verified in the smart contract code). Almost the entirety of the funds collected from the players is collected by the winner,
+          with only a small amount (Ξ0.002) being transferred to the address that calls the function to reveal the winner in order to recover the
+          transaction fee of doing so.</dd>
         <li><b>Can a truly random number be produced on the Ethereum blockchain?</b></li>
-        <dd class="details">- As mentioned above, the winner of the game is determined by the hash of the 3rd block published after the last player joins the game.
-        This hash incredibly difficult to predict and the consensus algorithm of the blockchain depends on it. However, a possible issue is that
-      a miner on the Ethereum blockchain could choose not to publish a block if the outcome does not benefit them. Still, they would lose the
-    block reward in doing so. The following should hold so that even a dishonest miner is dissuaded from cheating:</dd>
-        <dd class="details">Cost to Play < (Block Reward - Uncle Reward)</dd>
+        <dd class="details">- As mentioned above, the winner of the game is determined by the hash of the 3rd block published after the last player joins
+          the game. This hash incredibly difficult to predict and the consensus algorithm of the blockchain depends on it. However, a possible issue is
+          that a miner on the Ethereum blockchain could choose not to publish a block if the outcome does not benefit them. Still, they would lose the
+          block reward in doing so. Since there is no house edge, the following must stand to disincentivize a miner from not publishing the result:</dd>
+          <dd class="details">betAmount < staticBlockReward - uncleBlockReward</dd>
+          <dd class="details">This is true, since betAmount = Ξ0.05 and staticBlockReward - uncleBlockReward = Ξ0.625. There are other considerations concerning
+          grouping several transactions, and the solution proposed for this is to apply another hash to vary the desired block hash for a given map
+        area. </dd>
         <li><b>Is this an open source project?</b></li>
         <dd class="details">- Yes. You can find all the source code <a class='details' href="https://github.com/garrison1234/Hashminer" target="_blank">here</a> </dd>
         <li><b>What was the motivation for this project</b></li>
@@ -227,9 +243,7 @@
 
 
 </body>
-<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/bootstrap.min.js"></script>
 <script src="//cdn.jsdelivr.net/npm/phaser@3.10.1/dist/phaser.js"></script>

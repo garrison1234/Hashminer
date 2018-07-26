@@ -35,7 +35,7 @@ App = {
 
      // display the user's ETH account and balance
      displayAccountInfo: function() {
-       console.log('displayAccountInfo called');
+       //console.log('displayAccountInfo called');
        web3.eth.getCoinbase(function(err, account) {
          if(err === null) {
            App.account = account;
@@ -84,10 +84,10 @@ App = {
          });
        }).then(function(result) {
          //transaction was mined
-         console.log('playGame transaction successful, nonce: ' + _nonce);
+         //console.log('playGame transaction successful, nonce: ' + _nonce);
        }).catch(function(err) {
          //transaction failed
-         console.log('transaction failed');
+         //console.log('transaction failed');
        });
      },
 
@@ -103,7 +103,7 @@ App = {
      },
 
      getGameInfo: function() {
-       console.log('getGameInfo called');
+       //console.log('getGameInfo called');
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.getGameInfo();
        }).then(function(gameInformation) {
@@ -130,15 +130,15 @@ App = {
      },
 
      showModalIfFull: function() {
-       console.log('showModalIfFull called');
+       //console.log('showModalIfFull called');
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.getGameInfo();
        }).then(function(gameInformation) {
          // check that game is full
          if(gameInformation[3] == 16) {
-           console.log('game is full so call revealWinnerModalShow');
+           //console.log('game is full so call revealWinnerModalShow');
            setTimeout(function() {
-             console.log("3 block timer finished");
+             //console.log("3 block timer finished");
              // enable reveal winner alert on window
              App.revealWinnerModalShow()
            }, 1000);
@@ -149,7 +149,7 @@ App = {
 
      // gets all players info, adds players to game and blocks nonces if they aren't already (this is the most important function for the game logic)
      getPreviousPlayers: function() {
-       console.log('getPreviousPlayers called');
+       //console.log('getPreviousPlayers called');
        App.contracts.Hashminer.deployed().then(function(instance) {
          return instance.getPlayersInfo();
        }).then(function(playersInformation) {
@@ -186,20 +186,20 @@ App = {
      //generate random coordinates for a given nonce
      generateCoordinates: function(nonce) {
        do {
-         var xcoordinate = Math.trunc(nonce/4) * 240 + Math.round(Math.random() * 12) * 20 + 10;
-         console.log(xcoordinate);
+         var xcoordinate = Math.trunc(nonce/4) * 240 + Math.round(Math.random() * 11) * 20 + 10;
+         //console.log(xcoordinate);
          var ycoordinate = (nonce % 4) * 138 + Math.round(Math.random() * 5) * 23 + 12;
-         console.log(ycoordinate);
+         //console.log(ycoordinate);
        } while ((ycoordinate < 80) || (ycoordinate > 460) || (xcoordinate < 80) || (xcoordinate > 880));
        return [xcoordinate, ycoordinate];
      },
 
      // display window with reveal-winner button
      revealWinnerModalShow: function() {
-       console.log('revealWinnerModalShow called');
+       //console.log('revealWinnerModalShow called');
        // check that user account is playing
       if(App.playerAddresses.indexOf(App.account) != -1){
-         console.log('address playing');
+         //console.log('address playing');
         $('#revealModal').modal('show');
        }
      },
@@ -259,9 +259,9 @@ App = {
         // listen to LogPlayersReady event
        instance.LogPlayersReady({}, {}).watch(function(error, event) {
          if (!error) {
-           console.log('Players ready. Starting timer for 3 blocks');
+           //console.log('Players ready. Starting timer for 3 blocks');
            var playersReadyTimer = setTimeout(function() {
-             console.log("3 block timer finished");
+             //console.log("3 block timer finished");
              // enable reveal winner alert on window
              App.revealWinnerModalShow()
            }, 60000);

@@ -1,8 +1,10 @@
+var gameScale = 0.8;
+
 // phaser game configuration
 var config = {
     type: Phaser.AUTO,
-    width: 960,
-    height: 560,
+    width: 960*gameScale,
+    height: 560*gameScale,
     parent: 'game',
     antialiasing: false,
     physics: {
@@ -21,7 +23,7 @@ var config = {
 var web3LoadTimer;
 var newPlayers = [];
 var minerCounter = 0;
-var precision = 3;
+var precision = 3*gameScale;
 var cursorArea;
 var instructionsText;
 var coordinatesText;
@@ -78,12 +80,16 @@ WebFontConfig = {
 
   function create() {
 
-    this.add.image(480, 280, 'background');
+    this.bg = this.add.sprite((960*gameScale) / 2, (560*gameScale) / 2, 'background');
+    this.bg.setDisplaySize((960*gameScale), (560*gameScale));
+    //var background = this.add.image(480, 280, 'background');
+    //background.width = 960*gameScale;
+    //background.height = 540*gameScale;
 
     cursorArea = this.add.sprite(0, 0, 'cursorBlocked');
 
-    instructionsText = this.add.text(8, 560, '', { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
-    coordinatesText = this.add.text(8, 8, '', { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
+    instructionsText = this.add.text(8*gameScale, 560*gameScale, '', { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20*gameScale, align: "center" });
+    coordinatesText = this.add.text(8*gameScale, 8*gameScale, '', { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20*gameScale, align: "center" });
 
     /*// create loading animations
     this.anims.create({
@@ -283,7 +289,7 @@ WebFontConfig = {
       App.playGame(mapNonce);
 
       //push to pending players
-      var newLocalPlayer = {address: App.account, x:xmouse, y:ymouse, nonce:mapNonce};
+      var newLocalPlayer = {address: App.account, x:(xmouse + 10), y:(ymouse + 12), nonce:mapNonce};
       newLocalPlayer.timer = setTimeout(function() {
         console.log("unblock nonce: " + newLocalPlayer.nonce);
         game.unblockNonce(newLocalPlayer.nonce);
@@ -295,7 +301,7 @@ WebFontConfig = {
       game.blockNonce(mapNonce);
 
       // call to send transaction information to server.js
-      Client.playGame(mapNonce, xmouse, ymouse);
+      Client.playGame(mapNonce, (xmouse + 10), (ymouse + 12));
 
       // block mouse for 3 seconds to avoid sending transaction twice
       setTimeout(function() { mouseBlocked = false}, 1000);
@@ -372,8 +378,10 @@ WebFontConfig = {
             } else {
               element.sprite.setVelocityX(0);
               //console.log('element.sprite.x: ' + element.sprite.x);
-              element.sprite.x = Math.round(element.sprite.x / 20) * 20 + 10;
-              element.sprite.y = Math.round(element.sprite.y / 23) * 23 + 12;
+              //element.sprite.x = Math.round(element.sprite.x / 20) * 20 + 10;
+              //element.sprite.y = Math.round(element.sprite.y / 23) * 23 + 12;
+              element.sprite.x = element.xdestination;
+              element.sprite.y = element.ydestination;
               element.text.x = Math.floor(element.sprite.x + 12);
               //console.log('element.sprite.x: ' + element.sprite.x);
               element.sprite.anims.play(('mine' + ((index + 1).toString())), true);
@@ -400,7 +408,7 @@ WebFontConfig = {
         element.sprite.disableBody(true, true);
         if(element.nonce == winningNonce) {
           instructionsText = this.add.text(200, 520, 'Game finished. ' + 'User ' + element.address
-          + 'wins in map area: ' + element.nonce + '!',
+          + ' wins in map area: ' + element.nonce + '!',
           { font: "12px Aldrich", fill: "#00FF00", wordWrap: true, wordWrapWidth: 20, align: "center" });
           element.sprite = this.physics.add.sprite(element.xdestination, element.ydestination, ('minerwin' + ((index + 1).toString())))
           console.log('winning sprite:' + element.sprite);
@@ -436,7 +444,7 @@ WebFontConfig = {
   game.addNewMiner = function(receivedPlayer) {
       // add receivedPlayers array to newPlayers array
       newPlayers.push(receivedPlayer);
-      console.log(newPlayers);
+      //console.log(newPlayers);
   }
 
   // block nonce

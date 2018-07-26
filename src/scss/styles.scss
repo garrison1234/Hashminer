@@ -6,10 +6,16 @@ $theme-colors: (
   //"primary": #5b99a4
 );
 
+.btn-primary.focus, .btn-primary:focus {
+    -webkit-box-shadow: none!important;
+    box-shadow: none!important;
+}
+
 .btn-primary{
   background-color: #5b99a4 !important;
   border-color: #5b99a4 !important;
   color: #22324A !important;
+  outline: nonce !important;
 }
 
 .jumbotron {
