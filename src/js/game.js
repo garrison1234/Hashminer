@@ -1,4 +1,4 @@
-var gameScale = 0.8;
+var gameScale = 1;
 
 // phaser game configuration
 var config = {

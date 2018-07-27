@@ -14,24 +14,25 @@
 
 <body>
 
-      <div class="jumbotron text-center">
+      <div class="jumbotron text-center mb-1">
         <!--<img src="/assets/logo5.png" alt="Hashminer logo" style="height:128px;">-->
         HASHMINΞR<span class="details">Beta</span>
       </div>
-      </nav>
+      <div class="row d-flex justify-content-center mb-4">
+        <div class="card mb-4">
+          <div class="card-body">
+              <h5 class="card-title text-center header mb-4">User Information</h5>
+              <p id="account" class='details'></p>
+              <p id="accountBalance" class='details' style="display:inline;"></p>
+              <a id="metaMaskLink" class='details' href="https://metamask.io/" target="_blank" style="display:inline;"></a>
+          </div>
+        </div>
+      </div>
       <div class="row">
-        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-2 mx-0 px-0">
+        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-2 col-xxl-2 mx-0">
           <div class="row mx-0">
-            <div class="col-sm-0 col-md-0 col-lg-0 col-xl-1 mx-0 px-0"></div>
-            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-10 mx-0 px-0">
-              <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title text-center header mb-4">User Information</h5>
-                    <p id="account" class='details'></p>
-                    <p id="accountBalance" class='details' style="display:inline;"></p>
-                    <a id="metaMaskLink" class='details' href="https://metamask.io/" target="_blank" style="display:inline;"></a>
-                </div>
-              </div>
+            <div class="col-sm-0 col-md-0 col-lg-0 col-xl-1 col-xxl-2 mx-0 px-0"></div>
+            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-10 col-xxl-8 mx-0 px-0">
               <div class="row d-flex justify-content-center">
                   <button type="button" class="btn btn-primary mb-4" data-toggle="modal" data-target="#instructionsModal">
                     Instructions
@@ -42,23 +43,6 @@
                     FAQ
                   </button>
               </div>
-              <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title text-center header mb-4">Donations</h5>
-                    <p id="account" class='details'>ETH: 0x2932b7a2355d6fecc4b5c0b6bd44cc31df247a2e</p>
-                    <p id="account" class='details'>BTC: 3E9n1w3hhbEgxtYzfFMMEFhnMtNFYQDtYA</p>
-                    <p id="account" class='details'>LTC: La6f2hg6sVpZbbhq893LAQRFS99NzVLSKc</p>
-                </div>
-              </div>
-            </div>
-            <div class="col-sm-0 col-md-0 col-lg-0 col-xl-1 mx-0 px-0"></div>
-          </div>
-        </div>
-        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-8 align-items-center px-0" id="game"></div>
-        <div class="col-sm-12 col-md-12 col-lg-0 mx-0 col-xl-2 px-0">
-          <div class="row mx-0">
-            <div class="col-sm-0 col-md-0 col-lg-0 col-xl-1 mx-0 px-0"></div>
-            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-10 mx-0 px-0">
               <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title text-center header mb-4">Current Game Information</h5>
@@ -74,6 +58,17 @@
                     <p id="playerCounter" class='details'></p>
                 </div>
               </div>
+            </div>
+            <div class="col-sm-0 col-md-0 col-lg-0 col-xl-1 col-xxl-2 mx-0 px-0"></div>
+          </div>
+        </div>
+        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-8 col-xxl-8 text-center">
+                  <div id="game"></div>
+        </div>
+        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-2 col-xxl-2 mx-0">
+          <div class="row mx-0">
+            <div class="col-sm-0 col-md-0 col-lg-0 col-xl-1 col-xxl-2 mx-0 px-0"></div>
+            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-10 col-xxl-8 mx-0 px-0">
               <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title text-center header mb-4">Previous Game Information</h5>
@@ -85,7 +80,7 @@
                 </div>
               </div>
             </div>
-            <div class="col-sm-0 col-md-0 col-lg-0 col-xl-1 mx-0 px-0"></div>
+            <div class="col-sm-0 col-md-0 col-lg-0 col-xl-1 col-xxl-2 mx-0 px-0"></div>
           </div>
       </div>
     </div>
@@ -105,6 +100,14 @@
                 <tbody>
                 </tbody>
               </table>
+        </div>
+        <div class="card mb-4">
+          <div class="card-body">
+              <h5 class="card-title text-center header mb-4">Donations</h5>
+              <p id="account" class='details'>ETH: 0x2932b7a2355d6fecc4b5c0b6bd44cc31df247a2e</p>
+              <p id="account" class='details'>BTC: 3E9n1w3hhbEgxtYzfFMMEFhnMtNFYQDtYA</p>
+              <p id="account" class='details'>LTC: La6f2hg6sVpZbbhq893LAQRFS99NzVLSKc</p>
+          </div>
         </div>
       </div>
       <div clas="col"></div>
